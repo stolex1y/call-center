@@ -14,11 +14,42 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
 
-      - name: Install deps
+      - name: Set up GCC
         run: |
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
           sudo apt update
-          sudo apt install libboost-all-dev
-  
+          sudo apt install gcc-13 g++-13
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 20 --slave /usr/bin/g++ g++ /usr/bin/g++-13
+
+      - name: Cache boost
+        uses: actions/cache@v3
+        id: cache-boost
+        with:
+          path: "~/boost"
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-boost
+
+      - name: Install boost
+        env:
+          CACHE_HIT: ${{ steps.cache-boost.outputs.cache-hit }}
+        run: |
+          if [[ "$CACHE_HIT" == 'true' ]]; then
+            sudo cp --force --recursive ~/boost/lib/* /usr/lib
+            sudo cp --force --recursive ~/boost/include/* /usr/include/boost
+            ls -l /usr/lib
+            ls -l /usr/include
+          else
+            wget https://boostorg.jfrog.io/artifactory/main/release/1.83.0/source/boost_1_83_0.tar.gz
+            tar -xzf boost_*.tar.gz
+            cd boost_1_83_0
+            sudo ./bootstrap.sh
+            sudo ./b2 install  
+            mkdir ~/boost
+            mkdir ~/boost/lib
+            mkdir ~/boost/include
+            sudo cp --force --recursive /usr/local/lib/libboost* ~/boost/lib
+            sudo cp --force --recursive /usr/local/include/boost ~/boost/include
+          fi
+
       - name: Configure CMake
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 
