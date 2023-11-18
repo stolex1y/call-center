@@ -21,7 +21,7 @@ namespace call_center {
 
 class Journal {
  public:
-  Journal(const Configuration &configuration);
+  explicit Journal(const Configuration &configuration);
 
   void AddRecord(const CallDetailedRecord &cdr);
 
@@ -29,10 +29,14 @@ class Journal {
   static constexpr const auto kFileNameKey = "journal_file_name";
   static constexpr const auto kDefaultFileName = "journal.csv";
 
+  static constexpr const auto kMaxSizeKey = "journal_max_size";
+  static constexpr const size_t kDefaultMaxSize = 100;
+
+  const Configuration &configuration_;
   std::string file_name_;
   log::Sink sink_;
   log::Logger logger_;
-  const Configuration &configuration_;
+  size_t max_size_;
 
   static void Formatter(const boost::log::record_view &rec, boost::log::formatting_ostream &out);
   static std::string FormatCallDetailedRecord(const CallDetailedRecord &cdr);
@@ -43,7 +47,8 @@ class Journal {
   static std::string FormatDuration(const CallDetailedRecord::Duration &duration);
   static std::string FormatDuration(const std::optional<CallDetailedRecord::Duration> &duration);
 
-  std::string ReadFileName() const;
+  [[nodiscard]] std::string ReadFileName() const;
+  [[nodiscard]] size_t ReadMaxSize() const;
   void UpdateSink();
   log::Sink MakeSink();
 };

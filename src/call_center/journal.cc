@@ -13,10 +13,11 @@ namespace expr = boost::log::expressions;
 namespace date_time_utils = core::utils::date_time;
 
 Journal::Journal(const Configuration &configuration)
-    : file_name_(ReadFileName()),
+    : configuration_(configuration),
+      file_name_(ReadFileName()),
       sink_(MakeSink()),
       logger_({}, sink_),
-      configuration_(configuration) {
+      max_size_(ReadMaxSize()) {
 }
 
 void Journal::Formatter(const boost::log::record_view &rec, boost::log::formatting_ostream &out) {
@@ -86,15 +87,21 @@ std::string Journal::FormatUuid(const std::optional<boost::uuids::uuid> &uuid) {
 
 void Journal::UpdateSink() {
   auto new_file_name = ReadFileName();
-  if (new_file_name != file_name_) {
+  auto new_max_size = ReadMaxSize();
+  if (new_file_name != file_name_ || new_max_size != max_size_) {
     file_name_ = std::move(new_file_name);
+    max_size_ = new_max_size;
     sink_ = MakeSink();
   }
 }
 
 log::Sink Journal::MakeSink() {
   return {boost::make_shared<std::ofstream>(file_name_, std::ios_base::app),
-          log::SeverityLevel::kTrace, SIZE_MAX, Journal::Formatter};
+          log::SeverityLevel::kTrace, Journal::Formatter, max_size_};
+}
+
+size_t Journal::ReadMaxSize() const {
+  return configuration_.GetProperty<size_t>(kMaxSizeKey).value_or(kDefaultMaxSize);
 }
 
 } // call_center
