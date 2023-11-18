@@ -17,13 +17,12 @@ class Sink {
  public:
   using Formatter = std::function<void(const boost::log::record_view &rec, boost::log::formatting_ostream &out)>;
 
-  Sink(SeverityLevel level, size_t max_size);
+  explicit Sink(SeverityLevel level);
   Sink(const std::string &file_name, SeverityLevel level, size_t max_size);
-  Sink(const std::string &file_name, SeverityLevel level, size_t max_size,
-       const Formatter &formatter);
-  Sink(SeverityLevel level, size_t max_size, const Formatter &formatter);
+  Sink(const std::string &file_name, SeverityLevel level, size_t max_size, const Formatter &formatter);
+  Sink(SeverityLevel level, const Formatter &formatter);
   Sink(boost::shared_ptr<std::ostream> ostream, SeverityLevel level,
-       size_t max_size, const Formatter &formatter);
+       const Formatter &formatter, size_t max_size = SIZE_MAX);
   Sink(Sink &other) = delete;
   Sink(Sink &&other) = default;
   Sink &operator=(Sink &&other) = default;

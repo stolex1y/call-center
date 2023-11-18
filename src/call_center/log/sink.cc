@@ -18,27 +18,27 @@ namespace keywords = boost::log::keywords;
 
 namespace call_center::log {
 
-Sink::Sink(SeverityLevel level, size_t max_size)
-    : Sink(level, max_size, Sink::DefaultFormatter) {
+Sink::Sink(SeverityLevel level)
+    : Sink(level, Sink::DefaultFormatter) {
 }
 
 Sink::Sink(const std::string &file_name, SeverityLevel level, size_t max_size)
     : Sink(file_name, level, max_size, Sink::DefaultFormatter) {
 }
 
-Sink::Sink(SeverityLevel level, size_t max_size, const Formatter &formatter)
+Sink::Sink(SeverityLevel level, const Formatter &formatter)
     : Sink(boost::shared_ptr<std::ostream>(&std::cout, [](std::ostream *) {}),
-           level, max_size, formatter) {
+           level, formatter) {
 }
 
 Sink::Sink(const std::string &file_name, SeverityLevel level,
            size_t max_size, const Formatter &formatter)
     : Sink(boost::make_shared<std::ofstream>(file_name),
-           level, max_size, formatter) {
+           level, formatter, max_size) {
 }
 
 Sink::Sink(boost::shared_ptr<std::ostream> ostream, SeverityLevel level,
-           size_t max_size, const Formatter &formatter)
+           const Formatter &formatter, size_t max_size)
     : sink_impl_(new SinkImpl(keywords::max_size = max_size * 1024 * 1024)), stream_(std::move(ostream)),
       level_(level), max_size_(max_size) {
   boost::log::add_common_attributes();
