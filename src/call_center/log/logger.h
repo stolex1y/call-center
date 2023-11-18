@@ -1,44 +1,43 @@
 #ifndef CALL_CENTER_LOGGER_H
 #define CALL_CENTER_LOGGER_H
 
-#include <boost/log/core.hpp>
 #include <boost/log/sources/severity_logger.hpp>
-#include <boost/log/sources/logger.hpp>
 #include <boost/log/sources/record_ostream.hpp>
 
 #include <string>
 #include <optional>
 
-namespace call_center::log {
+#include "severity_level.h"
+#include "sink.h"
 
-enum class SeverityLevel {
-  kTrace,
-  kDebug,
-  kInfo,
-  kWarning,
-  kError,
-  kFatal
-};
+namespace call_center::log {
 
 class Logger : private boost::log::sources::severity_logger_mt<SeverityLevel> {
  public:
-  class Ostream : private boost::log::record_ostream {
+  class Ostream {
    public:
     explicit Ostream(Logger &log, SeverityLevel level);
+    Ostream(const Ostream &other) = delete;
+    Ostream &operator=(const Ostream &other) = delete;
     ~Ostream();
 
-    using boost::log::record_ostream::operator<<;
+    template<typename T>
+    Ostream &operator<<(const T &t) {
+      ostream_impl_ << t;
+      return *this;
+    }
 
    private:
+    using OstreamImpl = boost::log::record_ostream;
+
     Logger &logger_;
     boost::log::record record_;
+    OstreamImpl ostream_impl_;
   };
 
-  static void SetLevel(SeverityLevel level);
-  static void SetFileName(const std::string &file_name);
-  static void SetMaxSize(int max_size);
-
-  explicit Logger(std::string tag);
+  Logger(std::string tag, const Sink &sink);
+  Logger(const Logger &other) = delete;
+  Logger &operator=(const Logger &other) = delete;
 
   Ostream Trace();
   Ostream Debug();
@@ -46,16 +45,6 @@ class Logger : private boost::log::sources::severity_logger_mt<SeverityLevel> {
   Ostream Warning();
   Ostream Error();
   Ostream Fatal();
-
- private:
-  static SeverityLevel level_;
-  static std::string file_name_;
-  static int max_size_;
-
-  static void Formatter(const boost::log::record_view &rec, boost::log::formatting_ostream &out);
-  static void UpdateLogger();
-
-  std::string tag_;
 };
 
 }
