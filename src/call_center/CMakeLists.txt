@@ -1,6 +1,6 @@
 set(OBJ_LIB_TARGET callcenter)
-set(RUNNABLE_TARGET "${TARGET}_runnable")
-set(STATIC_LIB_TARGET "${TARGET}_static")
+set(RUNNABLE_TARGET "${OBJ_LIB_TARGET}_runnable")
+set(STATIC_LIB_TARGET "${OBJ_LIB_TARGET}_static")
 
 find_package(Boost COMPONENTS program_options log log_setup json REQUIRED)
 

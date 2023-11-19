@@ -1,6 +1,6 @@
 set(OBJ_LIB_TARGET callcenter)
-set(STATIC_LIB_TARGET "${TARGET}_static")
-set(TEST_TARGET "${TARGET}_test")
+set(STATIC_LIB_TARGET "${OBJ_LIB_TARGET}_static")
+set(TEST_TARGET "${OBJ_LIB_TARGET}_test")
 
 add_executable(${TEST_TARGET}
         call_center_service_test.cc
