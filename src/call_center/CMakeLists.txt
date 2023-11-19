@@ -51,8 +51,8 @@ add_library(${OBJ_LIB_TARGET} OBJECT
 )
 
 #warnings
-target_compile_options(${OBJ_LIB_TARGET} PRIVATE "-Werror" "-Wall" "-Wextra" "-Wpedantic")
-target_include_directories(${OBJ_LIB_TARGET} PUBLIC
+target_compile_options(${OBJ_LIB_TARGET} PRIVATE "-Werror" "-Wall" "-Wextra" "-Wpedantic" "-Wno-error=maybe-uninitialized")
+target_include_directories(${OBJ_LIB_TARGET} SYSTEM PUBLIC
         Boost::boost
 )
 target_include_directories(${OBJ_LIB_TARGET} PUBLIC
@@ -62,6 +62,7 @@ target_include_directories(${OBJ_LIB_TARGET} PUBLIC
 target_link_libraries(${OBJ_LIB_TARGET} PUBLIC
         ${Boost_LIBRARIES}
 )
+target_compile_definitions(${OBJ_LIB_TARGET} PUBLIC "BOOST_LOG_DYN_LINK")
 
 add_library(${STATIC_LIB_TARGET} STATIC)
 target_link_libraries(${STATIC_LIB_TARGET} ${OBJ_LIB_TARGET})
