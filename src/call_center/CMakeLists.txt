@@ -48,6 +48,8 @@ add_library(${OBJ_LIB_TARGET} OBJECT
         core/tasks.h
         core/utils/date_time.h
         core/utils/concepts.h
+        log/logger_provider.cc
+        log/logger_provider.h
 )
 
 #warnings

@@ -13,8 +13,11 @@ namespace call_center {
 
 class OperatorSet {
  public:
-  explicit OperatorSet(const Configuration &configuration,
-                       core::TaskManager &task_manager);
+  OperatorSet(std::shared_ptr<const Configuration> configuration,
+              std::shared_ptr<core::TaskManager> task_manager,
+              const std::shared_ptr<const log::LoggerProvider> &logger_provider);
+  OperatorSet(const OperatorSet &other) = delete;
+  OperatorSet &operator=(const OperatorSet &other) = delete;
 
   std::shared_ptr<Operator> EraseFree();
   void InsertFree(const std::shared_ptr<Operator> &op);
@@ -35,10 +38,12 @@ class OperatorSet {
 
   std::unordered_set<OperatorPtr, OperatorHash, OperatorEquals> free_operators_;
   std::unordered_set<OperatorPtr, OperatorHash, OperatorEquals> busy_operators_;
-  const Configuration &configuration_;
+  const std::shared_ptr<const Configuration> configuration_;
+  const std::shared_ptr<core::TaskManager> task_manager_;
   size_t operator_count_;
-  core::TaskManager &task_manager_;
   mutable std::mutex mutex_;
+  const std::shared_ptr<const log::LoggerProvider> &logger_provider_;
+  std::unique_ptr<log::Logger> logger_;
 
   [[nodiscard]] size_t ReadOperatorCount() const;
   void UpdateOperatorCount();

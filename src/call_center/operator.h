@@ -23,7 +23,12 @@ class Operator : public std::enable_shared_from_this<Operator> {
 
   using OnFinishHandle = std::function<void()>;
 
-  static std::shared_ptr<Operator> Create(core::TaskManager &task_manager, const Configuration &configuration);
+  static std::shared_ptr<Operator> Create(std::shared_ptr<core::TaskManager> task_manager,
+                                          std::shared_ptr<const Configuration> configuration,
+                                          const std::shared_ptr<const log::LoggerProvider> &logger_provider);
+
+  Operator(const Operator &other) = delete;
+  Operator &operator=(const Operator &other) = delete;
 
   [[nodiscard]] const boost::uuids::uuid &GetId() const;
   [[nodiscard]] Operator::Status GetStatus() const;
@@ -41,17 +46,20 @@ class Operator : public std::enable_shared_from_this<Operator> {
   static constexpr const uint64_t kDefaultMinDelay = 10;
   static constexpr const uint64_t kDefaultMaxDelay = 10;
 
-  boost::uuids::uuid id_ = boost::uuids::random_generator_mt19937()();
+  const boost::uuids::uuid id_ = boost::uuids::random_generator_mt19937()();
   Status status_ = Status::kFree;
   mutable std::mutex mutex_;
-  core::TaskManager &task_manager_;
-  const Configuration &configuration_;
+  const std::shared_ptr<core::TaskManager> task_manager_;
+  const std::shared_ptr<const Configuration> configuration_;
   uint64_t min_delay_;
   uint64_t max_delay_;
   Generator generator_;
   Distribution distribution_;
+  std::unique_ptr<log::Logger> logger_;
 
-  Operator(core::TaskManager &task_manager, const Configuration &configuration);
+  Operator(std::shared_ptr<core::TaskManager> task_manager,
+           std::shared_ptr<const Configuration> configuration,
+           const std::shared_ptr<const log::LoggerProvider> &logger_provider);
 
   uint64_t ReadMinDelay() const;
   uint64_t ReadMaxDelay() const;
@@ -59,6 +67,6 @@ class Operator : public std::enable_shared_from_this<Operator> {
   void UpdateDistribution();
 };
 
-} // call_center
+}
 
 #endif //CALL_CENTER_SRC_CALL_CENTER_OPERATOR_H_

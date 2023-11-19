@@ -6,8 +6,11 @@ namespace call_center::core {
 
 namespace asio = boost::asio;
 
-TaskManager::TaskManager(const log::Sink &sink)
-    : work_guard_(asio::make_work_guard(ioc_)), logger_("TaskManager", sink) {}
+TaskManager::TaskManager(std::shared_ptr<const Configuration> configuration,
+                         const std::shared_ptr<const log::LoggerProvider> &logger_provider)
+    : work_guard_(asio::make_work_guard(ioc_)),
+      logger_(logger_provider->Get("TaskManager")),
+      configuration_(std::move(configuration)) {}
 
 void TaskManager::Start() {
   {

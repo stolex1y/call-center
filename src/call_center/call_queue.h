@@ -21,7 +21,10 @@ class CallQueue {
     kOverload
   };
 
-  explicit CallQueue(const Configuration &configuration);
+  CallQueue(std::shared_ptr<const Configuration> configuration,
+            const std::shared_ptr<const log::LoggerProvider> &logger_provider);
+  CallQueue(const CallQueue &other) = delete;
+  CallQueue &operator=(const CallQueue &other) = delete;
 
   CallPtr PopFromQueue();
   PushResult PushToQueue(const CallPtr &call);
@@ -57,7 +60,8 @@ class CallQueue {
   std::multiset<CallPtr, TimeoutPointOrder> in_timout_point_order_;
   std::multiset<CallPtr, ReceiptOrder> in_receipt_order_;
   mutable std::mutex queue_mutex_;
-  const Configuration &configuration_;
+  std::unique_ptr<log::Logger> logger_;
+  const std::shared_ptr<const Configuration> configuration_;
   size_t capacity_;
 
   [[nodiscard]] size_t ReadCapacity() const;
@@ -96,6 +100,6 @@ bool CallQueue::MultisetContainsCall(const std::multiset<CallPtr, Cmp> &multiset
   return false;
 }
 
-} // call_center
+}
 
 #endif //CALL_CENTER_SRC_CALL_CENTER_CALL_QUEUE_H_

@@ -19,7 +19,7 @@ class TaskWrapped {
   void operator()() const;
 
  private:
-  const std::function<Task> task_;
+  std::function<Task> task_;
   log::Logger &logger_;
 };
 
@@ -51,8 +51,8 @@ void TimerTaskWrapped<Task, Clock>::operator()(const boost::system::error_code &
 
 template<typename Task, typename Clock>
 TimerTaskWrapped<Task, Clock>::TimerTaskWrapped(std::function<Task> task,
-                                         std::unique_ptr<Timer> timer,
-                                         log::Logger &logger)
+                                                std::unique_ptr<Timer> timer,
+                                                log::Logger &logger)
     : task_(std::move(task), logger), logger_(logger), timer_(std::move(timer)) {}
 
 template<typename Task>

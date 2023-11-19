@@ -20,7 +20,7 @@ class CallDetailedRecord {
   using TimePoint = std::chrono::time_point<Clock, Duration>;
 
   CallDetailedRecord(std::string caller_phone_number,
-                     const Configuration &configuration,
+                     std::shared_ptr<const Configuration> configuration,
                      OnFinish on_finish);
 
   void StartProcessing();
@@ -45,7 +45,7 @@ class CallDetailedRecord {
   static constexpr const auto kMaxWaitKey = "call_max_wait";
   static constexpr const uint64_t kDefaultMaxWait = 3;
 
-  const Configuration &configuration_;
+  const std::shared_ptr<const Configuration> configuration_;
   const TimePoint receipt_time_;
   TimePoint end_processing_time_;
   TimePoint start_processing_time_;

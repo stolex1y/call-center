@@ -8,12 +8,24 @@ namespace call_center::data {
 
 std::atomic_size_t HttpConnection::next_id_ = 0;
 
+std::shared_ptr<HttpConnection> HttpConnection::Create(tcp::socket &&socket,
+                                                       const std::unordered_map<
+                                                           std::string_view,
+                                                           std::shared_ptr<HttpRepository>> &repositories,
+                                                       const std::shared_ptr<const log::LoggerProvider> &logger_provider) {
+  return std::shared_ptr<HttpConnection>(
+      new HttpConnection(std::move(socket),
+                         repositories,
+                         logger_provider->Get("HttpConnection (" + std::to_string(next_id_.fetch_add(1)) + ")")));
+}
+
 HttpConnection::HttpConnection(tcp::socket &&socket,
                                const std::unordered_map<std::string_view,
                                                         std::shared_ptr<HttpRepository>> &repositories,
-                               log::Sink &sink)
-    : logger_("HttpConnection (" + std::to_string(id_) + ")", sink),
-      stream_(std::move(socket)), repositories_(repositories) {
+                               std::unique_ptr<log::Logger> logger)
+    : logger_(std::move(logger)),
+      stream_(std::move(socket)),
+      repositories_(repositories) {
   stream_.expires_after(30s);
 }
 
@@ -36,19 +48,19 @@ void HttpConnection::OnReadRequest(const HttpRepository::Request &request, beast
 
   if (ec) {
     Close();
-    logger_.Error() << "Failed on read request: " << ec.what();
+    logger_->Error() << "Failed on read request: " << ec.what();
     return;
   }
 
-  logger_.Info() << "Read request: " << to_string(request.method()) << " " << request.target();
+  logger_->Info() << "Read request: " << to_string(request.method()) << " " << request.target();
 
   auto path_root = request.target().substr(1, request.target().find_first_of("/", 1));
   auto repository = repositories_.find(path_root);
   if (repository == repositories_.end()) {
-    logger_.Info() << "No processing repository found";
+    logger_->Info() << "No processing repository found";
     WriteResponse(MakeNotFoundResponse());
   } else {
-    logger_.Info() << "Redirect request to repository";
+    logger_->Info() << "Redirect request to repository";
     repository->second->HandleRequest(
         request,
         [conn = shared_from_this()](HttpRepository::Response &&response) {
@@ -58,7 +70,7 @@ void HttpConnection::OnReadRequest(const HttpRepository::Request &request, beast
 }
 
 void HttpConnection::WriteResponse(HttpRepository::Response &&response) {
-  logger_.Info() << "Write response: " << response.result();
+  logger_->Info() << "Write response: " << response.result();
   bool keep_alive = response.keep_alive();
   beast::async_write(stream_,
                      http::message_generator{std::move(response)},
@@ -72,7 +84,7 @@ void HttpConnection::WriteResponse(HttpRepository::Response &&response) {
 void HttpConnection::OnWriteResponse(bool keep_alive, beast::error_code error_code) {
   if (error_code) {
     Close();
-    logger_.Error() << "Failed on write response: " << error_code.what();
+    logger_->Error() << "Failed on write response: " << error_code.what();
   }
 
   if (keep_alive) {
@@ -84,17 +96,9 @@ void HttpConnection::OnWriteResponse(bool keep_alive, beast::error_code error_co
 
 void HttpConnection::Close() {
   beast::error_code error;
-  logger_.Info() << "Close connection";
+  logger_->Info() << "Close connection";
   boost::system::error_code system_error = stream_.socket().shutdown(tcp::socket::shutdown_both, error);
   boost::ignore_unused(system_error);
-}
-
-std::shared_ptr<HttpConnection> HttpConnection::Create(tcp::socket &&socket,
-                                                       const std::unordered_map<
-                                                           std::string_view,
-                                                           std::shared_ptr<HttpRepository>> &repositories,
-                                                       log::Sink &sink) {
-  return std::shared_ptr<HttpConnection>(new HttpConnection(std::move(socket), repositories, sink));
 }
 
 HttpRepository::Response HttpConnection::MakeNotFoundResponse() {
@@ -105,4 +109,4 @@ HttpRepository::Response HttpConnection::MakeNotFoundResponse() {
   return response;
 }
 
-} // data
+}

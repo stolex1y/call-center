@@ -5,10 +5,13 @@
 
 namespace call_center {
 
-OperatorSet::OperatorSet(const Configuration &configuration,
-                         core::TaskManager &task_manager)
-    : configuration_(configuration), operator_count_(ReadOperatorCount()),
-      task_manager_(task_manager) {
+OperatorSet::OperatorSet(std::shared_ptr<const Configuration> configuration,
+                         std::shared_ptr<core::TaskManager> task_manager,
+                         const std::shared_ptr<const log::LoggerProvider> &logger_provider)
+    : configuration_(std::move(configuration)), task_manager_(std::move(task_manager)),
+      operator_count_(ReadOperatorCount()),
+      logger_provider_(logger_provider),
+      logger_(logger_provider->Get("OperatorSet")) {
   AddOperators(operator_count_);
 }
 
@@ -32,7 +35,7 @@ void OperatorSet::InsertFree(const std::shared_ptr<Operator> &op) {
 }
 
 size_t OperatorSet::ReadOperatorCount() const {
-  return configuration_.GetProperty<size_t>(kOperatorCountKey).value_or(kDefaultOperatorCount);
+  return configuration_->GetProperty<size_t>(kOperatorCountKey).value_or(kDefaultOperatorCount);
 }
 
 void OperatorSet::UpdateOperatorCount() {
@@ -52,7 +55,7 @@ void OperatorSet::UpdateOperatorCount() {
 
 void OperatorSet::AddOperators(size_t count) {
   for (size_t i = 0; i < count; ++i) {
-    free_operators_.emplace(Operator::Create(task_manager_, configuration_));
+    free_operators_.emplace(Operator::Create(task_manager_, configuration_, logger_provider_));
   }
 }
 

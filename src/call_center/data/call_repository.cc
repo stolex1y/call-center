@@ -11,14 +11,26 @@ namespace json = boost::json;
 
 namespace call_center::data {
 
-CallRepository::CallRepository(std::shared_ptr<CallCenter> call_center, Configuration &configuration, log::Sink &sink)
-    : logger_t("CallRepository", sink), HttpRepository("call", logger_t::member),
-      call_center_(std::move(call_center)), configuration_(configuration) {
+std::shared_ptr<CallRepository> CallRepository::Create(std::shared_ptr<CallCenter> call_center,
+                                                       std::shared_ptr<const Configuration> configuration,
+                                                       const std::shared_ptr<const log::LoggerProvider> &logger_provider) {
+  return std::shared_ptr<CallRepository>(new CallRepository(std::move(call_center),
+                                                            std::move(configuration),
+                                                            logger_provider->Get("CallRepository")));
+}
+
+CallRepository::CallRepository(std::shared_ptr<CallCenter> call_center,
+                               std::shared_ptr<const Configuration> configuration,
+                               std::unique_ptr<log::Logger> logger)
+    : logger_t(std::move(logger)),
+      HttpRepository("call", *logger_t::member),
+      call_center_(std::move(call_center)),
+      configuration_(std::move(configuration)) {
 }
 
 void CallRepository::HandleRequest(const http::request<http::string_body> &request,
                                    const HttpRepository::OnHandle &on_handle) {
-  logger_.Info() << "Start handle request: "  << to_string(request.method()) << " " << request.target();
+  logger_.Info() << "Start handle request: " << to_string(request.method()) << " " << request.target();
   if (request.method() != http::verb::post) {
     logger_.Info() << "Cannot handle request with illegal method ("
                    << to_string(request.method())
@@ -59,10 +71,4 @@ std::string CallRepository::MakeResponseBody(const CallDetailedRecord &cdr) {
   return serialize(json::value_from(call_response_dto));
 }
 
-std::shared_ptr<CallRepository> CallRepository::Create(std::shared_ptr<CallCenter> call_center,
-                                                       Configuration &configuration,
-                                                       log::Sink &sink) {
-  return std::shared_ptr<CallRepository>(new CallRepository(std::move(call_center), configuration, sink));
 }
-
-} // data

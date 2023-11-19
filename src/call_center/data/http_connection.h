@@ -15,7 +15,7 @@
 
 #include "http.h"
 #include "log/logger.h"
-#include "log/sink.h"
+#include "log/logger_provider.h"
 #include "http_repository.h"
 
 namespace call_center::data {
@@ -26,7 +26,7 @@ class HttpConnection : public std::enable_shared_from_this<HttpConnection> {
                                                 const std::unordered_map<
                                                     std::string_view,
                                                     std::shared_ptr<HttpRepository>> &repositories,
-                                                log::Sink &sink);
+                                                const std::shared_ptr<const log::LoggerProvider> &logger_provider);
 
   HttpConnection(const HttpConnection &other) = delete;
   HttpConnection &operator=(const HttpConnection &other) = delete;
@@ -36,12 +36,11 @@ class HttpConnection : public std::enable_shared_from_this<HttpConnection> {
  private:
   HttpConnection(tcp::socket &&socket,
                  const std::unordered_map<std::string_view, std::shared_ptr<HttpRepository>> &repositories,
-                 log::Sink &sink);
+                 std::unique_ptr<log::Logger> logger);
 
   static std::atomic_size_t next_id_;
 
-  const size_t id_ = next_id_.fetch_add(1);
-  log::Logger logger_;
+  const std::unique_ptr<log::Logger> logger_;
   beast::tcp_stream stream_;
   beast::flat_buffer buffer_;
   const std::unordered_map<std::string_view, std::shared_ptr<HttpRepository>> &repositories_;
@@ -54,6 +53,6 @@ class HttpConnection : public std::enable_shared_from_this<HttpConnection> {
   void OnReadRequest(const HttpRepository::Request &request, beast::error_code ec);
 };
 
-} // data
+}
 
 #endif //CALL_CENTER_SRC_CALL_CENTER_DATA_HTTP_CONNECTION_H_

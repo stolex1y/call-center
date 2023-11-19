@@ -9,9 +9,9 @@ namespace uuids = boost::uuids;
 namespace call_center {
 
 CallDetailedRecord::CallDetailedRecord(std::string caller_phone_number,
-                                       const Configuration &configuration,
+                                       std::shared_ptr<const Configuration> configuration,
                                        OnFinish on_finish)
-    : configuration_(configuration),
+    : configuration_(std::move(configuration)),
       receipt_time_(time_point_cast<Duration>(Clock::now())),
       max_wait_(std::chrono::seconds(ReadMaxWait())),
       timeout_point_(receipt_time_ + max_wait_),
@@ -85,7 +85,7 @@ bool CallDetailedRecord::IsTimeout() const {
 }
 
 uint64_t CallDetailedRecord::ReadMaxWait() const {
-  return configuration_.GetProperty<uint64_t>(kMaxWaitKey).value_or(kDefaultMaxWait);
+  return configuration_->GetProperty<uint64_t>(kMaxWaitKey).value_or(kDefaultMaxWait);
 }
 
 const CallDetailedRecord::TimePoint &CallDetailedRecord::GetTimeoutPoint() const {

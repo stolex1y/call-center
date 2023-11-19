@@ -11,12 +11,13 @@
 
 namespace call_center::data {
 
-class CallRepository : private boost::base_from_member<log::Logger>,
+class CallRepository : private boost::base_from_member<std::unique_ptr<log::Logger>>,
                        public HttpRepository,
                        public std::enable_shared_from_this<CallRepository> {
  public:
   static std::shared_ptr<CallRepository> Create(std::shared_ptr<CallCenter> call_center,
-                                                Configuration &configuration, log::Sink &sink);
+                                                std::shared_ptr<const Configuration> configuration,
+                                                const std::shared_ptr<const log::LoggerProvider> &logger_provider);
 
   CallRepository(const CallRepository &other) = delete;
   CallRepository &operator=(const CallRepository &other) = delete;
@@ -24,18 +25,20 @@ class CallRepository : private boost::base_from_member<log::Logger>,
   void HandleRequest(const http::request<http::string_body> &request, const OnHandle &on_handle) override;
 
  private:
-  using logger_t = boost::base_from_member<log::Logger>;
+  using logger_t = boost::base_from_member<std::unique_ptr<log::Logger>>;
 
-  std::shared_ptr<CallCenter> call_center_;
-  Configuration &configuration_;
+  const std::shared_ptr<CallCenter> call_center_;
+  const std::shared_ptr<const Configuration> configuration_;
 
   static std::string MakeResponseBody(const CallDetailedRecord &cdr);
 
-  CallRepository(std::shared_ptr<CallCenter> call_center, Configuration &configuration, log::Sink &sink);
+  CallRepository(std::shared_ptr<CallCenter> call_center,
+                 std::shared_ptr<const Configuration> configuration,
+                 std::unique_ptr<log::Logger> logger);
 
   std::optional<CallRequestDto> ParseRequestBody(const std::string_view &body);
 };
 
-} // data
+}
 
 #endif //CALL_CENTER_SRC_CALL_CENTER_DATA_QUERY_REPOSITORY_H_

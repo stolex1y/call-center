@@ -13,6 +13,8 @@ class HttpRepository {
   using Response = http::response<http::string_body>;
 
   HttpRepository(std::string root, log::Logger &logger);
+  HttpRepository(const HttpRepository &other) = delete;
+  HttpRepository &operator=(const HttpRepository &other) = delete;
   virtual ~HttpRepository() = default;
 
   virtual void HandleRequest(const http::request<http::string_body> &request, const OnHandle &on_handle) = 0;
@@ -28,6 +30,6 @@ class HttpRepository {
 
 };
 
-} // data
+}
 
 #endif //CALL_CENTER_SRC_CALL_CENTER_DATA_HTTP_REPOSITORY_H_

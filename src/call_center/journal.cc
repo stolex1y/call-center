@@ -12,8 +12,8 @@ namespace call_center {
 namespace expr = boost::log::expressions;
 namespace date_time_utils = core::utils::date_time;
 
-Journal::Journal(const Configuration &configuration)
-    : configuration_(configuration),
+Journal::Journal(std::shared_ptr<const Configuration> configuration)
+    : configuration_(std::move(configuration)),
       file_name_(ReadFileName()),
       sink_(MakeSink()),
       logger_({}, sink_),
@@ -25,7 +25,7 @@ void Journal::Formatter(const boost::log::record_view &rec, boost::log::formatti
 }
 
 std::string Journal::ReadFileName() const {
-  return configuration_.GetProperty<std::string>(kFileNameKey).value_or(kDefaultFileName);
+  return configuration_->GetProperty<std::string>(kFileNameKey).value_or(kDefaultFileName);
 }
 
 std::string Journal::FormatCallDetailedRecord(const CallDetailedRecord &cdr) {
@@ -101,7 +101,7 @@ log::Sink Journal::MakeSink() {
 }
 
 size_t Journal::ReadMaxSize() const {
-  return configuration_.GetProperty<size_t>(kMaxSizeKey).value_or(kDefaultMaxSize);
+  return configuration_->GetProperty<size_t>(kMaxSizeKey).value_or(kDefaultMaxSize);
 }
 
-} // call_center
+}

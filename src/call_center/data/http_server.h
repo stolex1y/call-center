@@ -20,8 +20,9 @@ class HttpServer : public std::enable_shared_from_this<HttpServer> {
   HttpServer(const HttpServer &other) = delete;
   HttpServer &operator=(const HttpServer &other) = delete;
 
-  static std::shared_ptr<HttpServer> Create(net::io_context &ioc, const tcp::endpoint &endpoint,
-                                            log::Sink &sink);
+  static std::shared_ptr<HttpServer> Create(net::io_context &ioc,
+                                            const tcp::endpoint &endpoint,
+                                            std::shared_ptr<const log::LoggerProvider> logger_provider);
 
   void AddRepository(const std::shared_ptr<HttpRepository> &repository);
   void Start();
@@ -32,16 +33,18 @@ class HttpServer : public std::enable_shared_from_this<HttpServer> {
   net::io_context &ioc_;
   const tcp::endpoint &endpoint_;
   tcp::acceptor acceptor_;
-  log::Logger logger_;
+  const std::shared_ptr<const log::LoggerProvider> logger_provider_;
+  const std::unique_ptr<log::Logger> logger_;
   std::atomic_bool stopped_ = true;
-  log::Sink &sink_;
 
-  HttpServer(net::io_context &ioc, const tcp::endpoint &endpoint, log::Sink &sink);
+  HttpServer(net::io_context &ioc,
+             const tcp::endpoint &endpoint,
+             std::shared_ptr<const log::LoggerProvider> logger_provider);
 
   void OnAccept(beast::error_code error, tcp::socket socket);
   void Open();
 };
 
-} // data
+}
 
 #endif //CALL_CENTER_SRC_CALL_CENTER_DATA_HTTP_SERVER_H_

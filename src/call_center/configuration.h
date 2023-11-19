@@ -6,14 +6,20 @@
 
 #include <boost/core/ignore_unused.hpp>
 
+#include "log/logger.h"
+#include "log/logger_provider.h"
+
 namespace call_center {
 
 class Configuration {
  public:
+  explicit Configuration(const std::shared_ptr<const log::LoggerProvider> &logger_provider);
+
   template<typename T>
   std::optional<T> GetProperty(const std::string &key) const;
 
  private:
+  std::unique_ptr<log::Logger> logger_;
 };
 
 template<typename T>
@@ -22,6 +28,6 @@ std::optional<T> Configuration::GetProperty(const std::string &key) const {
   return std::nullopt;
 }
 
-} // call_center
+}
 
 #endif //CALL_CENTER_SRC_CALL_CENTER_CONFIGURATION_H_

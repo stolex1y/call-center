@@ -1,6 +1,7 @@
 #include "severity_level.h"
 
 #include <ostream>
+
 namespace call_center::log {
 
 std::ostream &operator<<(std::ostream &out, SeverityLevel level) {

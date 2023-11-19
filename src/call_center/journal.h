@@ -21,7 +21,9 @@ namespace call_center {
 
 class Journal {
  public:
-  explicit Journal(const Configuration &configuration);
+  explicit Journal(std::shared_ptr<const Configuration> configuration);
+  Journal(const Journal &other) = delete;
+  Journal &operator=(const Journal &other) = delete;
 
   void AddRecord(const CallDetailedRecord &cdr);
 
@@ -32,7 +34,7 @@ class Journal {
   static constexpr const auto kMaxSizeKey = "journal_max_size";
   static constexpr const size_t kDefaultMaxSize = 100;
 
-  const Configuration &configuration_;
+  std::shared_ptr<const Configuration> configuration_;
   std::string file_name_;
   log::Sink sink_;
   log::Logger logger_;

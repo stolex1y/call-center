@@ -6,14 +6,20 @@
 
 namespace call_center::data {
 
+std::shared_ptr<HttpServer> HttpServer::Create(net::io_context &ioc,
+                                               const tcp::endpoint &endpoint,
+                                               std::shared_ptr<const log::LoggerProvider> logger_provider) {
+  return std::shared_ptr<HttpServer>(new HttpServer(ioc, endpoint, std::move(logger_provider)));
+}
+
 HttpServer::HttpServer(boost::asio::io_context &ioc,
                        const boost::asio::ip::tcp::endpoint &endpoint,
-                       log::Sink &sink)
+                       std::shared_ptr<const log::LoggerProvider> logger_provider)
     : ioc_(ioc),
       endpoint_(endpoint),
       acceptor_(ioc),
-      logger_("HttpServer", sink),
-      sink_(sink) {
+      logger_provider_(std::move(logger_provider)),
+      logger_(logger_provider_->Get("HttpServer")) {
   Open();
 }
 
@@ -51,7 +57,7 @@ void HttpServer::Open() {
   }
 
   stopped_.store(false);
-  logger_.Debug() << "Start listening for connections on " << std::to_string(endpoint_.port());
+  logger_->Debug() << "Start listening for connections on " << std::to_string(endpoint_.port());
 }
 
 void HttpServer::Start() {
@@ -67,28 +73,24 @@ void HttpServer::Start() {
 void HttpServer::Stop() {
   stopped_.store(true);
   acceptor_.close();
-  logger_.Info() << "Server stopped";
+  logger_->Info() << "Server stopped";
 }
 
 void HttpServer::OnAccept(beast::error_code error, tcp::socket socket) {
   if (error || stopped_) {
     if (error)
-      logger_.Error() << "Failed on accept with error: " << error.message();
+      logger_->Error() << "Failed on accept with error: " << error.message();
     else
-      logger_.Debug() << "New connection reject";
+      logger_->Debug() << "New connection reject";
     Stop();
   } else {
-    HttpConnection::Create(std::move(socket), repositories_, sink_)->ReadRequest();
+    HttpConnection::Create(std::move(socket), repositories_, logger_provider_)->ReadRequest();
     Start();
   }
-}
-
-std::shared_ptr<HttpServer> HttpServer::Create(net::io_context &ioc, const tcp::endpoint &endpoint, log::Sink &sink) {
-  return std::shared_ptr<HttpServer>(new HttpServer(ioc, endpoint, sink));
 }
 
 void HttpServer::AddRepository(const std::shared_ptr<HttpRepository> &repository) {
   repositories_.emplace(repository->GetRootPath(), repository);
 }
 
-} // data
+}

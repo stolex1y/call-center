@@ -65,4 +65,4 @@ void Sink::DefaultFormatter(const boost::log::record_view &rec, boost::log::form
   out << rec[expr::message];
 }
 
-} // log
+}

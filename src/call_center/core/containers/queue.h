@@ -16,6 +16,8 @@ template<NoThrowCopyConstructor T, typename Hash = std::hash<T>, typename Equal 
 class Queue {
  public:
   explicit Queue(size_t capacity = SIZE_MAX) : capacity_(capacity) {}
+  Queue(const Queue<T, Hash, Equal> &other) = delete;
+  Queue &operator=(const Queue<T, Hash, Equal> &other) = delete;
 
   bool Push(const T &t);
   std::optional<T> Pop();
