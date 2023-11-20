@@ -1,7 +1,6 @@
 #include "call_center.h"
 
 #include <boost/uuid/uuid_io.hpp>
-
 #include <chrono>
 
 namespace call_center {
@@ -11,16 +10,22 @@ using namespace std::chrono_literals;
 /**
  * Creating an instance of a class.
  */
-
-std::shared_ptr<CallCenter> CallCenter::Create(std::unique_ptr<Journal> journal,
-                                               std::shared_ptr<const Configuration> configuration,
-                                               std::shared_ptr<core::TaskManager> task_manager,
-                                               const std::shared_ptr<const log::LoggerProvider> &logger_provider,
-                                               std::unique_ptr<OperatorSet> operator_set,
-                                               std::unique_ptr<CallQueue> call_queue) {
+std::shared_ptr<CallCenter> CallCenter::Create(
+    std::unique_ptr<Journal> journal,
+    std::shared_ptr<const Configuration> configuration,
+    std::shared_ptr<core::TaskManager> task_manager,
+    const std::shared_ptr<const log::LoggerProvider> &logger_provider,
+    std::unique_ptr<OperatorSet> operator_set,
+    std::unique_ptr<CallQueue> call_queue
+) {
   return std::shared_ptr<CallCenter>(new CallCenter(
-      std::move(journal), std::move(configuration), std::move(task_manager),
-      logger_provider->Get("CallCenter"), std::move(operator_set), std::move(call_queue)));
+      std::move(journal),
+      std::move(configuration),
+      std::move(task_manager),
+      logger_provider->Get("CallCenter"),
+      std::move(operator_set),
+      std::move(call_queue)
+  ));
 }
 
 CallCenter::CallCenter(
@@ -29,10 +34,14 @@ CallCenter::CallCenter(
     std::shared_ptr<core::TaskManager> task_manager,
     std::unique_ptr<log::Logger> logger,
     std::unique_ptr<OperatorSet> operator_set,
-    std::unique_ptr<CallQueue> call_queue)
-    : journal_(std::move(journal)), operators_(std::move(operator_set)),
-      calls_(std::move(call_queue)), task_manager_(std::move(task_manager)),
-      configuration_(std::move(configuration)), logger_(std::move(logger)) {
+    std::unique_ptr<CallQueue> call_queue
+)
+    : journal_(std::move(journal)),
+      operators_(std::move(operator_set)),
+      calls_(std::move(call_queue)),
+      task_manager_(std::move(task_manager)),
+      configuration_(std::move(configuration)),
+      logger_(std::move(logger)) {
 }
 
 /**
@@ -64,8 +73,9 @@ void CallCenter::PushCall(const CallPtr &call) {
 
 /**
  * The main task is to process calls from the queue.
- * Cancels all calls with expired waiting time, after that, if there is a free operator, then sends him a request.
- * Otherwise, it looks at the minimum timeout point of waiting calls and plans a new iteration for this time.
+ * Cancels all calls with expired waiting time, after that, if there is a free
+ * operator, then sends him a request. Otherwise, it looks at the minimum
+ * timeout point of waiting calls and plans a new iteration for this time.
  */
 void CallCenter::PerformCallProcessingIteration() {
   if (calls_->QueueIsEmpty())
@@ -94,20 +104,22 @@ void CallCenter::PerformCallProcessingIteration() {
  * @param call - next call from the queue;
  * @param op - free operator who will handle the call.
  */
-void CallCenter::StartCallProcessing(const CallPtr &call,
-                                     const OperatorPtr &op) {
-  logger_->Debug() << "Start call (" << boost::uuids::to_string(call->GetId()) << ") processing";
+void CallCenter::StartCallProcessing(
+    const CallPtr &call, const OperatorPtr &op
+) {
+  logger_->Debug() << "Start call (" << boost::uuids::to_string(call->GetId())
+                   << ") processing";
   call->StartProcessing();
   call->SetOperatorId(op->GetId());
-  op->HandleCall(call,
-                 [call, op, call_center = shared_from_this()]() {
-                   call_center->FinishCallProcessing(call, op);
-                 });
+  op->HandleCall(call, [call, op, call_center = shared_from_this()]() {
+    call_center->FinishCallProcessing(call, op);
+  });
 }
 
 /**
- * Start processing a call if the queue is empty, there is a free operator and the call is unique.
- * It is necessary to bypass the queue, as it may have zero capacity.
+ * Start processing a call if the queue is empty, there is a free operator and
+ * the call is unique. It is necessary to bypass the queue, as it may have zero
+ * capacity.
  * @param call - call for processing.
  * @return True if processing has started, otherwise - false.
  */
@@ -134,9 +146,11 @@ bool CallCenter::StartCallProcessingIfPossible(const CallPtr &call) {
  * @param call - handled call;
  * @param op - operator who processed the call.
  */
-void CallCenter::FinishCallProcessing(const CallPtr &call,
-                                      const OperatorPtr &op) {
-  logger_->Debug() << "Finish call processing (" << boost::uuids::to_string(call->GetId()) << ")";
+void CallCenter::FinishCallProcessing(
+    const CallPtr &call, const OperatorPtr &op
+) {
+  logger_->Debug() << "Finish call processing ("
+                   << boost::uuids::to_string(call->GetId()) << ")";
   call->SetStatus(CallStatus::kOk);
   call->FinishProcessing();
   calls_->EraseFromProcessing(call);
@@ -153,9 +167,12 @@ void CallCenter::FinishCallProcessing(const CallPtr &call,
 
 /**
  * Schedule a new iteration of call processing at a certain time point.
- * @param time_point - time of execution of the new iteration of call processing.
+ * @param time_point - time of execution of the new iteration of call
+ * processing.
  */
-void CallCenter::ScheduleCallProcessingIteration(const CallDetailedRecord::TimePoint &time_point) {
+void CallCenter::ScheduleCallProcessingIteration(
+    const CallDetailedRecord::TimePoint &time_point
+) {
   logger_->Debug() << "Add task to call processing at: " << time_point;
 
   const auto task = [call_center = shared_from_this()]() {
@@ -188,4 +205,4 @@ void CallCenter::RejectAllTimeoutCalls() {
   }
 }
 
-}
+}  // namespace call_center

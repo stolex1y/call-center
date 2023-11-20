@@ -2,9 +2,9 @@
 #define CALL_CENTER_SRC_CALL_CENTER_UTILS_CONCURRENT_QUEUE_H_
 
 #include <mutex>
+#include <optional>
 #include <queue>
 #include <unordered_set>
-#include <optional>
 
 #include "core/utils/concepts.h"
 
@@ -12,10 +12,14 @@ namespace call_center::core::containers {
 
 using namespace core::utils::concepts;
 
-template<NoThrowCopyConstructor T, typename Hash = std::hash<T>, typename Equal = std::equal_to<T>>
+template <
+    NoThrowCopyConstructor T,
+    typename Hash = std::hash<T>,
+    typename Equal = std::equal_to<T>>
 class Queue {
  public:
-  explicit Queue(size_t capacity = SIZE_MAX) : capacity_(capacity) {}
+  explicit Queue(size_t capacity = SIZE_MAX) : capacity_(capacity) {
+  }
   Queue(const Queue<T, Hash, Equal> &other) = delete;
   Queue &operator=(const Queue<T, Hash, Equal> &other) = delete;
 
@@ -33,12 +37,12 @@ class Queue {
   size_t capacity_;
 };
 
-template<NoThrowCopyConstructor T, typename Hash, typename Equal>
+template <NoThrowCopyConstructor T, typename Hash, typename Equal>
 void Queue<T, Hash, Equal>::SetCapacity(size_t capacity) {
   capacity_ = capacity;
 }
 
-template<NoThrowCopyConstructor T, typename Hash, typename Equal>
+template <NoThrowCopyConstructor T, typename Hash, typename Equal>
 std::optional<T> Queue<T, Hash, Equal>::Peek() const {
   if (queue_.empty())
     return std::nullopt;
@@ -46,17 +50,17 @@ std::optional<T> Queue<T, Hash, Equal>::Peek() const {
   return queue_.front();
 }
 
-template<NoThrowCopyConstructor T, typename Hash, typename Equal>
+template <NoThrowCopyConstructor T, typename Hash, typename Equal>
 bool Queue<T, Hash, Equal>::IsFull() const {
   return queue_.size() >= capacity_;
 }
 
-template<NoThrowCopyConstructor T, typename Hash, typename Equal>
+template <NoThrowCopyConstructor T, typename Hash, typename Equal>
 bool Queue<T, Hash, Equal>::Contains(const T &t) {
   return set_.contains(t);
 }
 
-template<NoThrowCopyConstructor T, typename Hash, typename Equal>
+template <NoThrowCopyConstructor T, typename Hash, typename Equal>
 std::optional<T> Queue<T, Hash, Equal>::Pop() {
   if (queue_.empty())
     return std::nullopt;
@@ -67,7 +71,7 @@ std::optional<T> Queue<T, Hash, Equal>::Pop() {
   return item;
 }
 
-template<NoThrowCopyConstructor T, typename Hash, typename Equal>
+template <NoThrowCopyConstructor T, typename Hash, typename Equal>
 bool Queue<T, Hash, Equal>::Push(const T &t) {
   if (queue_.size() == capacity_)
     return false;
@@ -77,11 +81,11 @@ bool Queue<T, Hash, Equal>::Push(const T &t) {
   return true;
 }
 
-template<NoThrowCopyConstructor T, typename Hash, typename Equal>
+template <NoThrowCopyConstructor T, typename Hash, typename Equal>
 bool Queue<T, Hash, Equal>::IsEmpty() const {
   return queue_.empty();
 }
 
-}
+}  // namespace call_center::core::containers
 
-#endif //CALL_CENTER_SRC_CALL_CENTER_UTILS_CONCURRENT_QUEUE_H_
+#endif  // CALL_CENTER_SRC_CALL_CENTER_UTILS_CONCURRENT_QUEUE_H_

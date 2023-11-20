@@ -34,4 +34,4 @@ std::ostream &operator<<(std::ostream &out, SeverityLevel level) {
   return out;
 }
 
-}
+}  // namespace call_center::log

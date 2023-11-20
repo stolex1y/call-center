@@ -1,10 +1,8 @@
 #ifndef CALL_CENTER_SRC_CALL_CENTER_CALL_DETAILED_RECORD_H_
 #define CALL_CENTER_SRC_CALL_CENTER_CALL_DETAILED_RECORD_H_
 
-#include <chrono>
-
 #include <boost/uuid/uuid.hpp>
-
+#include <chrono>
 #include <functional>
 
 #include "call_status.h"
@@ -19,9 +17,11 @@ class CallDetailedRecord {
   using Duration = std::chrono::milliseconds;
   using TimePoint = std::chrono::time_point<Clock, Duration>;
 
-  CallDetailedRecord(std::string caller_phone_number,
-                     std::shared_ptr<const Configuration> configuration,
-                     OnFinish on_finish);
+  CallDetailedRecord(
+      std::string caller_phone_number,
+      std::shared_ptr<const Configuration> configuration,
+      OnFinish on_finish
+  );
 
   void StartProcessing();
   void FinishProcessing();
@@ -60,6 +60,6 @@ class CallDetailedRecord {
   [[nodiscard]] uint64_t ReadMaxWait() const;
 };
 
-} // call_center
+}  // namespace call_center
 
-#endif //CALL_CENTER_SRC_CALL_CENTER_CALL_DETAILED_RECORD_H_
+#endif  // CALL_CENTER_SRC_CALL_CENTER_CALL_DETAILED_RECORD_H_

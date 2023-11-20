@@ -4,18 +4,20 @@
 #include <boost/functional/hash.hpp>
 #include <boost/uuid/uuid.hpp>
 
-#include "core/containers/concurrent_hash_set.h"
-#include "operator.h"
-#include "core/task_manager.h"
 #include "configuration.h"
+#include "core/containers/concurrent_hash_set.h"
+#include "core/task_manager.h"
+#include "operator.h"
 
 namespace call_center {
 
 class OperatorSet {
  public:
-  OperatorSet(std::shared_ptr<const Configuration> configuration,
-              std::shared_ptr<core::TaskManager> task_manager,
-              const std::shared_ptr<const log::LoggerProvider> &logger_provider);
+  OperatorSet(
+      std::shared_ptr<const Configuration> configuration,
+      std::shared_ptr<core::TaskManager> task_manager,
+      const std::shared_ptr<const log::LoggerProvider> &logger_provider
+  );
   OperatorSet(const OperatorSet &other) = delete;
   OperatorSet &operator=(const OperatorSet &other) = delete;
 
@@ -51,6 +53,6 @@ class OperatorSet {
   size_t RemoveOperators(size_t count);
 };
 
-} // call_center
+}  // namespace call_center
 
-#endif //CALL_CENTER_SRC_CALL_CENTER_OPERATOR_SET_H_
+#endif  // CALL_CENTER_SRC_CALL_CENTER_OPERATOR_SET_H_

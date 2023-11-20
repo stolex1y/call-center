@@ -5,17 +5,10 @@
 
 namespace call_center::log {
 
-enum class SeverityLevel {
-  kTrace,
-  kDebug,
-  kInfo,
-  kWarning,
-  kError,
-  kFatal
-};
+enum class SeverityLevel { kTrace, kDebug, kInfo, kWarning, kError, kFatal };
 
 std::ostream &operator<<(std::ostream &out, SeverityLevel level);
 
-}
+}  // namespace call_center::log
 
-#endif //CALL_CENTER_SRC_CALL_CENTER_LOG_SEVERITY_LEVEL_H_
+#endif  // CALL_CENTER_SRC_CALL_CENTER_LOG_SEVERITY_LEVEL_H_

@@ -17,19 +17,22 @@ class HttpRepository {
   HttpRepository &operator=(const HttpRepository &other) = delete;
   virtual ~HttpRepository() = default;
 
-  virtual void HandleRequest(const http::request<http::string_body> &request, const OnHandle &on_handle) = 0;
+  virtual void HandleRequest(
+      const http::request<http::string_body> &request, const OnHandle &on_handle
+  ) = 0;
   [[nodiscard]] std::string_view GetRootPath() const;
 
  protected:
   log::Logger &logger_;
 
-  virtual Response MakeResponse(http::status status, bool keep_alive, std::string &&body);
+  virtual Response MakeResponse(
+      http::status status, bool keep_alive, std::string &&body
+  );
 
  private:
   std::string root_;
-
 };
 
-}
+}  // namespace call_center::data
 
-#endif //CALL_CENTER_SRC_CALL_CENTER_DATA_HTTP_REPOSITORY_H_
+#endif  // CALL_CENTER_SRC_CALL_CENTER_DATA_HTTP_REPOSITORY_H_

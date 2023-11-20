@@ -71,3 +71,6 @@ target_link_libraries(${STATIC_LIB_TARGET} ${OBJ_LIB_TARGET})
 
 add_executable(${RUNNABLE_TARGET} main.cc)
 target_link_libraries(${RUNNABLE_TARGET} ${OBJ_LIB_TARGET})
+
+include(Format)
+Format(${RUNNABLE_TARGET} .)

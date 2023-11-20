@@ -1,13 +1,12 @@
 #include "sink.h"
 
-#include <iostream>
-#include <fstream>
-
-#include <boost/log/core.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/log/core.hpp>
 #include <boost/log/expressions.hpp>
 #include <boost/log/sources/record_ostream.hpp>
 #include <boost/log/utility/setup/common_attributes.hpp>
+#include <fstream>
+#include <iostream>
 
 #include "attrs.h"
 
@@ -18,8 +17,7 @@ namespace keywords = boost::log::keywords;
 
 namespace call_center::log {
 
-Sink::Sink(SeverityLevel level)
-    : Sink(level, Sink::DefaultFormatter) {
+Sink::Sink(SeverityLevel level) : Sink(level, Sink::DefaultFormatter) {
 }
 
 Sink::Sink(const std::string &file_name, SeverityLevel level, size_t max_size)
@@ -27,20 +25,37 @@ Sink::Sink(const std::string &file_name, SeverityLevel level, size_t max_size)
 }
 
 Sink::Sink(SeverityLevel level, const Formatter &formatter)
-    : Sink(boost::shared_ptr<std::ostream>(&std::cout, [](std::ostream *) {}),
-           level, formatter) {
+    : Sink(
+          boost::shared_ptr<std::ostream>(&std::cout, [](std::ostream *) {}),
+          level,
+          formatter
+      ) {
 }
 
-Sink::Sink(const std::string &file_name, SeverityLevel level,
-           size_t max_size, const Formatter &formatter)
-    : Sink(boost::make_shared<std::ofstream>(file_name),
-           level, formatter, max_size) {
+Sink::Sink(
+    const std::string &file_name,
+    SeverityLevel level,
+    size_t max_size,
+    const Formatter &formatter
+)
+    : Sink(
+          boost::make_shared<std::ofstream>(file_name),
+          level,
+          formatter,
+          max_size
+      ) {
 }
 
-Sink::Sink(boost::shared_ptr<std::ostream> ostream, SeverityLevel level,
-           const Formatter &formatter, size_t max_size)
-    : sink_impl_(new SinkImpl(keywords::max_size = max_size * 1024 * 1024)), stream_(std::move(ostream)),
-      level_(level), max_size_(max_size) {
+Sink::Sink(
+    boost::shared_ptr<std::ostream> ostream,
+    SeverityLevel level,
+    const Formatter &formatter,
+    size_t max_size
+)
+    : sink_impl_(new SinkImpl(keywords::max_size = max_size * 1024 * 1024)),
+      stream_(std::move(ostream)),
+      level_(level),
+      max_size_(max_size) {
   boost::log::add_common_attributes();
 
   sink_impl_->set_formatter(formatter);
@@ -55,7 +70,9 @@ const boost::uuids::uuid &Sink::Id() const {
   return id_;
 }
 
-void Sink::DefaultFormatter(const boost::log::record_view &rec, boost::log::formatting_ostream &out) {
+void Sink::DefaultFormatter(
+    const boost::log::record_view &rec, boost::log::formatting_ostream &out
+) {
   out << "[" << to_simple_string(rec[attrs::timestamp].get()) << "] ";
   if (!rec[attrs::thread].empty()) {
     out << "tid[" << rec[attrs::thread] << "] ";
@@ -65,4 +82,4 @@ void Sink::DefaultFormatter(const boost::log::record_view &rec, boost::log::form
   out << rec[expr::message];
 }
 
-}
+}  // namespace call_center::log

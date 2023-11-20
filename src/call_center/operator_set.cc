@@ -1,14 +1,17 @@
 #include "operator_set.h"
 
-#include <boost/uuid/uuid.hpp>
 #include <boost/functional/hash.hpp>
+#include <boost/uuid/uuid.hpp>
 
 namespace call_center {
 
-OperatorSet::OperatorSet(std::shared_ptr<const Configuration> configuration,
-                         std::shared_ptr<core::TaskManager> task_manager,
-                         const std::shared_ptr<const log::LoggerProvider> &logger_provider)
-    : configuration_(std::move(configuration)), task_manager_(std::move(task_manager)),
+OperatorSet::OperatorSet(
+    std::shared_ptr<const Configuration> configuration,
+    std::shared_ptr<core::TaskManager> task_manager,
+    const std::shared_ptr<const log::LoggerProvider> &logger_provider
+)
+    : configuration_(std::move(configuration)),
+      task_manager_(std::move(task_manager)),
       operator_count_(ReadOperatorCount()),
       logger_provider_(logger_provider),
       logger_(logger_provider->Get("OperatorSet")) {
@@ -35,7 +38,8 @@ void OperatorSet::InsertFree(const std::shared_ptr<Operator> &op) {
 }
 
 size_t OperatorSet::ReadOperatorCount() const {
-  return configuration_->GetProperty<size_t>(kOperatorCountKey).value_or(kDefaultOperatorCount);
+  return configuration_->GetProperty<size_t>(kOperatorCountKey)
+      .value_or(kDefaultOperatorCount);
 }
 
 void OperatorSet::UpdateOperatorCount() {
@@ -55,7 +59,9 @@ void OperatorSet::UpdateOperatorCount() {
 
 void OperatorSet::AddOperators(size_t count) {
   for (size_t i = 0; i < count; ++i) {
-    free_operators_.emplace(Operator::Create(task_manager_, configuration_, logger_provider_));
+    free_operators_.emplace(
+        Operator::Create(task_manager_, configuration_, logger_provider_)
+    );
   }
 }
 
@@ -71,8 +77,9 @@ size_t OperatorSet::RemoveOperators(size_t count) {
   return removed;
 }
 
-bool OperatorSet::OperatorEquals::operator()(const OperatorPtr &first,
-                                             const OperatorPtr &second) const {
+bool OperatorSet::OperatorEquals::operator()(
+    const OperatorPtr &first, const OperatorPtr &second
+) const {
   if ((first == nullptr) ^ (second == nullptr))
     return false;
 
@@ -87,4 +94,4 @@ size_t OperatorSet::OperatorHash::operator()(const OperatorPtr &op) const {
   return boost::hash<boost::uuids::uuid>()(op->GetId());
 }
 
-} // call_center
+}  // namespace call_center

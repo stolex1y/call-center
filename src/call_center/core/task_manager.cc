@@ -6,11 +6,14 @@ namespace call_center::core {
 
 namespace asio = boost::asio;
 
-TaskManager::TaskManager(std::shared_ptr<const Configuration> configuration,
-                         const std::shared_ptr<const log::LoggerProvider> &logger_provider)
+TaskManager::TaskManager(
+    std::shared_ptr<const Configuration> configuration,
+    const std::shared_ptr<const log::LoggerProvider> &logger_provider
+)
     : work_guard_(asio::make_work_guard(ioc_)),
       logger_(logger_provider->Get("TaskManager")),
-      configuration_(std::move(configuration)) {}
+      configuration_(std::move(configuration)) {
+}
 
 void TaskManager::Start() {
   {
@@ -19,7 +22,9 @@ void TaskManager::Start() {
       return;
     stopped_ = false;
   }
-  thread_ = std::thread([&ioc = ioc_]() { ioc.run(); });
+  thread_ = std::thread([&ioc = ioc_]() {
+    ioc.run();
+  });
 }
 
 void TaskManager::Stop() {
@@ -43,4 +48,4 @@ asio::io_context &TaskManager::IoContext() {
   return ioc_;
 }
 
-}
+}  // namespace call_center::core

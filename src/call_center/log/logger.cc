@@ -13,8 +13,14 @@ namespace keywords = boost::log::keywords;
 namespace call_center::log {
 
 Logger::Logger(std::string tag, const Sink &sink) {
-  add_attribute(attrs::tag_attr_type::get_name(), boost_attrs::constant<std::string>(std::move(tag)));
-  add_attribute(attrs::channel_type::get_name(), boost_attrs::constant<boost::uuids::uuid>(sink.Id()));
+  add_attribute(
+      attrs::tag_attr_type::get_name(),
+      boost_attrs::constant<std::string>(std::move(tag))
+  );
+  add_attribute(
+      attrs::channel_type::get_name(),
+      boost_attrs::constant<boost::uuids::uuid>(sink.Id())
+  );
 }
 
 Logger::Ostream Logger::Trace() {
@@ -42,8 +48,7 @@ Logger::Ostream Logger::Fatal() {
 }
 
 Logger::Ostream::Ostream(Logger &logger, SeverityLevel level)
-    : logger_(logger),
-      record_(logger.open_record(keywords::severity = level)) {
+    : logger_(logger), record_(logger.open_record(keywords::severity = level)) {
   if (record_) {
     ostream_impl_.attach_record(record_);
   }
@@ -56,4 +61,4 @@ Logger::Ostream::~Ostream() {
   }
 }
 
-}
+}  // namespace call_center::log

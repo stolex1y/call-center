@@ -14,12 +14,18 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
 
-      - name: Set up GCC
+      - name: Apt update
         run: |
           sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
           sudo apt update
+
+      - name: Set up GCC
+        run: |
           sudo apt install gcc-13 g++-13
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 20 --slave /usr/bin/g++ g++ /usr/bin/g++-13
+
+      - name: Install
+        run: sudo apt install clang-format
 
       - name: Cache boost
         uses: actions/cache@v3

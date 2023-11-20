@@ -1,11 +1,10 @@
 #ifndef CALL_CENTER_LOGGER_H
 #define CALL_CENTER_LOGGER_H
 
-#include <boost/log/sources/severity_logger.hpp>
 #include <boost/log/sources/record_ostream.hpp>
-
-#include <string>
+#include <boost/log/sources/severity_logger.hpp>
 #include <optional>
+#include <string>
 
 #include "severity_level.h"
 #include "sink.h"
@@ -21,7 +20,7 @@ class Logger : private boost::log::sources::severity_logger_mt<SeverityLevel> {
     Ostream &operator=(const Ostream &other) = delete;
     ~Ostream();
 
-    template<typename T>
+    template <typename T>
     Ostream &operator<<(const T &t) {
       ostream_impl_ << t;
       return *this;
@@ -47,6 +46,6 @@ class Logger : private boost::log::sources::severity_logger_mt<SeverityLevel> {
   Ostream Fatal();
 };
 
-}
+}  // namespace call_center::log
 
-#endif //CALL_CENTER_LOGGER_H
+#endif  // CALL_CENTER_LOGGER_H

@@ -3,29 +3,27 @@
 
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
-
-#include <memory>
 #include <functional>
+#include <memory>
 #include <random>
 
 #include "call_detailed_record.h"
-#include "core/task_manager.h"
 #include "configuration.h"
+#include "core/task_manager.h"
 
 namespace call_center {
 
 class Operator : public std::enable_shared_from_this<Operator> {
  public:
-  enum class Status {
-    kFree,
-    kBusy
-  };
+  enum class Status { kFree, kBusy };
 
   using OnFinishHandle = std::function<void()>;
 
-  static std::shared_ptr<Operator> Create(std::shared_ptr<core::TaskManager> task_manager,
-                                          std::shared_ptr<const Configuration> configuration,
-                                          const std::shared_ptr<const log::LoggerProvider> &logger_provider);
+  static std::shared_ptr<Operator> Create(
+      std::shared_ptr<core::TaskManager> task_manager,
+      std::shared_ptr<const Configuration> configuration,
+      const std::shared_ptr<const log::LoggerProvider> &logger_provider
+  );
 
   Operator(const Operator &other) = delete;
   Operator &operator=(const Operator &other) = delete;
@@ -33,8 +31,10 @@ class Operator : public std::enable_shared_from_this<Operator> {
   [[nodiscard]] const boost::uuids::uuid &GetId() const;
   [[nodiscard]] Operator::Status GetStatus() const;
 
-  void HandleCall(const std::shared_ptr<CallDetailedRecord> &call,
-                  const OnFinishHandle &on_finish);
+  void HandleCall(
+      const std::shared_ptr<CallDetailedRecord> &call,
+      const OnFinishHandle &on_finish
+  );
 
  private:
   using Distribution = std::uniform_int_distribution<uint64_t>;
@@ -57,9 +57,11 @@ class Operator : public std::enable_shared_from_this<Operator> {
   Distribution distribution_;
   std::unique_ptr<log::Logger> logger_;
 
-  Operator(std::shared_ptr<core::TaskManager> task_manager,
-           std::shared_ptr<const Configuration> configuration,
-           const std::shared_ptr<const log::LoggerProvider> &logger_provider);
+  Operator(
+      std::shared_ptr<core::TaskManager> task_manager,
+      std::shared_ptr<const Configuration> configuration,
+      const std::shared_ptr<const log::LoggerProvider> &logger_provider
+  );
 
   uint64_t ReadMinDelay() const;
   uint64_t ReadMaxDelay() const;
@@ -67,6 +69,6 @@ class Operator : public std::enable_shared_from_this<Operator> {
   void UpdateDistribution();
 };
 
-}
+}  // namespace call_center
 
-#endif //CALL_CENTER_SRC_CALL_CENTER_OPERATOR_H_
+#endif  // CALL_CENTER_SRC_CALL_CENTER_OPERATOR_H_

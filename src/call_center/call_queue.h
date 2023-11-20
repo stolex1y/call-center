@@ -6,8 +6,8 @@
 #include <unordered_set>
 
 #include "call_detailed_record.h"
-#include "core/containers/queue.h"
 #include "configuration.h"
+#include "core/containers/queue.h"
 
 namespace call_center {
 
@@ -15,14 +15,12 @@ class CallQueue {
  public:
   using CallPtr = std::shared_ptr<CallDetailedRecord>;
 
-  enum class PushResult {
-    kOk,
-    kAlreadyInQueue,
-    kOverload
-  };
+  enum class PushResult { kOk, kAlreadyInQueue, kOverload };
 
-  CallQueue(std::shared_ptr<const Configuration> configuration,
-            const std::shared_ptr<const log::LoggerProvider> &logger_provider);
+  CallQueue(
+      std::shared_ptr<const Configuration> configuration,
+      const std::shared_ptr<const log::LoggerProvider> &logger_provider
+  );
   CallQueue(const CallQueue &other) = delete;
   CallQueue &operator=(const CallQueue &other) = delete;
 
@@ -56,7 +54,7 @@ class CallQueue {
   static constexpr const size_t kDefaultCapacity = 0;
 
   std::unordered_set<CallPtr, CallHash, CallEquals> in_processing_;
-  //TODO extract to its own class
+  // TODO extract to its own class
   std::multiset<CallPtr, TimeoutPointOrder> in_timout_point_order_;
   std::multiset<CallPtr, ReceiptOrder> in_receipt_order_;
   mutable std::mutex queue_mutex_;
@@ -69,16 +67,21 @@ class CallQueue {
   void EraseFromQueue(const CallPtr &call);
   void InsertToQueue(const CallPtr &call);
 
-  template<typename Cmp>
-  static void EraseCallFromMultiset(std::multiset<CallPtr, Cmp> &multiset, const CallPtr &call);
+  template <typename Cmp>
+  static void EraseCallFromMultiset(
+      std::multiset<CallPtr, Cmp> &multiset, const CallPtr &call
+  );
 
-  template<typename Cmp>
-  static bool MultisetContainsCall(const std::multiset<CallPtr, Cmp> &multiset, const CallPtr &call);
+  template <typename Cmp>
+  static bool MultisetContainsCall(
+      const std::multiset<CallPtr, Cmp> &multiset, const CallPtr &call
+  );
 };
 
-template<typename Cmp>
-void CallQueue::EraseCallFromMultiset(std::multiset<CallPtr, Cmp> &multiset,
-                                      const CallPtr &call) {
+template <typename Cmp>
+void CallQueue::EraseCallFromMultiset(
+    std::multiset<CallPtr, Cmp> &multiset, const CallPtr &call
+) {
   CallEquals equals;
   for (auto [begin, end] = multiset.equal_range(call); begin != end; ++begin) {
     if (equals(*begin, call)) {
@@ -88,9 +91,10 @@ void CallQueue::EraseCallFromMultiset(std::multiset<CallPtr, Cmp> &multiset,
   }
 }
 
-template<typename Cmp>
-bool CallQueue::MultisetContainsCall(const std::multiset<CallPtr, Cmp> &multiset,
-                                     const CallPtr &call) {
+template <typename Cmp>
+bool CallQueue::MultisetContainsCall(
+    const std::multiset<CallPtr, Cmp> &multiset, const CallPtr &call
+) {
   CallEquals equals;
   for (auto [begin, end] = multiset.equal_range(call); begin != end; ++begin) {
     if (equals(*begin, call)) {
@@ -100,6 +104,6 @@ bool CallQueue::MultisetContainsCall(const std::multiset<CallPtr, Cmp> &multiset
   return false;
 }
 
-}
+}  // namespace call_center
 
-#endif //CALL_CENTER_SRC_CALL_CENTER_CALL_QUEUE_H_
+#endif  // CALL_CENTER_SRC_CALL_CENTER_CALL_QUEUE_H_

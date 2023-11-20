@@ -1,18 +1,20 @@
-#include <boost/beast/version.hpp>
 #include "http_repository.h"
+
+#include <boost/beast/version.hpp>
 
 namespace call_center::data {
 
 HttpRepository::HttpRepository(std::string root, log::Logger &logger)
-    : logger_(logger),
-      root_(std::move(root)) {
+    : logger_(logger), root_(std::move(root)) {
 }
 
 std::string_view HttpRepository::GetRootPath() const {
   return root_;
 }
 
-HttpRepository::Response HttpRepository::MakeResponse(http::status status, bool keep_alive, std::string &&body) {
+HttpRepository::Response HttpRepository::MakeResponse(
+    http::status status, bool keep_alive, std::string &&body
+) {
   HttpRepository::Response response{};
   response.result(status);
   response.set(http::field::content_type, "application/json");
@@ -23,4 +25,4 @@ HttpRepository::Response HttpRepository::MakeResponse(http::status status, bool 
   return response;
 }
 
-}
+}  // namespace call_center::data

@@ -1,0 +1,16 @@
+Language:   Cpp
+BasedOnStyle: Google
+ColumnLimit: 80
+
+EmptyLineBeforeAccessModifier: Always
+
+AlignAfterOpenBracket: BlockIndent
+BinPackArguments: false
+BinPackParameters: false
+
+UseTab: Never
+
+AllowShortLoopsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLambdasOnASingleLine: Empty

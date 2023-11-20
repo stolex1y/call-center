@@ -26,7 +26,8 @@ class CallCenter : public std::enable_shared_from_this<CallCenter> {
       std::shared_ptr<core::TaskManager> task_manager,
       const std::shared_ptr<const log::LoggerProvider> &logger_provider,
       std::unique_ptr<OperatorSet> operator_set,
-      std::unique_ptr<CallQueue> call_queue);
+      std::unique_ptr<CallQueue> call_queue
+  );
 
   CallCenter(const CallCenter &other) = delete;
   CallCenter &operator=(const CallCenter &other) = delete;
@@ -35,12 +36,14 @@ class CallCenter : public std::enable_shared_from_this<CallCenter> {
   void PushCall(const CallPtr &call);
 
  protected:
-  CallCenter(std::unique_ptr<Journal> journal,
-             std::shared_ptr<const Configuration> configuration,
-             std::shared_ptr<core::TaskManager> task_manager,
-             std::unique_ptr<log::Logger> logger,
-             std::unique_ptr<OperatorSet> operator_set,
-             std::unique_ptr<CallQueue> call_queue);
+  CallCenter(
+      std::unique_ptr<Journal> journal,
+      std::shared_ptr<const Configuration> configuration,
+      std::shared_ptr<core::TaskManager> task_manager,
+      std::unique_ptr<log::Logger> logger,
+      std::unique_ptr<OperatorSet> operator_set,
+      std::unique_ptr<CallQueue> call_queue
+  );
 
  private:
   const std::unique_ptr<Journal> journal_;
@@ -56,7 +59,8 @@ class CallCenter : public std::enable_shared_from_this<CallCenter> {
   void StartCallProcessing(const CallPtr &call, const OperatorPtr &op);
 
   void ScheduleCallProcessingIteration(
-      const CallDetailedRecord::TimePoint &time_point);
+      const CallDetailedRecord::TimePoint &time_point
+  );
   void RejectCall(const CallPtr &call, CallStatus reason);
   void RejectAllTimeoutCalls();
 };

@@ -1,21 +1,20 @@
 #ifndef CALL_CENTER_SRC_CALL_CENTER_JOURNAL_H_
 #define CALL_CENTER_SRC_CALL_CENTER_JOURNAL_H_
 
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/date_time/time_facet.hpp>
 #include <boost/log/sinks.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/date_time/time_facet.hpp>
-
-#include <string>
 #include <optional>
 #include <ostream>
+#include <string>
 
-#include "log/severity_level.h"
-#include "log/sink.h"
-#include "log/logger.h"
 #include "call_detailed_record.h"
 #include "configuration.h"
+#include "log/logger.h"
+#include "log/severity_level.h"
+#include "log/sink.h"
 
 namespace call_center {
 
@@ -40,14 +39,23 @@ class Journal {
   log::Logger logger_;
   size_t max_size_;
 
-  static void Formatter(const boost::log::record_view &rec, boost::log::formatting_ostream &out);
+  static void Formatter(
+      const boost::log::record_view &rec, boost::log::formatting_ostream &out
+  );
   static std::string FormatCallDetailedRecord(const CallDetailedRecord &cdr);
-  static std::string FormatTimePoint(const CallDetailedRecord::TimePoint &time_point);
-  static std::string FormatTimePoint(const std::optional<CallDetailedRecord::TimePoint> &time_point);
+  static std::string FormatTimePoint(
+      const CallDetailedRecord::TimePoint &time_point
+  );
+  static std::string FormatTimePoint(
+      const std::optional<CallDetailedRecord::TimePoint> &time_point
+  );
   static std::string FormatUuid(const boost::uuids::uuid &uuid);
   static std::string FormatUuid(const std::optional<boost::uuids::uuid> &uuid);
-  static std::string FormatDuration(const CallDetailedRecord::Duration &duration);
-  static std::string FormatDuration(const std::optional<CallDetailedRecord::Duration> &duration);
+  static std::string FormatDuration(const CallDetailedRecord::Duration &duration
+  );
+  static std::string FormatDuration(
+      const std::optional<CallDetailedRecord::Duration> &duration
+  );
 
   [[nodiscard]] std::string ReadFileName() const;
   [[nodiscard]] size_t ReadMaxSize() const;
@@ -55,6 +63,6 @@ class Journal {
   log::Sink MakeSink();
 };
 
-}
+}  // namespace call_center
 
-#endif //CALL_CENTER_SRC_CALL_CENTER_JOURNAL_H_
+#endif  // CALL_CENTER_SRC_CALL_CENTER_JOURNAL_H_

@@ -2,16 +2,15 @@
 #define CALL_CENTER_SRC_CALL_CENTER_TASKS_H_
 
 #include <boost/asio.hpp>
-
-#include <thread>
-#include <functional>
 #include <chrono>
+#include <functional>
+#include <thread>
 
 #include "log/logger.h"
 
 namespace call_center::core::tasks {
 
-template<typename Task>
+template <typename Task>
 class TaskWrapped {
  public:
   TaskWrapped(std::function<Task> task, log::Logger &logger);
@@ -23,14 +22,16 @@ class TaskWrapped {
   log::Logger &logger_;
 };
 
-template<typename Task, typename Clock>
+template <typename Task, typename Clock>
 class TimerTaskWrapped {
  public:
   using Timer = boost::asio::basic_waitable_timer<Clock>;
 
-  TimerTaskWrapped(std::function<Task> task,
-                   std::unique_ptr<Timer> timer,
-                   log::Logger &logger);
+  TimerTaskWrapped(
+      std::function<Task> task,
+      std::unique_ptr<Timer> timer,
+      log::Logger &logger
+  );
 
   void operator()(const boost::system::error_code &error) const;
 
@@ -40,27 +41,33 @@ class TimerTaskWrapped {
   std::unique_ptr<Timer> timer_;
 };
 
-template<typename Task, typename Clock>
-void TimerTaskWrapped<Task, Clock>::operator()(const boost::system::error_code &error) const {
+template <typename Task, typename Clock>
+void TimerTaskWrapped<Task, Clock>::operator()(
+    const boost::system::error_code &error
+) const {
   if (!error) {
     task_();
   } else {
-    logger_.Error() << "System error in timer that used by the deferred task: " << error;
+    logger_.Error() << "System error in timer that used by the deferred task: "
+                    << error;
   }
 }
 
-template<typename Task, typename Clock>
-TimerTaskWrapped<Task, Clock>::TimerTaskWrapped(std::function<Task> task,
-                                                std::unique_ptr<Timer> timer,
-                                                log::Logger &logger)
-    : task_(std::move(task), logger), logger_(logger), timer_(std::move(timer)) {}
+template <typename Task, typename Clock>
+TimerTaskWrapped<Task, Clock>::TimerTaskWrapped(
+    std::function<Task> task, std::unique_ptr<Timer> timer, log::Logger &logger
+)
+    : task_(std::move(task), logger),
+      logger_(logger),
+      timer_(std::move(timer)) {
+}
 
-template<typename Task>
-TaskWrapped<Task>::TaskWrapped(std::function<Task> task,
-                               log::Logger &logger)
-    : task_(std::move(task)), logger_(logger) {}
+template <typename Task>
+TaskWrapped<Task>::TaskWrapped(std::function<Task> task, log::Logger &logger)
+    : task_(std::move(task)), logger_(logger) {
+}
 
-template<typename Task>
+template <typename Task>
 void TaskWrapped<Task>::operator()() const {
   try {
     logger_.Info() << "Starting execution of the user task";
@@ -72,6 +79,6 @@ void TaskWrapped<Task>::operator()() const {
   }
 }
 
-}
+}  // namespace call_center::core::tasks
 
-#endif //CALL_CENTER_SRC_CALL_CENTER_TASKS_H_
+#endif  // CALL_CENTER_SRC_CALL_CENTER_TASKS_H_

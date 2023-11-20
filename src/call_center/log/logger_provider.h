@@ -18,6 +18,6 @@ class LoggerProvider {
   std::unique_ptr<Sink> sink_;
 };
 
-}
+}  // namespace call_center::log
 
-#endif //CALL_CENTER_SRC_CALL_CENTER_LOG_LOGGER_PROVIDER_H_
+#endif  // CALL_CENTER_SRC_CALL_CENTER_LOG_LOGGER_PROVIDER_H_

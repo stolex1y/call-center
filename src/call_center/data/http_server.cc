@@ -6,15 +6,21 @@
 
 namespace call_center::data {
 
-std::shared_ptr<HttpServer> HttpServer::Create(net::io_context &ioc,
-                                               const tcp::endpoint &endpoint,
-                                               std::shared_ptr<const log::LoggerProvider> logger_provider) {
-  return std::shared_ptr<HttpServer>(new HttpServer(ioc, endpoint, std::move(logger_provider)));
+std::shared_ptr<HttpServer> HttpServer::Create(
+    net::io_context &ioc,
+    const tcp::endpoint &endpoint,
+    std::shared_ptr<const log::LoggerProvider> logger_provider
+) {
+  return std::shared_ptr<HttpServer>(
+      new HttpServer(ioc, endpoint, std::move(logger_provider))
+  );
 }
 
-HttpServer::HttpServer(boost::asio::io_context &ioc,
-                       const boost::asio::ip::tcp::endpoint &endpoint,
-                       std::shared_ptr<const log::LoggerProvider> logger_provider)
+HttpServer::HttpServer(
+    boost::asio::io_context &ioc,
+    const boost::asio::ip::tcp::endpoint &endpoint,
+    std::shared_ptr<const log::LoggerProvider> logger_provider
+)
     : ioc_(ioc),
       endpoint_(endpoint),
       acceptor_(ioc),
@@ -31,14 +37,19 @@ void HttpServer::Open() {
   system_error = acceptor_.open(endpoint_.protocol(), error);
   boost::ignore_unused(system_error);
   if (error) {
-    throw std::runtime_error("Failed on open acceptor with error: " + error.message());
+    throw std::runtime_error(
+        "Failed on open acceptor with error: " + error.message()
+    );
   }
 
   // Allow address reuse
-  system_error = acceptor_.set_option(net::socket_base::reuse_address(true), error);
+  system_error =
+      acceptor_.set_option(net::socket_base::reuse_address(true), error);
   boost::ignore_unused(system_error);
   if (error) {
-    throw std::runtime_error("Failed on set reuse option with error: " + error.message());
+    throw std::runtime_error(
+        "Failed on set reuse option with error: " + error.message()
+    );
   }
 
   // Bind to the server address
@@ -49,25 +60,28 @@ void HttpServer::Open() {
   }
 
   // Start listening for connections
-  system_error = acceptor_.listen(
-      net::socket_base::max_listen_connections, error);
+  system_error =
+      acceptor_.listen(net::socket_base::max_listen_connections, error);
   boost::ignore_unused(system_error);
   if (error) {
     throw std::runtime_error("Failed on listen with error: " + error.message());
   }
 
   stopped_.store(false);
-  logger_->Debug() << "Start listening for connections on " << std::to_string(endpoint_.port());
+  logger_->Debug() << "Start listening for connections on "
+                   << std::to_string(endpoint_.port());
 }
 
 void HttpServer::Start() {
   if (!acceptor_.is_open()) {
     Open();
   }
-  acceptor_.async_accept(ioc_,
-                         [this](beast::error_code ec, tcp::socket socket) {
-                           this->OnAccept(ec, std::move(socket));
-                         });
+  acceptor_.async_accept(
+      ioc_,
+      [this](beast::error_code ec, tcp::socket socket) {
+        this->OnAccept(ec, std::move(socket));
+      }
+  );
 }
 
 void HttpServer::Stop() {
@@ -84,13 +98,15 @@ void HttpServer::OnAccept(beast::error_code error, tcp::socket socket) {
       logger_->Debug() << "New connection reject";
     Stop();
   } else {
-    HttpConnection::Create(std::move(socket), repositories_, logger_provider_)->ReadRequest();
+    HttpConnection::Create(std::move(socket), repositories_, logger_provider_)
+        ->ReadRequest();
     Start();
   }
 }
 
-void HttpServer::AddRepository(const std::shared_ptr<HttpRepository> &repository) {
+void HttpServer::AddRepository(const std::shared_ptr<HttpRepository> &repository
+) {
   repositories_.emplace(repository->GetRootPath(), repository);
 }
 
-}
+}  // namespace call_center::data

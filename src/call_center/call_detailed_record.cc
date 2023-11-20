@@ -8,9 +8,11 @@ namespace uuids = boost::uuids;
 
 namespace call_center {
 
-CallDetailedRecord::CallDetailedRecord(std::string caller_phone_number,
-                                       std::shared_ptr<const Configuration> configuration,
-                                       OnFinish on_finish)
+CallDetailedRecord::CallDetailedRecord(
+    std::string caller_phone_number,
+    std::shared_ptr<const Configuration> configuration,
+    OnFinish on_finish
+)
     : configuration_(std::move(configuration)),
       receipt_time_(time_point_cast<Duration>(Clock::now())),
       max_wait_(std::chrono::seconds(ReadMaxWait())),
@@ -33,18 +35,21 @@ void CallDetailedRecord::FinishProcessing() {
 
 bool CallDetailedRecord::WasProcessed() const {
   return end_processing_time_ > start_processing_time_ &&
-      start_processing_time_ > receipt_time_;
+         start_processing_time_ > receipt_time_;
 }
 
-const CallDetailedRecord::TimePoint &CallDetailedRecord::GetReceiptTime() const {
+const CallDetailedRecord::TimePoint &CallDetailedRecord::GetReceiptTime(
+) const {
   return receipt_time_;
 }
 
-std::optional<CallDetailedRecord::TimePoint> CallDetailedRecord::GetEndProcessingTime() const {
+std::optional<CallDetailedRecord::TimePoint>
+CallDetailedRecord::GetEndProcessingTime() const {
   return end_processing_time_;
 }
 
-std::optional<CallDetailedRecord::TimePoint> CallDetailedRecord::GetStartProcessingTime() const {
+std::optional<CallDetailedRecord::TimePoint>
+CallDetailedRecord::GetStartProcessingTime() const {
   return start_processing_time_;
 }
 
@@ -64,7 +69,8 @@ std::optional<uuids::uuid> CallDetailedRecord::GetOperatorId() const {
   return operator_id_;
 }
 
-std::optional<CallDetailedRecord::Duration> CallDetailedRecord::GetProcessingDuration() const {
+std::optional<CallDetailedRecord::Duration>
+CallDetailedRecord::GetProcessingDuration() const {
   return end_processing_time_ - start_processing_time_;
 }
 
@@ -85,10 +91,12 @@ bool CallDetailedRecord::IsTimeout() const {
 }
 
 uint64_t CallDetailedRecord::ReadMaxWait() const {
-  return configuration_->GetProperty<uint64_t>(kMaxWaitKey).value_or(kDefaultMaxWait);
+  return configuration_->GetProperty<uint64_t>(kMaxWaitKey)
+      .value_or(kDefaultMaxWait);
 }
 
-const CallDetailedRecord::TimePoint &CallDetailedRecord::GetTimeoutPoint() const {
+const CallDetailedRecord::TimePoint &CallDetailedRecord::GetTimeoutPoint(
+) const {
   return timeout_point_;
 }
 
@@ -96,4 +104,4 @@ bool CallDetailedRecord::operator==(const CallDetailedRecord &other) const {
   return caller_phone_number_ == other.caller_phone_number_;
 }
 
-} // call_center
+}  // namespace call_center

@@ -1,12 +1,14 @@
 #include "call_queue.h"
 
-#include <boost/uuid/uuid.hpp>
 #include <boost/functional/hash.hpp>
+#include <boost/uuid/uuid.hpp>
 
 namespace call_center {
 
-CallQueue::CallQueue(std::shared_ptr<const Configuration> configuration,
-                     const std::shared_ptr<const log::LoggerProvider> &logger_provider)
+CallQueue::CallQueue(
+    std::shared_ptr<const Configuration> configuration,
+    const std::shared_ptr<const log::LoggerProvider> &logger_provider
+)
     : logger_(logger_provider->Get("CallQueue")),
       configuration_(std::move(configuration)),
       capacity_(ReadCapacity()) {
@@ -81,7 +83,8 @@ bool CallQueue::InsertToProcessing(const CallPtr &call) {
 }
 
 size_t CallQueue::ReadCapacity() const {
-  return configuration_->GetProperty<size_t>(kCapacityKey).value_or(kDefaultCapacity);
+  return configuration_->GetProperty<size_t>(kCapacityKey)
+      .value_or(kDefaultCapacity);
 }
 
 void CallQueue::UpdateCapacity() {
@@ -102,10 +105,13 @@ void CallQueue::InsertToQueue(const CallPtr &call) {
 }
 
 bool CallQueue::Contains(const CallPtr &call) const {
-  return MultisetContainsCall(in_receipt_order_, call) || in_processing_.contains(call);
+  return MultisetContainsCall(in_receipt_order_, call) ||
+         in_processing_.contains(call);
 }
 
-bool CallQueue::CallEquals::operator()(const CallPtr &first, const CallPtr &second) const {
+bool CallQueue::CallEquals::operator()(
+    const CallPtr &first, const CallPtr &second
+) const {
   if ((first == nullptr) ^ (second == nullptr))
     return false;
 
@@ -120,12 +126,16 @@ size_t CallQueue::CallHash::operator()(const CallPtr &call) const {
   return std::hash<std::string>()(call->GetCallerPhoneNumber());
 }
 
-bool CallQueue::ReceiptOrder::operator()(const CallPtr &first, const CallPtr &second) const {
+bool CallQueue::ReceiptOrder::operator()(
+    const CallPtr &first, const CallPtr &second
+) const {
   return first->GetReceiptTime() < second->GetReceiptTime();
 }
 
-bool CallQueue::TimeoutPointOrder::operator()(const CallPtr &first, const CallPtr &second) const {
+bool CallQueue::TimeoutPointOrder::operator()(
+    const CallPtr &first, const CallPtr &second
+) const {
   return first->GetTimeoutPoint() < second->GetTimeoutPoint();
 }
 
-}
+}  // namespace call_center

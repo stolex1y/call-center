@@ -2,8 +2,8 @@
 #define CALL_CENTER_SRC_CALL_CENTER_LOG_ATTRS_H_
 
 #include <boost/date_time/posix_time/ptime.hpp>
-#include <boost/log/expressions/keyword.hpp>
 #include <boost/log/attributes/current_thread_id.hpp>
+#include <boost/log/expressions/keyword.hpp>
 #include <boost/uuid/uuid.hpp>
 
 #include "severity_level.h"
@@ -17,6 +17,6 @@ BOOST_LOG_ATTRIBUTE_KEYWORD(tag_attr, "Tag", std::string)
 BOOST_LOG_ATTRIBUTE_KEYWORD(timestamp, "TimeStamp", boost::posix_time::ptime)
 BOOST_LOG_ATTRIBUTE_KEYWORD(thread, "ThreadID", boost::log::thread_id)
 
-}
+}  // namespace call_center::log::attrs
 
-#endif //CALL_CENTER_SRC_CALL_CENTER_LOG_ATTRS_H_
+#endif  // CALL_CENTER_SRC_CALL_CENTER_LOG_ATTRS_H_
