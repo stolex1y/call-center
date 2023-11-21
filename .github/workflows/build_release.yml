@@ -24,7 +24,7 @@ jobs:
           sudo apt install gcc-13 g++-13
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 20 --slave /usr/bin/g++ g++ /usr/bin/g++-13
 
-      - name: Install
+      - name: Install clang-format
         run: sudo apt install clang-format
 
       - name: Cache boost
