@@ -18,8 +18,6 @@ CallDetailedRecord::CallDetailedRecord(
       id_(uuids::random_generator_mt19937()()),
       caller_phone_number_(std::move(caller_phone_number)),
       on_finish_(std::move(on_finish)) {
-  end_processing_time_ = TimePoint{Duration(0)};
-  start_processing_time_ = TimePoint{Duration(0)};
   max_wait_ = WaitingDuration(ReadMaxWait());
   timeout_point_ = receipt_time_ + max_wait_;
 }
