@@ -11,12 +11,12 @@ namespace call_center {
 namespace expr = boost::log::expressions;
 namespace date_time_utils = core::utils::date_time;
 
-Journal::Journal(std::shared_ptr<const Configuration> configuration)
-    : configuration_(std::move(configuration)),
-      file_name_(ReadFileName()),
-      sink_(MakeSink()),
-      logger_({}, sink_),
-      max_size_(ReadMaxSize()) {
+Journal::Journal(std::shared_ptr<Configuration> configuration)
+    : configuration_(std::move(configuration)) {
+  file_name_ = ReadFileName();
+  max_size_ = ReadMaxSize();
+  sink_ = MakeSink();
+  logger_ = std::make_unique<log::Logger>("Journal", *sink_);
 }
 
 void Journal::Formatter(
@@ -26,8 +26,7 @@ void Journal::Formatter(
 }
 
 std::string Journal::ReadFileName() const {
-  return configuration_->GetProperty<std::string>(kFileNameKey)
-      .value_or(kDefaultFileName);
+  return configuration_->GetProperty(kFileNameKey_, file_name_);
 }
 
 std::string Journal::FormatCallDetailedRecord(const CallDetailedRecord &cdr) {
@@ -49,7 +48,7 @@ std::string Journal::FormatCallDetailedRecord(const CallDetailedRecord &cdr) {
 void Journal::AddRecord(const CallDetailedRecord &cdr) {
   UpdateSink();
   auto result = FormatCallDetailedRecord(cdr);
-  logger_.Info() << result;
+  logger_->Info() << result;
 }
 
 std::string Journal::FormatTimePoint(
@@ -99,20 +98,21 @@ void Journal::UpdateSink() {
     file_name_ = std::move(new_file_name);
     max_size_ = new_max_size;
     sink_ = MakeSink();
+    logger_ = std::make_unique<log::Logger>("Journal", *sink_);
   }
 }
 
-log::Sink Journal::MakeSink() {
-  return {
+std::unique_ptr<log::Sink> Journal::MakeSink() {
+  return std::make_unique<log::Sink>(
       boost::make_shared<std::ofstream>(file_name_, std::ios_base::app),
       log::SeverityLevel::kTrace,
       Journal::Formatter,
-      max_size_};
+      max_size_
+  );
 }
 
 size_t Journal::ReadMaxSize() const {
-  return configuration_->GetProperty<size_t>(kMaxSizeKey)
-      .value_or(kDefaultMaxSize);
+  return configuration_->GetNumber<size_t>(kMaxSizeKey_, max_size_, 1);
 }
 
 }  // namespace call_center

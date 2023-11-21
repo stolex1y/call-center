@@ -3,6 +3,7 @@
 
 #include <boost/functional/hash.hpp>
 #include <boost/uuid/uuid.hpp>
+#include <unordered_set>
 
 #include "configuration.h"
 #include "core/containers/concurrent_hash_set.h"
@@ -14,7 +15,7 @@ namespace call_center {
 class OperatorSet {
  public:
   OperatorSet(
-      std::shared_ptr<const Configuration> configuration,
+      std::shared_ptr<Configuration> configuration,
       std::shared_ptr<core::TaskManager> task_manager,
       const std::shared_ptr<const log::LoggerProvider> &logger_provider
   );
@@ -35,14 +36,14 @@ class OperatorSet {
     size_t operator()(const OperatorPtr &op) const;
   };
 
-  static constexpr const auto kOperatorCountKey = "operator_count";
-  static constexpr const size_t kDefaultOperatorCount = 2;
+  static constexpr const auto kOperatorCountKey_ = "operator_count";
+  static constexpr const size_t kDefaultOperatorCount_ = 10;
 
   std::unordered_set<OperatorPtr, OperatorHash, OperatorEquals> free_operators_;
   std::unordered_set<OperatorPtr, OperatorHash, OperatorEquals> busy_operators_;
-  const std::shared_ptr<const Configuration> configuration_;
+  const std::shared_ptr<Configuration> configuration_;
   const std::shared_ptr<core::TaskManager> task_manager_;
-  size_t operator_count_;
+  size_t operator_count_ = kDefaultOperatorCount_;
   mutable std::mutex mutex_;
   const std::shared_ptr<const log::LoggerProvider> &logger_provider_;
   std::unique_ptr<log::Logger> logger_;

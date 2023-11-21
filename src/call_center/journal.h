@@ -20,24 +20,24 @@ namespace call_center {
 
 class Journal {
  public:
-  explicit Journal(std::shared_ptr<const Configuration> configuration);
+  explicit Journal(std::shared_ptr<Configuration> configuration);
   Journal(const Journal &other) = delete;
   Journal &operator=(const Journal &other) = delete;
 
   void AddRecord(const CallDetailedRecord &cdr);
 
  private:
-  static constexpr const auto kFileNameKey = "journal_file_name";
-  static constexpr const auto kDefaultFileName = "journal.csv";
+  static constexpr const auto kFileNameKey_ = "journal_file_name";
+  static constexpr const auto kDefaultFileName_ = "journal.csv";
 
-  static constexpr const auto kMaxSizeKey = "journal_max_size";
-  static constexpr const size_t kDefaultMaxSize = 100;
+  static constexpr const auto kMaxSizeKey_ = "journal_max_size";
+  static constexpr const size_t kDefaultMaxSize_ = SIZE_MAX;
 
-  std::shared_ptr<const Configuration> configuration_;
-  std::string file_name_;
-  log::Sink sink_;
-  log::Logger logger_;
-  size_t max_size_;
+  std::shared_ptr<Configuration> configuration_;
+  std::string file_name_ = kDefaultFileName_;
+  size_t max_size_ = kDefaultMaxSize_;
+  std::unique_ptr<log::Sink> sink_;
+  std::unique_ptr<log::Logger> logger_;
 
   static void Formatter(
       const boost::log::record_view &rec, boost::log::formatting_ostream &out
@@ -60,7 +60,7 @@ class Journal {
   [[nodiscard]] std::string ReadFileName() const;
   [[nodiscard]] size_t ReadMaxSize() const;
   void UpdateSink();
-  log::Sink MakeSink();
+  std::unique_ptr<log::Sink> MakeSink();
 };
 
 }  // namespace call_center

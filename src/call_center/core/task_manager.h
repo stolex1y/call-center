@@ -18,7 +18,7 @@ namespace call_center::core {
 class TaskManager {
  public:
   explicit TaskManager(
-      std::shared_ptr<const Configuration> configuration,
+      std::shared_ptr<Configuration> configuration,
       const std::shared_ptr<const log::LoggerProvider> &logger_provider
   );
   TaskManager(const TaskManager &other) = delete;
@@ -56,7 +56,7 @@ class TaskManager {
   bool stopped_ = true;
   std::mutex mutex_;
   const std::unique_ptr<log::Logger> logger_;
-  const std::shared_ptr<const Configuration> configuration_;
+  const std::shared_ptr<Configuration> configuration_;
 };
 
 template <typename Task, typename TimePoint>

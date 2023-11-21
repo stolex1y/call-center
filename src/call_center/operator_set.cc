@@ -6,15 +6,15 @@
 namespace call_center {
 
 OperatorSet::OperatorSet(
-    std::shared_ptr<const Configuration> configuration,
+    std::shared_ptr<Configuration> configuration,
     std::shared_ptr<core::TaskManager> task_manager,
     const std::shared_ptr<const log::LoggerProvider> &logger_provider
 )
     : configuration_(std::move(configuration)),
       task_manager_(std::move(task_manager)),
-      operator_count_(ReadOperatorCount()),
       logger_provider_(logger_provider),
       logger_(logger_provider->Get("OperatorSet")) {
+  operator_count_ = ReadOperatorCount();
   AddOperators(operator_count_);
 }
 
@@ -38,8 +38,9 @@ void OperatorSet::InsertFree(const std::shared_ptr<Operator> &op) {
 }
 
 size_t OperatorSet::ReadOperatorCount() const {
-  return configuration_->GetProperty<size_t>(kOperatorCountKey)
-      .value_or(kDefaultOperatorCount);
+  return configuration_->GetNumber<size_t>(
+      kOperatorCountKey_, operator_count_, 1
+  );
 }
 
 void OperatorSet::UpdateOperatorCount() {

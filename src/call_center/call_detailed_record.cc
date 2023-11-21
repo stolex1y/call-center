@@ -10,18 +10,18 @@ namespace call_center {
 
 CallDetailedRecord::CallDetailedRecord(
     std::string caller_phone_number,
-    std::shared_ptr<const Configuration> configuration,
+    std::shared_ptr<Configuration> configuration,
     OnFinish on_finish
 )
     : configuration_(std::move(configuration)),
       receipt_time_(time_point_cast<Duration>(Clock::now())),
-      max_wait_(std::chrono::seconds(ReadMaxWait())),
-      timeout_point_(receipt_time_ + max_wait_),
       id_(uuids::random_generator_mt19937()()),
       caller_phone_number_(std::move(caller_phone_number)),
       on_finish_(std::move(on_finish)) {
   end_processing_time_ = TimePoint{Duration(0)};
   start_processing_time_ = TimePoint{Duration(0)};
+  max_wait_ = WaitingDuration(ReadMaxWait());
+  timeout_point_ = receipt_time_ + max_wait_;
 }
 
 void CallDetailedRecord::StartProcessing() {
@@ -82,7 +82,8 @@ void CallDetailedRecord::SetStatus(CallStatus status) {
   status_ = status;
 }
 
-const CallDetailedRecord::Duration &CallDetailedRecord::GetMaxWait() const {
+const CallDetailedRecord::WaitingDuration &CallDetailedRecord::GetMaxWait(
+) const {
   return max_wait_;
 }
 
@@ -91,8 +92,7 @@ bool CallDetailedRecord::IsTimeout() const {
 }
 
 uint64_t CallDetailedRecord::ReadMaxWait() const {
-  return configuration_->GetProperty<uint64_t>(kMaxWaitKey)
-      .value_or(kDefaultMaxWait);
+  return configuration_->GetProperty<uint64_t>(kMaxWaitKey_, max_wait_.count());
 }
 
 const CallDetailedRecord::TimePoint &CallDetailedRecord::GetTimeoutPoint(

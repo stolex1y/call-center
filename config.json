@@ -1,0 +1,11 @@
+{
+  "call_max_wait": 5,
+  "queue_capacity": 2,
+  "configuration_is_caching": false,
+  "configuration_updating_period": 10,
+  "journal_file_name": "journal1.csv",
+  "journal_max_size": 10000,
+  "operator_min_delay": 10,
+  "operator_max_delay": 10,
+  "operator_count": 1
+}

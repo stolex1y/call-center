@@ -12,7 +12,7 @@ using namespace std::chrono_literals;
  */
 std::shared_ptr<CallCenter> CallCenter::Create(
     std::unique_ptr<Journal> journal,
-    std::shared_ptr<const Configuration> configuration,
+    std::shared_ptr<Configuration> configuration,
     std::shared_ptr<core::TaskManager> task_manager,
     const std::shared_ptr<const log::LoggerProvider> &logger_provider,
     std::unique_ptr<OperatorSet> operator_set,
@@ -22,7 +22,7 @@ std::shared_ptr<CallCenter> CallCenter::Create(
       std::move(journal),
       std::move(configuration),
       std::move(task_manager),
-      logger_provider->Get("CallCenter"),
+      logger_provider,
       std::move(operator_set),
       std::move(call_queue)
   ));
@@ -30,9 +30,9 @@ std::shared_ptr<CallCenter> CallCenter::Create(
 
 CallCenter::CallCenter(
     std::unique_ptr<Journal> journal,
-    std::shared_ptr<const Configuration> configuration,
+    std::shared_ptr<Configuration> configuration,
     std::shared_ptr<core::TaskManager> task_manager,
-    std::unique_ptr<log::Logger> logger,
+    const std::shared_ptr<const log::LoggerProvider> &logger_provider,
     std::unique_ptr<OperatorSet> operator_set,
     std::unique_ptr<CallQueue> call_queue
 )
@@ -41,7 +41,7 @@ CallCenter::CallCenter(
       calls_(std::move(call_queue)),
       task_manager_(std::move(task_manager)),
       configuration_(std::move(configuration)),
-      logger_(std::move(logger)) {
+      logger_(logger_provider->Get("CallCenter")) {
 }
 
 /**

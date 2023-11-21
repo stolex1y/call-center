@@ -1,17 +1,16 @@
 #include "call_queue.h"
 
 #include <boost/functional/hash.hpp>
-#include <boost/uuid/uuid.hpp>
 
 namespace call_center {
 
 CallQueue::CallQueue(
-    std::shared_ptr<const Configuration> configuration,
+    std::shared_ptr<Configuration> configuration,
     const std::shared_ptr<const log::LoggerProvider> &logger_provider
 )
     : logger_(logger_provider->Get("CallQueue")),
-      configuration_(std::move(configuration)),
-      capacity_(ReadCapacity()) {
+      configuration_(std::move(configuration)) {
+  capacity_ = ReadCapacity();
 }
 
 CallQueue::CallPtr CallQueue::PopFromQueue() {
@@ -83,8 +82,7 @@ bool CallQueue::InsertToProcessing(const CallPtr &call) {
 }
 
 size_t CallQueue::ReadCapacity() const {
-  return configuration_->GetProperty<size_t>(kCapacityKey)
-      .value_or(kDefaultCapacity);
+  return configuration_->GetProperty(kCapacityKey_, capacity_);
 }
 
 void CallQueue::UpdateCapacity() {

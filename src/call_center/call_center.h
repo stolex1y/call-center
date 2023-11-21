@@ -22,7 +22,7 @@ class CallCenter : public std::enable_shared_from_this<CallCenter> {
 
   static std::shared_ptr<CallCenter> Create(
       std::unique_ptr<Journal> journal,
-      std::shared_ptr<const Configuration> configuration,
+      std::shared_ptr<Configuration> configuration,
       std::shared_ptr<core::TaskManager> task_manager,
       const std::shared_ptr<const log::LoggerProvider> &logger_provider,
       std::unique_ptr<OperatorSet> operator_set,
@@ -38,9 +38,9 @@ class CallCenter : public std::enable_shared_from_this<CallCenter> {
  protected:
   CallCenter(
       std::unique_ptr<Journal> journal,
-      std::shared_ptr<const Configuration> configuration,
+      std::shared_ptr<Configuration> configuration,
       std::shared_ptr<core::TaskManager> task_manager,
-      std::unique_ptr<log::Logger> logger,
+      const std::shared_ptr<const log::LoggerProvider> &logger_provider,
       std::unique_ptr<OperatorSet> operator_set,
       std::unique_ptr<CallQueue> call_queue
   );
@@ -50,7 +50,7 @@ class CallCenter : public std::enable_shared_from_this<CallCenter> {
   const std::unique_ptr<OperatorSet> operators_;
   const std::unique_ptr<CallQueue> calls_;
   const std::shared_ptr<core::TaskManager> task_manager_;
-  const std::shared_ptr<const Configuration> configuration_;
+  const std::shared_ptr<Configuration> configuration_;
   const std::unique_ptr<log::Logger> logger_;
 
   void PerformCallProcessingIteration();

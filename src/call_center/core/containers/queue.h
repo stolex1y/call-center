@@ -10,8 +10,6 @@
 
 namespace call_center::core::containers {
 
-using namespace core::utils::concepts;
-
 template <
     NoThrowCopyConstructor T,
     typename Hash = std::hash<T>,

@@ -18,7 +18,7 @@ class CallRepository
  public:
   static std::shared_ptr<CallRepository> Create(
       std::shared_ptr<CallCenter> call_center,
-      std::shared_ptr<const Configuration> configuration,
+      std::shared_ptr<Configuration> configuration,
       const std::shared_ptr<const log::LoggerProvider> &logger_provider
   );
 
@@ -33,13 +33,13 @@ class CallRepository
   using logger_t = boost::base_from_member<std::unique_ptr<log::Logger>>;
 
   const std::shared_ptr<CallCenter> call_center_;
-  const std::shared_ptr<const Configuration> configuration_;
+  const std::shared_ptr<Configuration> configuration_;
 
   static std::string MakeResponseBody(const CallDetailedRecord &cdr);
 
   CallRepository(
       std::shared_ptr<CallCenter> call_center,
-      std::shared_ptr<const Configuration> configuration,
+      std::shared_ptr<Configuration> configuration,
       std::unique_ptr<log::Logger> logger
   );
 

@@ -50,6 +50,9 @@ add_library(${OBJ_LIB_TARGET} OBJECT
         core/utils/concepts.h
         log/logger_provider.cc
         log/logger_provider.h
+        configuration_updater.cc
+        configuration_updater.h
+        core/containers/concurrent_hash_map.h
 )
 
 #warnings
@@ -72,5 +75,14 @@ target_link_libraries(${STATIC_LIB_TARGET} ${OBJ_LIB_TARGET})
 add_executable(${RUNNABLE_TARGET} main.cc)
 target_link_libraries(${RUNNABLE_TARGET} ${OBJ_LIB_TARGET})
 
+# clang-format
 include(Format)
 Format(${RUNNABLE_TARGET} .)
+
+# copy config.json
+add_custom_command(
+        TARGET ${RUNNABLE_TARGET} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_SOURCE_DIR}/config.json
+        ${CMAKE_CURRENT_BINARY_DIR}/config.json
+)

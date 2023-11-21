@@ -13,7 +13,7 @@ namespace call_center::data {
 
 std::shared_ptr<CallRepository> CallRepository::Create(
     std::shared_ptr<CallCenter> call_center,
-    std::shared_ptr<const Configuration> configuration,
+    std::shared_ptr<Configuration> configuration,
     const std::shared_ptr<const log::LoggerProvider> &logger_provider
 ) {
   return std::shared_ptr<CallRepository>(new CallRepository(
@@ -25,7 +25,7 @@ std::shared_ptr<CallRepository> CallRepository::Create(
 
 CallRepository::CallRepository(
     std::shared_ptr<CallCenter> call_center,
-    std::shared_ptr<const Configuration> configuration,
+    std::shared_ptr<Configuration> configuration,
     std::unique_ptr<log::Logger> logger
 )
     : logger_t(std::move(logger)),

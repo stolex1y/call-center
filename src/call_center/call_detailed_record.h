@@ -15,11 +15,12 @@ class CallDetailedRecord {
   using OnFinish = std::function<void(const CallDetailedRecord &cdr)>;
   using Clock = std::chrono::utc_clock;
   using Duration = std::chrono::milliseconds;
+  using WaitingDuration = std::chrono::seconds;
   using TimePoint = std::chrono::time_point<Clock, Duration>;
 
   CallDetailedRecord(
       std::string caller_phone_number,
-      std::shared_ptr<const Configuration> configuration,
+      std::shared_ptr<Configuration> configuration,
       OnFinish on_finish
   );
 
@@ -36,21 +37,21 @@ class CallDetailedRecord {
   [[nodiscard]] const std::string &GetCallerPhoneNumber() const;
   [[nodiscard]] CallStatus GetStatus() const;
   [[nodiscard]] std::optional<boost::uuids::uuid> GetOperatorId() const;
-  [[nodiscard]] const Duration &GetMaxWait() const;
+  [[nodiscard]] const WaitingDuration &GetMaxWait() const;
   [[nodiscard]] bool IsTimeout() const;
   [[nodiscard]] const TimePoint &GetTimeoutPoint() const;
   [[nodiscard]] bool operator==(const CallDetailedRecord &other) const;
 
  private:
-  static constexpr const auto kMaxWaitKey = "call_max_wait";
-  static constexpr const uint64_t kDefaultMaxWait = 3;
+  static constexpr const auto kMaxWaitKey_ = "call_max_wait";
+  static constexpr const WaitingDuration kDefaultMaxWait_{30};
 
-  const std::shared_ptr<const Configuration> configuration_;
+  const std::shared_ptr<Configuration> configuration_;
   const TimePoint receipt_time_;
   TimePoint end_processing_time_;
   TimePoint start_processing_time_;
-  const Duration max_wait_;
-  const TimePoint timeout_point_;
+  WaitingDuration max_wait_ = kDefaultMaxWait_;
+  TimePoint timeout_point_;
   const boost::uuids::uuid id_;
   const std::string caller_phone_number_;
   CallStatus status_ = CallStatus::kOk;
