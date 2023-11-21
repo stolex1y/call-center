@@ -27,11 +27,7 @@ class TimerTaskWrapped {
  public:
   using Timer = boost::asio::basic_waitable_timer<Clock>;
 
-  TimerTaskWrapped(
-      std::function<Task> task,
-      std::unique_ptr<Timer> timer,
-      log::Logger &logger
-  );
+  TimerTaskWrapped(std::function<Task> task, std::unique_ptr<Timer> timer, log::Logger &logger);
 
   void operator()(const boost::system::error_code &error) const;
 
@@ -42,14 +38,11 @@ class TimerTaskWrapped {
 };
 
 template <typename Task, typename Clock>
-void TimerTaskWrapped<Task, Clock>::operator()(
-    const boost::system::error_code &error
-) const {
+void TimerTaskWrapped<Task, Clock>::operator()(const boost::system::error_code &error) const {
   if (!error) {
     task_();
   } else {
-    logger_.Error() << "System error in timer that used by the deferred task: "
-                    << error;
+    logger_.Error() << "System error in timer that used by the deferred task: " << error;
   }
 }
 
@@ -57,9 +50,7 @@ template <typename Task, typename Clock>
 TimerTaskWrapped<Task, Clock>::TimerTaskWrapped(
     std::function<Task> task, std::unique_ptr<Timer> timer, log::Logger &logger
 )
-    : task_(std::move(task), logger),
-      logger_(logger),
-      timer_(std::move(timer)) {
+    : task_(std::move(task), logger), logger_(logger), timer_(std::move(timer)) {
 }
 
 template <typename Task>

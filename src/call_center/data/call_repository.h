@@ -11,10 +11,9 @@
 
 namespace call_center::data {
 
-class CallRepository
-    : private boost::base_from_member<std::unique_ptr<log::Logger>>,
-      public HttpRepository,
-      public std::enable_shared_from_this<CallRepository> {
+class CallRepository : private boost::base_from_member<std::unique_ptr<log::Logger>>,
+                       public HttpRepository,
+                       public std::enable_shared_from_this<CallRepository> {
  public:
   static std::shared_ptr<CallRepository> Create(
       std::shared_ptr<CallCenter> call_center,
@@ -25,9 +24,8 @@ class CallRepository
   CallRepository(const CallRepository &other) = delete;
   CallRepository &operator=(const CallRepository &other) = delete;
 
-  void HandleRequest(
-      const http::request<http::string_body> &request, const OnHandle &on_handle
-  ) override;
+  void HandleRequest(const http::request<http::string_body> &request, const OnHandle &on_handle)
+      override;
 
  private:
   using logger_t = boost::base_from_member<std::unique_ptr<log::Logger>>;

@@ -58,9 +58,7 @@ class CallCenter : public std::enable_shared_from_this<CallCenter> {
   bool StartCallProcessingIfPossible(const CallPtr &call);
   void StartCallProcessing(const CallPtr &call, const OperatorPtr &op);
 
-  void ScheduleCallProcessingIteration(
-      const CallDetailedRecord::TimePoint &time_point
-  );
+  void ScheduleCallProcessingIteration(const CallDetailedRecord::TimePoint &time_point);
   void RejectCall(const CallPtr &call, CallStatus reason);
   void RejectAllTimeoutCalls();
 };

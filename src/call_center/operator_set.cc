@@ -38,9 +38,7 @@ void OperatorSet::InsertFree(const std::shared_ptr<Operator> &op) {
 }
 
 size_t OperatorSet::ReadOperatorCount() const {
-  return configuration_->GetNumber<size_t>(
-      kOperatorCountKey_, operator_count_, 1
-  );
+  return configuration_->GetNumber<size_t>(kOperatorCountKey_, operator_count_, 1);
 }
 
 void OperatorSet::UpdateOperatorCount() {
@@ -60,9 +58,7 @@ void OperatorSet::UpdateOperatorCount() {
 
 void OperatorSet::AddOperators(size_t count) {
   for (size_t i = 0; i < count; ++i) {
-    free_operators_.emplace(
-        Operator::Create(task_manager_, configuration_, logger_provider_)
-    );
+    free_operators_.emplace(Operator::Create(task_manager_, configuration_, logger_provider_));
   }
 }
 
@@ -78,9 +74,8 @@ size_t OperatorSet::RemoveOperators(size_t count) {
   return removed;
 }
 
-bool OperatorSet::OperatorEquals::operator()(
-    const OperatorPtr &first, const OperatorPtr &second
-) const {
+bool OperatorSet::OperatorEquals::operator()(const OperatorPtr &first, const OperatorPtr &second)
+    const {
   if ((first == nullptr) ^ (second == nullptr))
     return false;
 

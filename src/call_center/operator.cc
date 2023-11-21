@@ -9,9 +9,9 @@ std::shared_ptr<Operator> Operator::Create(
     std::shared_ptr<Configuration> configuration,
     const std::shared_ptr<const log::LoggerProvider> &logger_provider
 ) {
-  return std::shared_ptr<Operator>(new Operator(
-      std::move(task_manager), std::move(configuration), logger_provider
-  ));
+  return std::shared_ptr<Operator>(
+      new Operator(std::move(task_manager), std::move(configuration), logger_provider)
+  );
 }
 
 Operator::Operator(
@@ -22,15 +22,12 @@ Operator::Operator(
     : task_manager_(std::move(task_manager)),
       configuration_(std::move(configuration)),
       generator_(boost::hash_value(id_)),
-      logger_(logger_provider->Get(
-          "Operator (" + boost::uuids::to_string(id_) + ")"
-      )) {
+      logger_(logger_provider->Get("Operator (" + boost::uuids::to_string(id_) + ")")) {
   InitDistributionParameters();
 }
 
 void Operator::HandleCall(
-    const std::shared_ptr<CallDetailedRecord> &call,
-    const OnFinishHandle &on_finish
+    const std::shared_ptr<CallDetailedRecord> &call, const OnFinishHandle &on_finish
 ) {
   {
     std::lock_guard lock(mutex_);
@@ -45,8 +42,7 @@ void Operator::HandleCall(
   };
   const auto delay = GetCallDelay();
 
-  logger_->Info() << "Handle call '" << boost::uuids::to_string(call->GetId())
-                  << "' for " << delay;
+  logger_->Info() << "Handle call '" << boost::uuids::to_string(call->GetId()) << "' for " << delay;
 
   task_manager_->PostTaskDelayed<void()>(delay, finish_handle);
 }
@@ -57,16 +53,13 @@ void Operator::UpdateDistributionParameters() {
     min_delay_ = new_min;
     max_delay_ = new_max;
     distribution_ = Distribution(min_delay_, max_delay_);
-    logger_->Debug() << "Update distribution parameters: " << min_delay_ << ", "
-                     << max_delay_;
+    logger_->Debug() << "Update distribution parameters: " << min_delay_ << ", " << max_delay_;
   }
 }
 
 std::pair<uint64_t, uint64_t> Operator::ReadMinMax() const {
-  const uint64_t new_min =
-      configuration_->GetProperty(kMinDelayKey_, min_delay_);
-  const uint64_t new_max =
-      configuration_->GetNumber(kMaxDelayKey_, max_delay_, new_min);
+  const uint64_t new_min = configuration_->GetProperty(kMinDelayKey_, min_delay_);
+  const uint64_t new_max = configuration_->GetNumber(kMaxDelayKey_, max_delay_, new_min);
   return {new_min, new_max};
 }
 

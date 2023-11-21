@@ -14,12 +14,10 @@ namespace call_center::log {
 
 Logger::Logger(std::string tag, const Sink &sink) {
   add_attribute(
-      attrs::tag_attr_type::get_name(),
-      boost_attrs::constant<std::string>(std::move(tag))
+      attrs::tag_attr_type::get_name(), boost_attrs::constant<std::string>(std::move(tag))
   );
   add_attribute(
-      attrs::channel_type::get_name(),
-      boost_attrs::constant<boost::uuids::uuid>(sink.Id())
+      attrs::channel_type::get_name(), boost_attrs::constant<boost::uuids::uuid>(sink.Id())
   );
 }
 

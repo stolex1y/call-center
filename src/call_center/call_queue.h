@@ -68,9 +68,7 @@ class CallQueue {
   void InsertToQueue(const CallPtr &call);
 
   template <typename Cmp>
-  static void EraseCallFromMultiset(
-      std::multiset<CallPtr, Cmp> &multiset, const CallPtr &call
-  );
+  static void EraseCallFromMultiset(std::multiset<CallPtr, Cmp> &multiset, const CallPtr &call);
 
   template <typename Cmp>
   static bool MultisetContainsCall(
@@ -79,9 +77,7 @@ class CallQueue {
 };
 
 template <typename Cmp>
-void CallQueue::EraseCallFromMultiset(
-    std::multiset<CallPtr, Cmp> &multiset, const CallPtr &call
-) {
+void CallQueue::EraseCallFromMultiset(std::multiset<CallPtr, Cmp> &multiset, const CallPtr &call) {
   CallEquals equals;
   for (auto [begin, end] = multiset.equal_range(call); begin != end; ++begin) {
     if (equals(*begin, call)) {

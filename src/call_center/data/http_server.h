@@ -30,8 +30,7 @@ class HttpServer : public std::enable_shared_from_this<HttpServer> {
   void Stop();
 
  private:
-  std::unordered_map<std::string_view, std::shared_ptr<HttpRepository>>
-      repositories_;
+  std::unordered_map<std::string_view, std::shared_ptr<HttpRepository>> repositories_;
   net::io_context &ioc_;
   const tcp::endpoint &endpoint_;
   tcp::acceptor acceptor_;

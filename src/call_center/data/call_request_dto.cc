@@ -2,9 +2,7 @@
 
 namespace call_center::data {
 
-CallRequestDto tag_invoke(
-    const json::value_to_tag<CallRequestDto> &, const json::value &json
-) {
+CallRequestDto tag_invoke(const json::value_to_tag<CallRequestDto> &, const json::value &json) {
   const json::object &json_obj = json.as_object();
 
   return {.phone = std::string(json_obj.at("phone").as_string())};

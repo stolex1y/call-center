@@ -12,9 +12,7 @@ std::shared_ptr<Configuration> Configuration::Create(
   return std::shared_ptr<Configuration>(new Configuration(logger_provider));
 }
 
-Configuration::Configuration(
-    const std::shared_ptr<const log::LoggerProvider> &logger_provider
-)
+Configuration::Configuration(const std::shared_ptr<const log::LoggerProvider> &logger_provider)
     : logger_(logger_provider->Get("Configuration")) {
   UpdateConfiguration();
 }
@@ -32,8 +30,7 @@ void Configuration::UpdateConfiguration() {
   auto &&json_value = boost::json::parse(config_file, error);
   if (error || !json_value.is_object()) {
     config_json_ = {};
-    logger_->Error() << "Invalid json format in configuration file: "
-                     << error.what();
+    logger_->Error() << "Invalid json format in configuration file: " << error.what();
     return;
   }
   config_json_ = std::move(json_value.as_object());

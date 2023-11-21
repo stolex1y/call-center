@@ -34,22 +34,18 @@ void CallDetailedRecord::FinishProcessing() {
 }
 
 bool CallDetailedRecord::WasProcessed() const {
-  return end_processing_time_ > start_processing_time_ &&
-         start_processing_time_ > receipt_time_;
+  return end_processing_time_ > start_processing_time_ && start_processing_time_ > receipt_time_;
 }
 
-const CallDetailedRecord::TimePoint &CallDetailedRecord::GetReceiptTime(
-) const {
+const CallDetailedRecord::TimePoint &CallDetailedRecord::GetReceiptTime() const {
   return receipt_time_;
 }
 
-std::optional<CallDetailedRecord::TimePoint>
-CallDetailedRecord::GetEndProcessingTime() const {
+std::optional<CallDetailedRecord::TimePoint> CallDetailedRecord::GetEndProcessingTime() const {
   return end_processing_time_;
 }
 
-std::optional<CallDetailedRecord::TimePoint>
-CallDetailedRecord::GetStartProcessingTime() const {
+std::optional<CallDetailedRecord::TimePoint> CallDetailedRecord::GetStartProcessingTime() const {
   return start_processing_time_;
 }
 
@@ -69,8 +65,7 @@ std::optional<uuids::uuid> CallDetailedRecord::GetOperatorId() const {
   return operator_id_;
 }
 
-std::optional<CallDetailedRecord::Duration>
-CallDetailedRecord::GetProcessingDuration() const {
+std::optional<CallDetailedRecord::Duration> CallDetailedRecord::GetProcessingDuration() const {
   return end_processing_time_ - start_processing_time_;
 }
 
@@ -82,8 +77,7 @@ void CallDetailedRecord::SetStatus(CallStatus status) {
   status_ = status;
 }
 
-const CallDetailedRecord::WaitingDuration &CallDetailedRecord::GetMaxWait(
-) const {
+const CallDetailedRecord::WaitingDuration &CallDetailedRecord::GetMaxWait() const {
   return max_wait_;
 }
 
@@ -95,8 +89,7 @@ uint64_t CallDetailedRecord::ReadMaxWait() const {
   return configuration_->GetProperty<uint64_t>(kMaxWaitKey_, max_wait_.count());
 }
 
-const CallDetailedRecord::TimePoint &CallDetailedRecord::GetTimeoutPoint(
-) const {
+const CallDetailedRecord::TimePoint &CallDetailedRecord::GetTimeoutPoint() const {
   return timeout_point_;
 }
 

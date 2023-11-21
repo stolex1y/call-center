@@ -45,13 +45,11 @@ class TaskManager {
   template <typename Task, typename Clock>
   tasks::TimerTaskWrapped<Task, Clock> MakeTimerTaskWrapped(
       std::function<Task> task,
-      std::unique_ptr<typename tasks::TimerTaskWrapped<Task, Clock>::Timer>
-          timer
+      std::unique_ptr<typename tasks::TimerTaskWrapped<Task, Clock>::Timer> timer
   );
 
   boost::asio::io_context ioc_;
-  boost::asio::executor_work_guard<boost::asio::io_context::executor_type>
-      work_guard_;
+  boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work_guard_;
   std::thread thread_;
   bool stopped_ = true;
   std::mutex mutex_;
@@ -60,37 +58,24 @@ class TaskManager {
 };
 
 template <typename Task, typename TimePoint>
-void TaskManager::PostTaskAt(
-    const TimePoint &time_point, std::function<Task> task
-) {
+void TaskManager::PostTaskAt(const TimePoint &time_point, std::function<Task> task) {
   using Clock = typename TimePoint::clock;
 
   logger_->Info() << "Starting the timer of deferred task until " << time_point;
   auto timer =
-      std::make_unique<typename tasks::TimerTaskWrapped<Task, Clock>::Timer>(
-          ioc_, time_point
-      );
-  timer->async_wait(
-      MakeTimerTaskWrapped<Task, Clock>(std::move(task), std::move(timer))
-  );
+      std::make_unique<typename tasks::TimerTaskWrapped<Task, Clock>::Timer>(ioc_, time_point);
+  timer->async_wait(MakeTimerTaskWrapped<Task, Clock>(std::move(task), std::move(timer)));
 }
 
 template <typename Task, typename Duration>
-void TaskManager::PostTaskDelayed(
-    const Duration &delay, std::function<Task> task
-) {
+void TaskManager::PostTaskDelayed(const Duration &delay, std::function<Task> task) {
   using Clock = typename std::chrono::steady_clock;
 
   logger_->Info() << "Starting the timer of task delayed by "
                   << std::chrono::floor<std::chrono::milliseconds>(delay);
 
-  auto timer =
-      std::make_unique<typename tasks::TimerTaskWrapped<Task, Clock>::Timer>(
-          ioc_, delay
-      );
-  timer->async_wait(
-      MakeTimerTaskWrapped<Task, Clock>(std::move(task), std::move(timer))
-  );
+  auto timer = std::make_unique<typename tasks::TimerTaskWrapped<Task, Clock>::Timer>(ioc_, delay);
+  timer->async_wait(MakeTimerTaskWrapped<Task, Clock>(std::move(task), std::move(timer)));
 }
 
 template <typename Task, typename Clock>
@@ -102,8 +87,7 @@ tasks::TimerTaskWrapped<Task, Clock> TaskManager::MakeTimerTaskWrapped(
 }
 
 template <typename Task>
-tasks::TaskWrapped<Task> TaskManager::MakeTaskWrapped(std::function<Task> task
-) {
+tasks::TaskWrapped<Task> TaskManager::MakeTaskWrapped(std::function<Task> task) {
   return {std::move(task), *logger_};
 }
 

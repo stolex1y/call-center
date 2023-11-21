@@ -23,9 +23,7 @@ class HttpConnection : public std::enable_shared_from_this<HttpConnection> {
  public:
   static std::shared_ptr<HttpConnection> Create(
       tcp::socket &&socket,
-      const std::unordered_map<
-          std::string_view,
-          std::shared_ptr<HttpRepository>> &repositories,
+      const std::unordered_map<std::string_view, std::shared_ptr<HttpRepository>> &repositories,
       const std::shared_ptr<const log::LoggerProvider> &logger_provider
   );
 
@@ -37,9 +35,7 @@ class HttpConnection : public std::enable_shared_from_this<HttpConnection> {
  private:
   HttpConnection(
       tcp::socket &&socket,
-      const std::unordered_map<
-          std::string_view,
-          std::shared_ptr<HttpRepository>> &repositories,
+      const std::unordered_map<std::string_view, std::shared_ptr<HttpRepository>> &repositories,
       std::unique_ptr<log::Logger> logger
   );
 
@@ -48,17 +44,14 @@ class HttpConnection : public std::enable_shared_from_this<HttpConnection> {
   const std::unique_ptr<log::Logger> logger_;
   beast::tcp_stream stream_;
   beast::flat_buffer buffer_;
-  const std::unordered_map<std::string_view, std::shared_ptr<HttpRepository>>
-      &repositories_;
+  const std::unordered_map<std::string_view, std::shared_ptr<HttpRepository>> &repositories_;
 
   static HttpRepository::Response MakeNotFoundResponse();
 
   void WriteResponse(HttpRepository::Response &&response);
   void OnWriteResponse(bool keep_alive, beast::error_code error_code);
   void Close();
-  void OnReadRequest(
-      const HttpRepository::Request &request, beast::error_code ec
-  );
+  void OnReadRequest(const HttpRepository::Request &request, beast::error_code ec);
 };
 
 }  // namespace call_center::data

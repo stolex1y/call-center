@@ -11,15 +11,11 @@ namespace call_center::core::containers {
 
 using namespace core::utils::concepts;
 
-template <
-    NoThrowMoveConstructor T,
-    typename Hash = std::hash<T>,
-    typename Equal = std::equal_to<T>>
+template <NoThrowMoveConstructor T, typename Hash = std::hash<T>, typename Equal = std::equal_to<T>>
 class ConcurrentHashSet {
  public:
   ConcurrentHashSet(const ConcurrentHashSet<T, Hash, Equal> &other) = delete;
-  ConcurrentHashSet &operator=(const ConcurrentHashSet<T, Hash, Equal> &other
-  ) = delete;
+  ConcurrentHashSet &operator=(const ConcurrentHashSet<T, Hash, Equal> &other) = delete;
 
   bool Insert(T t);
   bool Erase(const T &t);

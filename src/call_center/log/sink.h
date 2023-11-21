@@ -15,17 +15,13 @@ namespace call_center::log {
 
 class Sink {
  public:
-  using Formatter = std::function<void(
-      const boost::log::record_view &rec, boost::log::formatting_ostream &out
-  )>;
+  using Formatter =
+      std::function<void(const boost::log::record_view &rec, boost::log::formatting_ostream &out)>;
 
   explicit Sink(SeverityLevel level);
   Sink(const std::string &file_name, SeverityLevel level, size_t max_size);
   Sink(
-      const std::string &file_name,
-      SeverityLevel level,
-      size_t max_size,
-      const Formatter &formatter
+      const std::string &file_name, SeverityLevel level, size_t max_size, const Formatter &formatter
   );
   Sink(SeverityLevel level, const Formatter &formatter);
   Sink(
@@ -42,8 +38,7 @@ class Sink {
   [[nodiscard]] const boost::uuids::uuid &Id() const;
 
  private:
-  using SinkImpl = boost::log::sinks::synchronous_sink<
-      boost::log::sinks::text_ostream_backend>;
+  using SinkImpl = boost::log::sinks::synchronous_sink<boost::log::sinks::text_ostream_backend>;
 
   boost::shared_ptr<SinkImpl> sink_impl_;
   boost::shared_ptr<std::ostream> stream_;

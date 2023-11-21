@@ -49,9 +49,7 @@ class Configuration : public std::enable_shared_from_this<Configuration> {
   mutable std::shared_mutex config_mutex_;
   core::containers::ConcurrentHashMap<std::string, std::any> cache_values_;
 
-  explicit Configuration(
-      const std::shared_ptr<const log::LoggerProvider> &logger_provider
-  );
+  explicit Configuration(const std::shared_ptr<const log::LoggerProvider> &logger_provider);
 
   void UpdateCaching();
 
@@ -92,8 +90,8 @@ std::optional<T> Configuration::ReadProperty(const std::string &key) {
 
   auto result = try_value_to<T>(config_json_.at(key));
   if (!result.has_value()) {
-    logger_->Error() << "Couldn't parse value as '" << typeid(T).name()
-                     << "' by key '" << key << "'. " << result.error().what();
+    logger_->Error() << "Couldn't parse value as '" << typeid(T).name() << "' by key '" << key
+                     << "'. " << result.error().what();
     return std::nullopt;
   } else {
     return result.value();
@@ -101,13 +99,11 @@ std::optional<T> Configuration::ReadProperty(const std::string &key) {
 }
 
 template <Arithmetic T>
-T Configuration::GetNumber(
-    const std::string &key, T default_value, T min, T max
-) {
+T Configuration::GetNumber(const std::string &key, T default_value, T min, T max) {
   const auto value = GetProperty<T>(key, default_value);
   if (value < min || value > max) {
-    logger_->Warning() << "Value by key '" << key << "' isn't in range [" << min
-                       << ", " << max << "]";
+    logger_->Warning() << "Value by key '" << key << "' isn't in range [" << min << ", " << max
+                       << "]";
   }
   return std::max(min, std::min(max, value));
 }

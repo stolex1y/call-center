@@ -19,9 +19,7 @@ Journal::Journal(std::shared_ptr<Configuration> configuration)
   logger_ = std::make_unique<log::Logger>("Journal", *sink_);
 }
 
-void Journal::Formatter(
-    const boost::log::record_view &rec, boost::log::formatting_ostream &out
-) {
+void Journal::Formatter(const boost::log::record_view &rec, boost::log::formatting_ostream &out) {
   out << rec[expr::message];
 }
 
@@ -51,8 +49,7 @@ void Journal::AddRecord(const CallDetailedRecord &cdr) {
   logger_->Info() << result;
 }
 
-std::string Journal::FormatTimePoint(
-    const std::optional<CallDetailedRecord::TimePoint> &time_point
+std::string Journal::FormatTimePoint(const std::optional<CallDetailedRecord::TimePoint> &time_point
 ) {
   if (time_point)
     return FormatTimePoint(time_point.value());
@@ -60,20 +57,15 @@ std::string Journal::FormatTimePoint(
     return "";
 }
 
-std::string Journal::FormatTimePoint(
-    const CallDetailedRecord::TimePoint &time_point
-) {
+std::string Journal::FormatTimePoint(const CallDetailedRecord::TimePoint &time_point) {
   return std::vformat("{0:%F} {0:%T}", std::make_format_args(time_point));
 }
 
-std::string Journal::FormatDuration(const CallDetailedRecord::Duration &duration
-) {
+std::string Journal::FormatDuration(const CallDetailedRecord::Duration &duration) {
   return std::vformat("{0:%T}", std::make_format_args(duration));
 }
 
-std::string Journal::FormatDuration(
-    const std::optional<CallDetailedRecord::Duration> &duration
-) {
+std::string Journal::FormatDuration(const std::optional<CallDetailedRecord::Duration> &duration) {
   if (duration)
     return FormatDuration(*duration);
   else

@@ -25,9 +25,7 @@ class HttpRepository {
  protected:
   log::Logger &logger_;
 
-  virtual Response MakeResponse(
-      http::status status, bool keep_alive, std::string &&body
-  );
+  virtual Response MakeResponse(http::status status, bool keep_alive, std::string &&body);
 
  private:
   std::string root_;

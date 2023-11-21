@@ -12,9 +12,7 @@ struct CallResponseDto {
   std::string call_status;
 
   friend void tag_invoke(
-      const json::value_from_tag &,
-      json::value &json,
-      const CallResponseDto &call_response
+      const json::value_from_tag &, json::value &json, const CallResponseDto &call_response
   );
 };
 

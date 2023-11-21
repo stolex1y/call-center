@@ -10,10 +10,7 @@
 
 namespace call_center::core::containers {
 
-template <
-    NoThrowCopyConstructor T,
-    typename Hash = std::hash<T>,
-    typename Equal = std::equal_to<T>>
+template <NoThrowCopyConstructor T, typename Hash = std::hash<T>, typename Equal = std::equal_to<T>>
 class Queue {
  public:
   explicit Queue(size_t capacity = SIZE_MAX) : capacity_(capacity) {

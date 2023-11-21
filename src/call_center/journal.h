@@ -39,23 +39,15 @@ class Journal {
   std::unique_ptr<log::Sink> sink_;
   std::unique_ptr<log::Logger> logger_;
 
-  static void Formatter(
-      const boost::log::record_view &rec, boost::log::formatting_ostream &out
-  );
+  static void Formatter(const boost::log::record_view &rec, boost::log::formatting_ostream &out);
   static std::string FormatCallDetailedRecord(const CallDetailedRecord &cdr);
-  static std::string FormatTimePoint(
-      const CallDetailedRecord::TimePoint &time_point
-  );
-  static std::string FormatTimePoint(
-      const std::optional<CallDetailedRecord::TimePoint> &time_point
+  static std::string FormatTimePoint(const CallDetailedRecord::TimePoint &time_point);
+  static std::string FormatTimePoint(const std::optional<CallDetailedRecord::TimePoint> &time_point
   );
   static std::string FormatUuid(const boost::uuids::uuid &uuid);
   static std::string FormatUuid(const std::optional<boost::uuids::uuid> &uuid);
-  static std::string FormatDuration(const CallDetailedRecord::Duration &duration
-  );
-  static std::string FormatDuration(
-      const std::optional<CallDetailedRecord::Duration> &duration
-  );
+  static std::string FormatDuration(const CallDetailedRecord::Duration &duration);
+  static std::string FormatDuration(const std::optional<CallDetailedRecord::Duration> &duration);
 
   [[nodiscard]] std::string ReadFileName() const;
   [[nodiscard]] size_t ReadMaxSize() const;

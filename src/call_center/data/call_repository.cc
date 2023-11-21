@@ -17,9 +17,7 @@ std::shared_ptr<CallRepository> CallRepository::Create(
     const std::shared_ptr<const log::LoggerProvider> &logger_provider
 ) {
   return std::shared_ptr<CallRepository>(new CallRepository(
-      std::move(call_center),
-      std::move(configuration),
-      logger_provider->Get("CallRepository")
+      std::move(call_center), std::move(configuration), logger_provider->Get("CallRepository")
   ));
 }
 
@@ -35,14 +33,13 @@ CallRepository::CallRepository(
 }
 
 void CallRepository::HandleRequest(
-    const http::request<http::string_body> &request,
-    const HttpRepository::OnHandle &on_handle
+    const http::request<http::string_body> &request, const HttpRepository::OnHandle &on_handle
 ) {
-  logger_.Info() << "Start handle request: " << to_string(request.method())
-                 << " " << request.target();
+  logger_.Info() << "Start handle request: " << to_string(request.method()) << " "
+                 << request.target();
   if (request.method() != http::verb::post) {
-    logger_.Info() << "Cannot handle request with illegal method ("
-                   << to_string(request.method()) << ")";
+    logger_.Info() << "Cannot handle request with illegal method (" << to_string(request.method())
+                   << ")";
     on_handle(MakeResponse(http::status::method_not_allowed, false, {}));
     return;
   }
@@ -52,10 +49,8 @@ void CallRepository::HandleRequest(
     on_handle(MakeResponse(http::status::bad_request, false, {}));
     return;
   } else {
-    auto on_call_processing_finish = [repo = shared_from_this(),
-                                      on_handle](const auto &call) {
-      auto response =
-          repo->MakeResponse(http::status::ok, false, MakeResponseBody(call));
+    auto on_call_processing_finish = [repo = shared_from_this(), on_handle](const auto &call) {
+      auto response = repo->MakeResponse(http::status::ok, false, MakeResponseBody(call));
       on_handle(std::move(response));
     };
     auto call = std::make_shared<CallDetailedRecord>(
@@ -65,9 +60,7 @@ void CallRepository::HandleRequest(
   }
 }
 
-std::optional<CallRequestDto> CallRepository::ParseRequestBody(
-    const std::string_view &body
-) {
+std::optional<CallRequestDto> CallRepository::ParseRequestBody(const std::string_view &body) {
   try {
     const auto json_body = json::parse(body);
     return json::value_to<CallRequestDto>(json_body);

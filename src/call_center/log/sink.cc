@@ -25,25 +25,13 @@ Sink::Sink(const std::string &file_name, SeverityLevel level, size_t max_size)
 }
 
 Sink::Sink(SeverityLevel level, const Formatter &formatter)
-    : Sink(
-          boost::shared_ptr<std::ostream>(&std::cout, [](std::ostream *) {}),
-          level,
-          formatter
-      ) {
+    : Sink(boost::shared_ptr<std::ostream>(&std::cout, [](std::ostream *) {}), level, formatter) {
 }
 
 Sink::Sink(
-    const std::string &file_name,
-    SeverityLevel level,
-    size_t max_size,
-    const Formatter &formatter
+    const std::string &file_name, SeverityLevel level, size_t max_size, const Formatter &formatter
 )
-    : Sink(
-          boost::make_shared<std::ofstream>(file_name),
-          level,
-          formatter,
-          max_size
-      ) {
+    : Sink(boost::make_shared<std::ofstream>(file_name), level, formatter, max_size) {
 }
 
 Sink::Sink(

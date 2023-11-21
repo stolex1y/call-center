@@ -11,8 +11,7 @@
 
 namespace call_center {
 
-class ConfigurationUpdater
-    : public std::enable_shared_from_this<ConfigurationUpdater> {
+class ConfigurationUpdater : public std::enable_shared_from_this<ConfigurationUpdater> {
  public:
   static std::shared_ptr<ConfigurationUpdater> Create(
       std::shared_ptr<Configuration> configuration,
@@ -25,8 +24,7 @@ class ConfigurationUpdater
  private:
   using Duration = std::chrono::minutes;
 
-  static constexpr const auto kUpdatingPeriodKey_ =
-      "configuration_updating_period";
+  static constexpr const auto kUpdatingPeriodKey_ = "configuration_updating_period";
   static constexpr const Duration kDefaultUpdatingPeriod_ = Duration(10);
 
   std::shared_ptr<core::TaskManager> task_manager_;

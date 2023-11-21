@@ -104,11 +104,8 @@ void CallCenter::PerformCallProcessingIteration() {
  * @param call - next call from the queue;
  * @param op - free operator who will handle the call.
  */
-void CallCenter::StartCallProcessing(
-    const CallPtr &call, const OperatorPtr &op
-) {
-  logger_->Debug() << "Start call (" << boost::uuids::to_string(call->GetId())
-                   << ") processing";
+void CallCenter::StartCallProcessing(const CallPtr &call, const OperatorPtr &op) {
+  logger_->Debug() << "Start call (" << boost::uuids::to_string(call->GetId()) << ") processing";
   call->StartProcessing();
   call->SetOperatorId(op->GetId());
   op->HandleCall(call, [call, op, call_center = shared_from_this()]() {
@@ -146,11 +143,8 @@ bool CallCenter::StartCallProcessingIfPossible(const CallPtr &call) {
  * @param call - handled call;
  * @param op - operator who processed the call.
  */
-void CallCenter::FinishCallProcessing(
-    const CallPtr &call, const OperatorPtr &op
-) {
-  logger_->Debug() << "Finish call processing ("
-                   << boost::uuids::to_string(call->GetId()) << ")";
+void CallCenter::FinishCallProcessing(const CallPtr &call, const OperatorPtr &op) {
+  logger_->Debug() << "Finish call processing (" << boost::uuids::to_string(call->GetId()) << ")";
   call->SetStatus(CallStatus::kOk);
   call->FinishProcessing();
   calls_->EraseFromProcessing(call);
@@ -170,9 +164,7 @@ void CallCenter::FinishCallProcessing(
  * @param time_point - time of execution of the new iteration of call
  * processing.
  */
-void CallCenter::ScheduleCallProcessingIteration(
-    const CallDetailedRecord::TimePoint &time_point
-) {
+void CallCenter::ScheduleCallProcessingIteration(const CallDetailedRecord::TimePoint &time_point) {
   logger_->Debug() << "Add task to call processing at: " << time_point;
 
   const auto task = [call_center = shared_from_this()]() {
@@ -187,8 +179,7 @@ void CallCenter::ScheduleCallProcessingIteration(
  * @param reason - reason for rejection.
  */
 void CallCenter::RejectCall(const CallPtr &call, CallStatus reason) {
-  logger_->Info() << "Reject call (" << boost::uuids::to_string(call->GetId())
-                  << ") - " << reason;
+  logger_->Info() << "Reject call (" << boost::uuids::to_string(call->GetId()) << ") - " << reason;
   call->SetStatus(reason);
   call->FinishProcessing();
   journal_->AddRecord(*call);

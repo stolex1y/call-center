@@ -31,10 +31,7 @@ class Operator : public std::enable_shared_from_this<Operator> {
   [[nodiscard]] const boost::uuids::uuid &GetId() const;
   [[nodiscard]] Operator::Status GetStatus() const;
 
-  void HandleCall(
-      const std::shared_ptr<CallDetailedRecord> &call,
-      const OnFinishHandle &on_finish
-  );
+  void HandleCall(const std::shared_ptr<CallDetailedRecord> &call, const OnFinishHandle &on_finish);
 
  private:
   using Distribution = std::uniform_int_distribution<uint64_t>;
