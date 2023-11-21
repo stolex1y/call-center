@@ -35,6 +35,7 @@ void TaskManager::Stop() {
     stopped_ = true;
   }
   work_guard_.reset();
+  ioc_.stop();
   if (thread_.joinable())
     thread_.join();
 }

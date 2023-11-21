@@ -8,4 +8,7 @@ void tag_invoke(
   json = {{"call_status", call_response.call_status}};
 }
 
+CallResponseDto::CallResponseDto(CallStatus status) : call_status(to_string(status)) {
+}
+
 }  // namespace call_center::data

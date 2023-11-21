@@ -17,6 +17,8 @@ class CallQueue {
 
   enum class PushResult { kOk, kAlreadyInQueue, kOverload };
 
+  static constexpr const auto kCapacityKey_ = "queue_capacity";
+
   CallQueue(
       std::shared_ptr<Configuration> configuration,
       const std::shared_ptr<const log::LoggerProvider> &logger_provider
@@ -32,6 +34,8 @@ class CallQueue {
   void EraseFromProcessing(const CallPtr &call);
   bool InsertToProcessing(const CallPtr &call);
   [[nodiscard]] bool Contains(const CallPtr &call) const;
+  [[nodiscard]] size_t GetSize() const;
+  [[nodiscard]] size_t GetCapacity() const;
 
  private:
   struct CallEquals {
@@ -50,14 +54,13 @@ class CallQueue {
     bool operator()(const CallPtr &first, const CallPtr &second) const;
   };
 
-  static constexpr const auto kCapacityKey_ = "queue_capacity";
   static constexpr const size_t kDefaultCapacity_ = 10;
 
   std::unordered_set<CallPtr, CallHash, CallEquals> in_processing_;
   // TODO extract to its own class
   std::multiset<CallPtr, TimeoutPointOrder> in_timout_point_order_;
   std::multiset<CallPtr, ReceiptOrder> in_receipt_order_;
-  mutable std::mutex queue_mutex_;
+  mutable std::shared_mutex queue_mutex_;
   std::unique_ptr<log::Logger> logger_;
   const std::shared_ptr<Configuration> configuration_;
   size_t capacity_ = kDefaultCapacity_;

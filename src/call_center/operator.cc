@@ -29,15 +29,11 @@ Operator::Operator(
 void Operator::HandleCall(
     const std::shared_ptr<CallDetailedRecord> &call, const OnFinishHandle &on_finish
 ) {
-  {
-    std::lock_guard lock(mutex_);
-    assert(status_ == Status::kFree);
-    status_ = Status::kBusy;
-  }
+  assert(status_ == Status::kFree);
+  status_ = Status::kBusy;
 
   const auto finish_handle = [op = shared_from_this(), on_finish]() mutable {
     on_finish();
-    std::lock_guard lock(op->mutex_);
     op->status_ = Status::kFree;
   };
   const auto delay = GetCallDelay();
@@ -73,13 +69,8 @@ Operator::DelayDuration Operator::GetCallDelay() {
   return DelayDuration(distribution_(generator_));
 }
 
-const boost::uuids::uuid &Operator::GetId() const {
+boost::uuids::uuid Operator::GetId() const {
   return id_;
-}
-
-Operator::Status Operator::GetStatus() const {
-  std::lock_guard<std::mutex> lock(mutex_);
-  return status_;
 }
 
 }  // namespace call_center

@@ -71,7 +71,8 @@ std::optional<CallRequestDto> CallRepository::ParseRequestBody(const std::string
 }
 
 std::string CallRepository::MakeResponseBody(const CallDetailedRecord &cdr) {
-  CallResponseDto &&call_response_dto{to_string(cdr.GetStatus())};
+  assert(cdr.WasFinished());
+  auto &&call_response_dto = CallResponseDto(*cdr.GetStatus());
   return serialize(json::value_from(call_response_dto));
 }
 

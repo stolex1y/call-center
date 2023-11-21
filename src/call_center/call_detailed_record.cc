@@ -24,32 +24,46 @@ CallDetailedRecord::CallDetailedRecord(
   timeout_point_ = receipt_time_ + max_wait_;
 }
 
-void CallDetailedRecord::StartProcessing() {
+void CallDetailedRecord::StartProcessing(boost::uuids::uuid operator_id) {
+  std::lock_guard lock(mutex_);
+  operator_id_ = operator_id;
   start_processing_time_ = time_point_cast<Duration>(Clock::now());
 }
 
-void CallDetailedRecord::FinishProcessing() {
-  end_processing_time_ = time_point_cast<Duration>(Clock::now());
+void CallDetailedRecord::FinishProcessing(CallStatus status) {
+  {
+    std::lock_guard lock(mutex_);
+    status_ = status;
+    end_processing_time_ = time_point_cast<Duration>(Clock::now());
+  }
   on_finish_(*this);
 }
 
 bool CallDetailedRecord::WasProcessed() const {
-  return end_processing_time_ > start_processing_time_ && start_processing_time_ > receipt_time_;
+  std::shared_lock lock(mutex_);
+  return status_ == CallStatus::kOk;
 }
 
-const CallDetailedRecord::TimePoint &CallDetailedRecord::GetReceiptTime() const {
+bool CallDetailedRecord::WasFinished() const {
+  std::shared_lock lock(mutex_);
+  return status_ != std::nullopt;
+}
+
+CallDetailedRecord::TimePoint CallDetailedRecord::GetReceiptTime() const {
   return receipt_time_;
 }
 
 std::optional<CallDetailedRecord::TimePoint> CallDetailedRecord::GetEndProcessingTime() const {
+  std::shared_lock lock(mutex_);
   return end_processing_time_;
 }
 
 std::optional<CallDetailedRecord::TimePoint> CallDetailedRecord::GetStartProcessingTime() const {
+  std::shared_lock lock(mutex_);
   return start_processing_time_;
 }
 
-const uuids::uuid &CallDetailedRecord::GetId() const {
+uuids::uuid CallDetailedRecord::GetId() const {
   return id_;
 }
 
@@ -57,44 +71,69 @@ const std::string &CallDetailedRecord::GetCallerPhoneNumber() const {
   return caller_phone_number_;
 }
 
-CallStatus CallDetailedRecord::GetStatus() const {
+std::optional<CallStatus> CallDetailedRecord::GetStatus() const {
+  std::shared_lock lock(mutex_);
   return status_;
 }
 
 std::optional<uuids::uuid> CallDetailedRecord::GetOperatorId() const {
+  std::shared_lock lock(mutex_);
   return operator_id_;
 }
 
 std::optional<CallDetailedRecord::Duration> CallDetailedRecord::GetProcessingDuration() const {
-  return end_processing_time_ - start_processing_time_;
+  std::shared_lock lock(mutex_);
+  if (WasProcessed()) {
+    return *end_processing_time_ - *start_processing_time_;
+  } else {
+    return std::nullopt;
+  }
 }
 
-void CallDetailedRecord::SetOperatorId(boost::uuids::uuid uuid) {
-  operator_id_ = uuid;
-}
-
-void CallDetailedRecord::SetStatus(CallStatus status) {
-  status_ = status;
-}
-
-const CallDetailedRecord::WaitingDuration &CallDetailedRecord::GetMaxWait() const {
+CallDetailedRecord::WaitingDuration CallDetailedRecord::GetMaxWait() const {
   return max_wait_;
 }
 
 bool CallDetailedRecord::IsTimeout() const {
-  return Clock::now() - GetReceiptTime() >= max_wait_;
+  return (Clock::now() - GetReceiptTime()) >= max_wait_;
 }
 
 uint64_t CallDetailedRecord::ReadMaxWait() const {
   return configuration_->GetProperty<uint64_t>(kMaxWaitKey_, max_wait_.count());
 }
 
-const CallDetailedRecord::TimePoint &CallDetailedRecord::GetTimeoutPoint() const {
+CallDetailedRecord::TimePoint CallDetailedRecord::GetTimeoutPoint() const {
   return timeout_point_;
 }
 
 bool CallDetailedRecord::operator==(const CallDetailedRecord &other) const {
   return caller_phone_number_ == other.caller_phone_number_;
+}
+
+std::optional<CallDetailedRecord::Duration> CallDetailedRecord::GetWaitingDuration() const {
+  std::shared_lock lock(mutex_);
+  if (WasFinished()) {
+    if (WasProcessed()) {
+      return *start_processing_time_ - receipt_time_;
+    } else {
+      return *end_processing_time_ - receipt_time_;
+    }
+  } else {
+    return std::nullopt;
+  }
+}
+
+std::optional<CallDetailedRecord::Duration> CallDetailedRecord::GetTotalTime() const {
+  std::shared_lock lock(mutex_);
+  if (WasFinished()) {
+    if (WasProcessed()) {
+      return *GetWaitingDuration() + *GetProcessingDuration();
+    } else {
+      return *GetWaitingDuration();
+    }
+  } else {
+    return std::nullopt;
+  }
 }
 
 }  // namespace call_center

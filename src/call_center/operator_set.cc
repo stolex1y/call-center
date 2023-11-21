@@ -3,7 +3,11 @@
 #include <boost/functional/hash.hpp>
 #include <boost/uuid/uuid.hpp>
 
+#include "core/utils/uuids.h"
+
 namespace call_center {
+
+using namespace core::utils;
 
 OperatorSet::OperatorSet(
     std::shared_ptr<Configuration> configuration,
@@ -19,26 +23,44 @@ OperatorSet::OperatorSet(
 }
 
 std::shared_ptr<Operator> OperatorSet::EraseFree() {
-  std::lock_guard<std::mutex> lock(mutex_);
-
-  UpdateOperatorCount();
+  std::lock_guard lock(mutex_);
 
   if (free_operators_.empty())
     return nullptr;
 
   auto erased = *free_operators_.begin();
+  busy_operators_.emplace(erased);
   free_operators_.erase(free_operators_.begin());
+  logger_->Debug() << "Take free operator " << erased->GetId();
+  UpdateOperatorCount();
   return erased;
 }
 
 void OperatorSet::InsertFree(const std::shared_ptr<Operator> &op) {
-  std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard lock(mutex_);
+  logger_->Debug() << "Return free operator " << op->GetId();
   free_operators_.emplace(op);
+  busy_operators_.erase(op);
   UpdateOperatorCount();
 }
 
 size_t OperatorSet::ReadOperatorCount() const {
   return configuration_->GetNumber<size_t>(kOperatorCountKey_, operator_count_, 1);
+}
+
+size_t OperatorSet::GetSize() const {
+  std::shared_lock lock(mutex_);
+  return operator_count_;
+}
+
+size_t OperatorSet::GetFreeOperatorCount() const {
+  std::shared_lock lock(mutex_);
+  return free_operators_.size();
+}
+
+size_t OperatorSet::GetBusyOperatorCount() const {
+  std::shared_lock lock(mutex_);
+  return busy_operators_.size();
 }
 
 void OperatorSet::UpdateOperatorCount() {

@@ -53,6 +53,8 @@ add_library(${OBJ_LIB_TARGET} OBJECT
         configuration_updater.cc
         configuration_updater.h
         core/containers/concurrent_hash_map.h
+        core/utils/uuids.h
+        core/utils/uuids.cc
 )
 
 #warnings

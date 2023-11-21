@@ -17,7 +17,7 @@ namespace call_center::core {
 
 class TaskManager {
  public:
-  explicit TaskManager(
+  TaskManager(
       std::shared_ptr<Configuration> configuration,
       const std::shared_ptr<const log::LoggerProvider> &logger_provider
   );

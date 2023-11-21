@@ -87,6 +87,7 @@ void CallCenter::PerformCallProcessingIteration() {
   if (op) {
     CallPtr call = calls_->PopFromQueue();
     if (call) {
+      calls_->InsertToProcessing(call);
       StartCallProcessing(call, op);
     } else {
       operators_->InsertFree(op);
@@ -106,8 +107,7 @@ void CallCenter::PerformCallProcessingIteration() {
  */
 void CallCenter::StartCallProcessing(const CallPtr &call, const OperatorPtr &op) {
   logger_->Debug() << "Start call (" << boost::uuids::to_string(call->GetId()) << ") processing";
-  call->StartProcessing();
-  call->SetOperatorId(op->GetId());
+  call->StartProcessing(op->GetId());
   op->HandleCall(call, [call, op, call_center = shared_from_this()]() {
     call_center->FinishCallProcessing(call, op);
   });
@@ -145,8 +145,7 @@ bool CallCenter::StartCallProcessingIfPossible(const CallPtr &call) {
  */
 void CallCenter::FinishCallProcessing(const CallPtr &call, const OperatorPtr &op) {
   logger_->Debug() << "Finish call processing (" << boost::uuids::to_string(call->GetId()) << ")";
-  call->SetStatus(CallStatus::kOk);
-  call->FinishProcessing();
+  call->FinishProcessing(CallStatus::kOk);
   calls_->EraseFromProcessing(call);
   operators_->InsertFree(op);
   journal_->AddRecord(*call);
@@ -180,8 +179,7 @@ void CallCenter::ScheduleCallProcessingIteration(const CallDetailedRecord::TimeP
  */
 void CallCenter::RejectCall(const CallPtr &call, CallStatus reason) {
   logger_->Info() << "Reject call (" << boost::uuids::to_string(call->GetId()) << ") - " << reason;
-  call->SetStatus(reason);
-  call->FinishProcessing();
+  call->FinishProcessing(reason);
   journal_->AddRecord(*call);
 }
 

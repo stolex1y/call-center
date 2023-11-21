@@ -14,6 +14,8 @@ namespace call_center {
 
 class OperatorSet {
  public:
+  static constexpr const auto kOperatorCountKey_ = "operator_count";
+
   OperatorSet(
       std::shared_ptr<Configuration> configuration,
       std::shared_ptr<core::TaskManager> task_manager,
@@ -24,6 +26,9 @@ class OperatorSet {
 
   std::shared_ptr<Operator> EraseFree();
   void InsertFree(const std::shared_ptr<Operator> &op);
+  [[nodiscard]] size_t GetSize() const;
+  [[nodiscard]] size_t GetFreeOperatorCount() const;
+  [[nodiscard]] size_t GetBusyOperatorCount() const;
 
  private:
   using OperatorPtr = std::shared_ptr<Operator>;
@@ -36,7 +41,6 @@ class OperatorSet {
     size_t operator()(const OperatorPtr &op) const;
   };
 
-  static constexpr const auto kOperatorCountKey_ = "operator_count";
   static constexpr const size_t kDefaultOperatorCount_ = 10;
 
   std::unordered_set<OperatorPtr, OperatorHash, OperatorEquals> free_operators_;
@@ -44,7 +48,7 @@ class OperatorSet {
   const std::shared_ptr<Configuration> configuration_;
   const std::shared_ptr<core::TaskManager> task_manager_;
   size_t operator_count_ = kDefaultOperatorCount_;
-  mutable std::mutex mutex_;
+  mutable std::shared_mutex mutex_;
   const std::shared_ptr<const log::LoggerProvider> &logger_provider_;
   std::unique_ptr<log::Logger> logger_;
 

@@ -4,8 +4,6 @@
 
 namespace call_center {
 
-const auto kFileName = "config.json";
-
 std::shared_ptr<Configuration> Configuration::Create(
     const std::shared_ptr<const log::LoggerProvider> &logger_provider
 ) {
@@ -20,9 +18,9 @@ Configuration::Configuration(const std::shared_ptr<const log::LoggerProvider> &l
 void Configuration::UpdateConfiguration() {
   std::lock_guard lock(config_mutex_);
 
-  std::ifstream config_file(kFileName);
+  std::ifstream config_file(kFileName_);
   if (!config_file) {
-    logger_->Warning() << "Couldn't open configuration file: " << kFileName;
+    logger_->Warning() << "Couldn't open configuration file: " << kFileName_;
     return;
   }
 

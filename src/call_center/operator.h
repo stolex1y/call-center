@@ -18,6 +18,10 @@ class Operator : public std::enable_shared_from_this<Operator> {
   enum class Status { kFree, kBusy };
 
   using OnFinishHandle = std::function<void()>;
+  using DelayDuration = std::chrono::seconds;
+
+  static constexpr const auto kMinDelayKey_ = "operator_min_delay";
+  static constexpr const auto kMaxDelayKey_ = "operator_max_delay";
 
   static std::shared_ptr<Operator> Create(
       std::shared_ptr<core::TaskManager> task_manager,
@@ -28,24 +32,19 @@ class Operator : public std::enable_shared_from_this<Operator> {
   Operator(const Operator &other) = delete;
   Operator &operator=(const Operator &other) = delete;
 
-  [[nodiscard]] const boost::uuids::uuid &GetId() const;
-  [[nodiscard]] Operator::Status GetStatus() const;
+  [[nodiscard]] boost::uuids::uuid GetId() const;
 
   void HandleCall(const std::shared_ptr<CallDetailedRecord> &call, const OnFinishHandle &on_finish);
 
  private:
   using Distribution = std::uniform_int_distribution<uint64_t>;
   using Generator = std::mt19937_64;
-  using DelayDuration = std::chrono::seconds;
 
-  static constexpr const auto kMinDelayKey_ = "operator_min_delay";
-  static constexpr const auto kMaxDelayKey_ = "operator_max_delay";
   static constexpr const uint64_t kDefaultMinDelay_ = 10;
   static constexpr const uint64_t kDefaultMaxDelay_ = 60;
 
   const boost::uuids::uuid id_ = boost::uuids::random_generator_mt19937()();
   Status status_ = Status::kFree;
-  mutable std::mutex mutex_;
   const std::shared_ptr<core::TaskManager> task_manager_;
   const std::shared_ptr<Configuration> configuration_;
   uint64_t min_delay_ = kDefaultMinDelay_;

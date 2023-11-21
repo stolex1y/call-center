@@ -35,7 +35,7 @@ std::string Journal::FormatCallDetailedRecord(const CallDetailedRecord &cdr) {
           FormatUuid(cdr.GetId()),
           cdr.GetCallerPhoneNumber(),
           FormatTimePoint(cdr.GetEndProcessingTime()),
-          to_string(cdr.GetStatus()),
+          to_string(*cdr.GetStatus()),
           FormatTimePoint(cdr.GetStartProcessingTime()),
           FormatUuid(cdr.GetOperatorId()),
           FormatDuration(cdr.GetProcessingDuration())
@@ -45,6 +45,7 @@ std::string Journal::FormatCallDetailedRecord(const CallDetailedRecord &cdr) {
 
 void Journal::AddRecord(const CallDetailedRecord &cdr) {
   UpdateSink();
+  assert(cdr.WasFinished());
   auto result = FormatCallDetailedRecord(cdr);
   logger_->Info() << result;
 }

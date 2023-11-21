@@ -20,6 +20,9 @@ class Configuration : public std::enable_shared_from_this<Configuration> {
       const std::shared_ptr<const log::LoggerProvider> &logger_provider
   );
 
+  static constexpr const auto kFileName_ = "config.json";
+  static constexpr const auto kCachingKey_ = "configuration_is_caching";
+
   Configuration(Configuration &other) = delete;
   Configuration &operator=(Configuration &other) = delete;
 
@@ -40,7 +43,6 @@ class Configuration : public std::enable_shared_from_this<Configuration> {
   void UpdateConfiguration();
 
  private:
-  static constexpr const auto kCachingKey_ = "configuration_is_caching";
   static constexpr const bool kDefaultCaching_ = true;
 
   std::atomic_bool caching_ = kDefaultCaching_;
