@@ -54,31 +54,12 @@ jobs:
             sudo cp --force --recursive /usr/local/include/boost ~/boost/include
           fi
 
-      - name: Cache CMake build
-        uses: actions/cache@v3
-        id: cache-cmake-build
-        with:
-          path: "~/build"
-          key: ${{ runner.os }}-build-cmake-build
-
-      - name: Restore cache build
-        env:
-          CACHE_HIT: ${{ steps.cache-cmake-build.outputs.cache-hit }}
-        run: |
-          if [[ "$CACHE_HIT" == 'true' ]]; then
-            mkdir build
-            cp --force --recursive ~/build/* build
-          else
-            mkdir ~/build
-          fi
-
       - name: Configure CMake
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
         run: |
           cmake --build ./build --config Release -j 2
-          sudo cp --force --recursive build/* ~/build
 
       - name: Test
         run: |
