@@ -30,7 +30,7 @@ void ConfigurationUpdater::StartUpdating() {
 void ConfigurationUpdater::ScheduleUpdating() {
   UpdateUpdatingPeriod();
   logger_->Info() << "Schedule configuration updating after " << updating_period_;
-  task_manager_->PostTaskDelayed<void()>(updating_period_, [updater = shared_from_this()]() {
+  task_manager_->PostTaskDelayed(updating_period_, [updater = shared_from_this()]() {
     updater->logger_->Info() << "Update configuration";
     updater->configuration_->UpdateConfiguration();
     updater->ScheduleUpdating();

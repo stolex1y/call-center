@@ -152,7 +152,7 @@ void CallCenter::FinishCallProcessing(const CallPtr &call, const OperatorPtr &op
 
   // now there is at least one free operator
   if (!calls_->QueueIsEmpty()) {
-    task_manager_->PostTask<void()>([call_center = shared_from_this()]() {
+    task_manager_->PostTask([call_center = shared_from_this()]() {
       call_center->PerformCallProcessingIteration();
     });
   }
@@ -169,7 +169,7 @@ void CallCenter::ScheduleCallProcessingIteration(const CallDetailedRecord::TimeP
   const auto task = [call_center = shared_from_this()]() {
     call_center->PerformCallProcessingIteration();
   };
-  task_manager_->PostTaskAt<void()>(time_point, task);
+  task_manager_->PostTaskAt(time_point, task);
 }
 
 /**

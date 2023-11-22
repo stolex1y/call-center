@@ -26,7 +26,9 @@ class ConcurrentHashMap {
   bool Empty() const;
   std::optional<V> Get(const K &key) const;
   void Clear();
-  bool Contains(const K &key);
+  [[nodiscard]] bool Contains(const K &key) const;
+  [[nodiscard]] size_t GetSize() const;
+  std::optional<std::pair<K, V>> First() const;
 
  private:
   mutable std::shared_mutex mutex_;
@@ -34,7 +36,22 @@ class ConcurrentHashMap {
 };
 
 template <NoThrowMoveConstructor K, NoThrowMoveConstructor V, typename Hash, typename Equal>
-bool ConcurrentHashMap<K, V, Hash, Equal>::Contains(const K &key) {
+std::optional<std::pair<K, V>> ConcurrentHashMap<K, V, Hash, Equal>::First() const {
+  std::shared_lock lock(mutex_);
+  if (map_.empty())
+    return std::nullopt;
+  else
+    return *map_.begin();
+}
+
+template <NoThrowMoveConstructor K, NoThrowMoveConstructor V, typename Hash, typename Equal>
+size_t ConcurrentHashMap<K, V, Hash, Equal>::GetSize() const {
+  std::shared_lock lock(mutex_);
+  return map_.size();
+}
+
+template <NoThrowMoveConstructor K, NoThrowMoveConstructor V, typename Hash, typename Equal>
+bool ConcurrentHashMap<K, V, Hash, Equal>::Contains(const K &key) const {
   std::shared_lock lock(mutex_);
   return map_.contains(key);
 }
@@ -50,7 +67,7 @@ std::optional<V> ConcurrentHashMap<K, V, Hash, Equal>::Get(const K &key) const {
   std::shared_lock lock(mutex_);
   if (!map_.contains(key))
     return std::nullopt;
-  return *map_.find(key);
+  return map_.find(key)->second;
 }
 
 template <NoThrowMoveConstructor K, NoThrowMoveConstructor V, typename Hash, typename Equal>

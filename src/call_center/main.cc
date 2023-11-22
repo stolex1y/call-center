@@ -1,7 +1,7 @@
 #include "call_center.h"
 #include "configuration.h"
 #include "configuration_updater.h"
-#include "core/task_manager.h"
+#include "core/task_manager_impl.h"
 #include "data/call_repository.h"
 #include "data/http_server.h"
 #include "journal.h"
@@ -19,7 +19,7 @@ int main() {
   const auto address = net::ip::address_v4::any();
 
   const auto configuration = Configuration::Create(logger_provider);
-  auto task_manager = std::make_shared<TaskManager>(configuration, logger_provider);
+  auto task_manager = TaskManagerImpl::Create(configuration, logger_provider);
   ConfigurationUpdater::Create(configuration, task_manager, logger_provider)->StartUpdating();
   auto call_center = CallCenter::Create(
       std::make_unique<Journal>(configuration),

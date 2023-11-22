@@ -36,7 +36,7 @@ add_library(${OBJ_LIB_TARGET} OBJECT
         data/call_request_dto.h
         data/call_response_dto.cc
         data/call_response_dto.h
-        core/task_manager.cc
+        core/task_manager_impl.cc
         core/task_manager.h
         log/sink.cc
         log/sink.h
@@ -55,6 +55,7 @@ add_library(${OBJ_LIB_TARGET} OBJECT
         core/containers/concurrent_hash_map.h
         core/utils/uuids.h
         core/utils/uuids.cc
+        core/task_manager_impl.h
 )
 
 #warnings

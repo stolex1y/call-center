@@ -26,24 +26,24 @@ class CallDetailedRecord {
       OnFinish on_finish
   );
 
-  void StartProcessing(boost::uuids::uuid operator_id);
-  void FinishProcessing(CallStatus status);
-  [[nodiscard]] bool WasProcessed() const;
-  [[nodiscard]] std::optional<Duration> GetProcessingDuration() const;
-  [[nodiscard]] std::optional<Duration> GetTotalTime() const;
-  [[nodiscard]] TimePoint GetReceiptTime() const;
-  [[nodiscard]] std::optional<TimePoint> GetEndProcessingTime() const;
-  [[nodiscard]] std::optional<TimePoint> GetStartProcessingTime() const;
-  [[nodiscard]] boost::uuids::uuid GetId() const;
-  [[nodiscard]] const std::string &GetCallerPhoneNumber() const;
-  [[nodiscard]] std::optional<CallStatus> GetStatus() const;
-  [[nodiscard]] std::optional<boost::uuids::uuid> GetOperatorId() const;
-  [[nodiscard]] WaitingDuration GetMaxWait() const;
-  [[nodiscard]] bool IsTimeout() const;
-  [[nodiscard]] TimePoint GetTimeoutPoint() const;
-  [[nodiscard]] std::optional<Duration> GetWaitingDuration() const;
-  [[nodiscard]] bool WasFinished() const;
-  [[nodiscard]] bool operator==(const CallDetailedRecord &other) const;
+  virtual void StartProcessing(boost::uuids::uuid operator_id);
+  virtual void FinishProcessing(CallStatus status);
+  [[nodiscard]] virtual bool WasProcessed() const;
+  [[nodiscard]] virtual std::optional<Duration> GetProcessingDuration() const;
+  [[nodiscard]] virtual std::optional<Duration> GetTotalTime() const;
+  [[nodiscard]] virtual TimePoint GetReceiptTime() const;
+  [[nodiscard]] virtual std::optional<TimePoint> GetEndProcessingTime() const;
+  [[nodiscard]] virtual std::optional<TimePoint> GetStartProcessingTime() const;
+  [[nodiscard]] virtual boost::uuids::uuid GetId() const;
+  [[nodiscard]] virtual const std::string &GetCallerPhoneNumber() const;
+  [[nodiscard]] virtual std::optional<CallStatus> GetStatus() const;
+  [[nodiscard]] virtual std::optional<boost::uuids::uuid> GetOperatorId() const;
+  [[nodiscard]] virtual WaitingDuration GetMaxWait() const;
+  [[nodiscard]] virtual bool IsTimeout() const;
+  [[nodiscard]] virtual TimePoint GetTimeoutPoint() const;
+  [[nodiscard]] virtual std::optional<Duration> GetWaitingDuration() const;
+  [[nodiscard]] virtual bool WasFinished() const;
+  [[nodiscard]] virtual bool operator==(const CallDetailedRecord &other) const;
 
  private:
   static constexpr const WaitingDuration kDefaultMaxWait_{30};

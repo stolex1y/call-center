@@ -7,5 +7,7 @@
   "journal_max_size": 10000,
   "operator_min_delay": 10,
   "operator_max_delay": 10,
-  "operator_count": 1
+  "operator_count": 1,
+  "task_manager_user_thread_count": 10,
+  "task_manager_io_thread_count": 64
 }

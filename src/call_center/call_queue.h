@@ -65,7 +65,6 @@ class CallQueue {
   const std::shared_ptr<Configuration> configuration_;
   size_t capacity_ = kDefaultCapacity_;
 
-  [[nodiscard]] size_t ReadCapacity() const;
   void UpdateCapacity();
   void EraseFromQueue(const CallPtr &call);
   void InsertToQueue(const CallPtr &call);

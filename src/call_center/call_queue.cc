@@ -14,7 +14,7 @@ CallQueue::CallQueue(
     const std::shared_ptr<const log::LoggerProvider> &logger_provider
 )
     : logger_(logger_provider->Get("CallQueue")), configuration_(std::move(configuration)) {
-  capacity_ = ReadCapacity();
+  UpdateCapacity();
 }
 
 CallQueue::CallPtr CallQueue::PopFromQueue() {
@@ -92,10 +92,6 @@ size_t CallQueue::GetCapacity() const {
   return capacity_;
 }
 
-size_t CallQueue::ReadCapacity() const {
-  return configuration_->GetProperty(kCapacityKey_, capacity_);
-}
-
 bool CallQueue::InsertToProcessing(const CallPtr &call) {
   std::lock_guard lock(queue_mutex_);
 
@@ -108,10 +104,7 @@ bool CallQueue::InsertToProcessing(const CallPtr &call) {
 }
 
 void CallQueue::UpdateCapacity() {
-  const size_t new_capacity = ReadCapacity();
-  if (new_capacity != capacity_) {
-    capacity_ = new_capacity;
-  }
+  capacity_ = configuration_->GetProperty(kCapacityKey_, capacity_);
 }
 
 void CallQueue::EraseFromQueue(const CallPtr &call) {

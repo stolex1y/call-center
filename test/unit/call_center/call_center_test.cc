@@ -3,6 +3,7 @@
 #include <gtest/gtest.h>
 
 #include "configuration_adapter.h"
+#include "core/task_manager_impl.h"
 
 namespace call_center::test {
 
@@ -31,7 +32,7 @@ class CallCenterTest : public testing::Test {
 
   template <typename Duration>
   void LimitTaskManagerExecution(Duration limit) {
-    task_manager_->PostTaskDelayed<void()>(limit, [this]() {
+    task_manager_->PostTaskDelayed(limit, [this]() {
       EXPECT_EQ(0, call_queue_->GetSize()) << "The test time is over, but the work is not finished";
       EXPECT_EQ(0, operators_->GetBusyOperatorCount())
           << "The test time is over, but the work is not finished";
@@ -72,8 +73,7 @@ class CallCenterTest : public testing::Test {
       ));
   const std::shared_ptr<Configuration> configuration_ = Configuration::Create(logger_provider_);
   ConfigurationAdapter configuration_adapter_{configuration_};
-  const std::shared_ptr<TaskManager> task_manager_ =
-      std::make_shared<TaskManager>(configuration_, logger_provider_);
+  const std::shared_ptr<TaskManagerImpl> task_manager_ = TaskManagerImpl::Create(configuration_, logger_provider_);
   Journal *journal_;
   OperatorSet *operators_;
   CallQueue *call_queue_;

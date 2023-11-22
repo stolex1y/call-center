@@ -40,7 +40,7 @@ void Operator::HandleCall(
 
   logger_->Info() << "Handle call '" << boost::uuids::to_string(call->GetId()) << "' for " << delay;
 
-  task_manager_->PostTaskDelayed<void()>(delay, finish_handle);
+  task_manager_->PostTaskDelayed(delay, finish_handle);
 }
 
 void Operator::UpdateDistributionParameters() {
