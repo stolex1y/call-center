@@ -17,7 +17,7 @@
 
 namespace call_center::core {
 
-class TaskManagerImpl : public TaskManager, public std::enable_shared_from_this<TaskManagerImpl> {
+class TaskManagerImpl : public TaskManager {
  public:
   static constexpr const auto kUserThreadCountKey = "task_manager_user_thread_count";
   static constexpr const auto kIoThreadCountKey = "task_manager_io_thread_count";
@@ -44,19 +44,18 @@ class TaskManagerImpl : public TaskManager, public std::enable_shared_from_this<
   static const size_t kDefaultIoThreadCount;
   boost::asio::io_context io_context_;
   boost::asio::io_context user_context_;
-  boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work_guard_;
+  boost::asio::executor_work_guard<boost::asio::io_context::executor_type> user_work_guard_;
+  boost::asio::executor_work_guard<boost::asio::io_context::executor_type> io_work_guard_;
   bool stopped_ = true;
   std::mutex stop_mutex_;
   const std::unique_ptr<log::Logger> logger_;
   const std::shared_ptr<Configuration> configuration_;
-  std::shared_mutex io_mutex_;
-  std::shared_mutex user_mutex_;
   boost::thread_group user_threads_;
   boost::thread_group io_threads_;
   size_t user_thread_count_ = kDefaultUserThreadCount;
   size_t io_thread_count_ = kDefaultIoThreadCount;
 
-  void AddThreadsToGroup(
+  static void AddThreadsToGroup(
       boost::thread_group &thread_group, size_t thread_count, boost::asio::io_context &context
   );
 

@@ -24,7 +24,8 @@ TaskManagerImpl::TaskManagerImpl(
     std::shared_ptr<Configuration> configuration,
     const std::shared_ptr<const log::LoggerProvider> &logger_provider
 )
-    : work_guard_(asio::make_work_guard(io_context_)),
+    : user_work_guard_(asio::make_work_guard(user_context_)),
+      io_work_guard_(asio::make_work_guard(io_context_)),
       logger_(logger_provider->Get("TaskManagerImpl")),
       configuration_(std::move(configuration)) {
 }
@@ -50,7 +51,8 @@ void TaskManagerImpl::Stop() {
       return;
     stopped_ = true;
   }
-  work_guard_.reset();
+  io_work_guard_.reset();
+  user_work_guard_.reset();
   io_context_.stop();
   user_context_.stop();
   Join();
@@ -111,7 +113,7 @@ void TaskManagerImpl::AddThreadsToGroup(
     boost::thread_group &thread_group, size_t thread_count, boost::asio::io_context &context
 ) {
   for (size_t i = 0; i < thread_count; ++i) {
-    thread_group.add_thread(new boost::thread([&context, logger = logger_.get()]() {
+    thread_group.add_thread(new boost::thread([&context]() {
       context.run();
     }));
   }
