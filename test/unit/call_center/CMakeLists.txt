@@ -6,6 +6,13 @@ add_executable(${TEST_TARGET}
         call_center_test.cc
         configuration_adapter.cc
         configuration_adapter.h
+        fake/fake_clock.cc
+        fake/fake_clock.h
+        fake/fake_task_manager.cc
+        fake/fake_task_manager.h
+        fake/fake_call_detailed_record.cc
+        fake/fake_call_detailed_record.h
+        fake/clock_interface.h
 )
 
 # clang-format
