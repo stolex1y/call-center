@@ -29,7 +29,7 @@ class FakeTaskManager : public TaskManager {
  private:
   static const size_t kThreadCount;
 
-  std::map<FakeClock::TimePoint, tasks::TaskWrapped<Task>> tasks_;
+  std::multimap<FakeClock::TimePoint, tasks::TaskWrapped<Task>> tasks_;
   FakeClock clock_;
   boost::thread_group threads_;
   const std::unique_ptr<log::Logger> logger_;
