@@ -33,8 +33,8 @@ void Operator::HandleCall(
   status_ = Status::kBusy;
 
   const auto finish_handle = [op = shared_from_this(), on_finish]() mutable {
-    on_finish();
     op->status_ = Status::kFree;
+    on_finish();
   };
   const auto delay = GetCallDelay();
 

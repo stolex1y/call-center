@@ -72,7 +72,7 @@ CallQueue::CallPtr CallQueue::GetMinTimeoutCallInQueue() const {
     return nullptr;
 
   logger_->Debug() << "Min timeout in queue: "
-                   << (*in_timout_point_order_.begin())->GetTimeoutPoint();
+                   << *(*in_timout_point_order_.begin())->GetTimeoutPoint();
   return *in_timout_point_order_.begin();
 }
 

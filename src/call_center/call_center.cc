@@ -49,6 +49,7 @@ CallCenter::CallCenter(
  * @param call - call for processing.
  */
 void CallCenter::PushCall(const CallPtr &call) {
+  call->SetReceiptTime();
   // try to bypass the queue
   const auto started = StartCallProcessingIfPossible(call);
   if (started)
@@ -95,7 +96,7 @@ void CallCenter::PerformCallProcessingIteration() {
   } else {
     CallPtr call = calls_->GetMinTimeoutCallInQueue();
     if (call) {
-      ScheduleCallProcessingIteration(call->GetTimeoutPoint());
+      ScheduleCallProcessingIteration(*call->GetTimeoutPoint());
     }
   }
 }
@@ -118,7 +119,7 @@ void CallCenter::StartCallProcessing(const CallPtr &call, const OperatorPtr &op)
  * the call is unique. It is necessary to bypass the queue, as it may have zero
  * capacity.
  * @param call - call for processing.
- * @return True if processing has started, otherwise - false.
+ * @return True if processing has stopped_, otherwise - false.
  */
 bool CallCenter::StartCallProcessingIfPossible(const CallPtr &call) {
   if (!calls_->QueueIsEmpty())

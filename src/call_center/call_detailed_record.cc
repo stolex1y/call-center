@@ -14,16 +14,15 @@ CallDetailedRecord::CallDetailedRecord(
     OnFinish on_finish
 )
     : configuration_(std::move(configuration)),
-      receipt_time_(time_point_cast<Duration>(Clock::now())),
       id_(uuids::random_generator_mt19937()()),
       caller_phone_number_(std::move(caller_phone_number)),
       on_finish_(std::move(on_finish)) {
   max_wait_ = WaitingDuration(ReadMaxWait());
-  timeout_point_ = receipt_time_ + max_wait_;
 }
 
 void CallDetailedRecord::StartProcessing(boost::uuids::uuid operator_id) {
   std::lock_guard lock(mutex_);
+  assert(WasReceipt_() && !WasFinished_());
   operator_id_ = operator_id;
   start_processing_time_ = time_point_cast<Duration>(Clock::now());
 }
@@ -31,6 +30,7 @@ void CallDetailedRecord::StartProcessing(boost::uuids::uuid operator_id) {
 void CallDetailedRecord::FinishProcessing(CallStatus status) {
   {
     std::lock_guard lock(mutex_);
+    assert(WasReceipt_() && !WasFinished_());
     status_ = status;
     end_processing_time_ = time_point_cast<Duration>(Clock::now());
   }
@@ -39,15 +39,16 @@ void CallDetailedRecord::FinishProcessing(CallStatus status) {
 
 bool CallDetailedRecord::WasProcessed() const {
   std::shared_lock lock(mutex_);
-  return status_ == CallStatus::kOk;
+  return WasProcessed_();
 }
 
 bool CallDetailedRecord::WasFinished() const {
   std::shared_lock lock(mutex_);
-  return status_ != std::nullopt;
+  return WasFinished_();
 }
 
-CallDetailedRecord::TimePoint CallDetailedRecord::GetReceiptTime() const {
+std::optional<CallDetailedRecord::TimePoint> CallDetailedRecord::GetReceiptTime() const {
+  std::shared_lock lock(mutex_);
   return receipt_time_;
 }
 
@@ -81,7 +82,7 @@ std::optional<uuids::uuid> CallDetailedRecord::GetOperatorId() const {
 
 std::optional<CallDetailedRecord::Duration> CallDetailedRecord::GetProcessingDuration() const {
   std::shared_lock lock(mutex_);
-  if (WasProcessed()) {
+  if (WasProcessed_()) {
     return *end_processing_time_ - *start_processing_time_;
   } else {
     return std::nullopt;
@@ -93,14 +94,19 @@ CallDetailedRecord::WaitingDuration CallDetailedRecord::GetMaxWait() const {
 }
 
 bool CallDetailedRecord::IsTimeout() const {
-  return (Clock::now() - GetReceiptTime()) >= max_wait_;
+  std::shared_lock lock(mutex_);
+  if (WasReceipt_())
+    return Clock::now() >= timeout_point_;
+  else
+    return false;
 }
 
 uint64_t CallDetailedRecord::ReadMaxWait() const {
   return configuration_->GetProperty<uint64_t>(kMaxWaitKey_, max_wait_.count());
 }
 
-CallDetailedRecord::TimePoint CallDetailedRecord::GetTimeoutPoint() const {
+std::optional<CallDetailedRecord::TimePoint> CallDetailedRecord::GetTimeoutPoint() const {
+  std::shared_lock lock(mutex_);
   return timeout_point_;
 }
 
@@ -110,11 +116,11 @@ bool CallDetailedRecord::operator==(const CallDetailedRecord &other) const {
 
 std::optional<CallDetailedRecord::Duration> CallDetailedRecord::GetWaitingDuration() const {
   std::shared_lock lock(mutex_);
-  if (WasFinished()) {
-    if (WasProcessed()) {
-      return *start_processing_time_ - receipt_time_;
+  if (WasFinished_()) {
+    if (WasProcessed_()) {
+      return *start_processing_time_ - *receipt_time_;
     } else {
-      return *end_processing_time_ - receipt_time_;
+      return *end_processing_time_ - *receipt_time_;
     }
   } else {
     return std::nullopt;
@@ -123,8 +129,8 @@ std::optional<CallDetailedRecord::Duration> CallDetailedRecord::GetWaitingDurati
 
 std::optional<CallDetailedRecord::Duration> CallDetailedRecord::GetTotalTime() const {
   std::shared_lock lock(mutex_);
-  if (WasFinished()) {
-    if (WasProcessed()) {
+  if (WasFinished_()) {
+    if (WasProcessed_()) {
       return *GetWaitingDuration() + *GetProcessingDuration();
     } else {
       return *GetWaitingDuration();
@@ -132,6 +138,25 @@ std::optional<CallDetailedRecord::Duration> CallDetailedRecord::GetTotalTime() c
   } else {
     return std::nullopt;
   }
+}
+
+void CallDetailedRecord::SetReceiptTime() {
+  std::lock_guard lock(mutex_);
+  assert(!WasReceipt_());
+  receipt_time_ = time_point_cast<Duration>(Clock::now());
+  timeout_point_ = *receipt_time_ + max_wait_;
+}
+
+bool CallDetailedRecord::WasFinished_() const {
+  return status_ != std::nullopt;
+}
+
+bool CallDetailedRecord::WasProcessed_() const {
+  return status_ == CallStatus::kOk;
+}
+
+bool CallDetailedRecord::WasReceipt_() const {
+  return receipt_time_ != std::nullopt;
 }
 
 }  // namespace call_center
