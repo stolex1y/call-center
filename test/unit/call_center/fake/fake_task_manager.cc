@@ -47,17 +47,26 @@ boost::asio::io_context &FakeTaskManager::IoContext() {
 
 void FakeTaskManager::PostTask(std::function<Task> task) {
   AddTask(clock_.Now(), std::move(task));
+  has_tasks_.notify_one();
 }
 
 void FakeTaskManager::PostTaskDelayedImpl(Duration_t delay, std::function<Task> task) {
-  AddTask(clock_.Now() + delay, std::move(task));
+  if (delay == Duration_t(0)) {
+    PostTask(std::move(task));
+  } else {
+    AddTask(clock_.Now() + delay, std::move(task));
+  }
 }
 
 void FakeTaskManager::PostTaskAtImpl(TimePoint_t time_point, std::function<Task> task) {
-  AddTask(
-      std::chrono::time_point_cast<FakeClock::Duration, FakeClock::Clock>(time_point),
-      std::move(task)
-  );
+  if (time_point == clock_.Now()) {
+    PostTask(std::move(task));
+  } else {
+    AddTask(
+        std::chrono::time_point_cast<FakeClock::Duration, FakeClock::Clock>(time_point),
+        std::move(task)
+    );
+  }
 }
 
 tasks::TaskWrapped<TaskManager::Task> FakeTaskManager::MakeTaskWrapped(std::function<Task> task) {

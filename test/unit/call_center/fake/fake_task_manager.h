@@ -34,7 +34,6 @@ class FakeTaskManager : public TaskManager {
   boost::thread_group threads_;
   const std::unique_ptr<log::Logger> logger_;
   std::atomic_bool stopped_ = true;
-  mutable std::shared_mutex stop_mutex_;
   mutable std::shared_mutex tasks_mutex_;
   mutable std::mutex advance_mutex_;
   std::atomic_int handle_count_ = 0;
