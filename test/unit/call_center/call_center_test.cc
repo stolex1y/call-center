@@ -31,24 +31,29 @@ class CallCenterTest : public testing::Test {
   void PushCalls(const CallsVector &calls);
   void PushCall(const CallPtr &call);
 
-  const std::string test_name_ = testing::UnitTest::GetInstance()->current_test_info()->name();
-  const std::shared_ptr<const LoggerProvider> logger_provider_ = std::make_shared<LoggerProvider>(
-      std::make_unique<Sink>(test_name_ + ".log", SeverityLevel::kTrace, SIZE_MAX)
-  );
-  const std::shared_ptr<Configuration> configuration_ =
-      Configuration::Create(logger_provider_, "config-" + test_name_ + ".json");
-  ConfigurationAdapter configuration_adapter_{configuration_};
-  const std::shared_ptr<FakeTaskManager> task_manager_ = FakeTaskManager::Create(logger_provider_);
-  const ClockInterface &clock_ = task_manager_->GetClock();
+  const std::string test_name_;
+  const std::shared_ptr<const LoggerProvider> logger_provider_;
+  const std::shared_ptr<Configuration> configuration_;
+  ConfigurationAdapter configuration_adapter_;
+  const std::shared_ptr<FakeTaskManager> task_manager_;
+  const ClockInterface &clock_;
   Journal *journal_;
   OperatorSet *operators_;
   CallQueue *call_queue_;
   std::shared_ptr<CallCenter> call_center_;
-  int next_call_index_ = 1;
+  int next_call_index_;
 };
 
 CallCenterTest::CallCenterTest()
-    : journal_(new Journal(configuration_)),
+    : test_name_(testing::UnitTest::GetInstance()->current_test_info()->name()),
+      logger_provider_(std::make_shared<LoggerProvider>(
+          std::make_unique<Sink>(test_name_ + ".log", SeverityLevel::kTrace, SIZE_MAX)
+      )),
+      configuration_(Configuration::Create(logger_provider_, "config-" + test_name_ + ".json")),
+      configuration_adapter_(configuration_),
+      task_manager_(FakeTaskManager::Create(logger_provider_)),
+      clock_(task_manager_->GetClock()),
+      journal_(new Journal(configuration_)),
       operators_(new OperatorSet(configuration_, task_manager_, logger_provider_)),
       call_queue_(new CallQueue(configuration_, logger_provider_)),
       call_center_(CallCenter::Create(
@@ -58,7 +63,8 @@ CallCenterTest::CallCenterTest()
           logger_provider_,
           std::unique_ptr<OperatorSet>(operators_),
           std::unique_ptr<CallQueue>(call_queue_)
-      )) {
+      )),
+      next_call_index_(1) {
   configuration_adapter_.SetConfigurationCaching(false);
   configuration_adapter_.UpdateConfiguration();
   task_manager_->Start();
@@ -66,6 +72,7 @@ CallCenterTest::CallCenterTest()
 
 CallCenterTest::~CallCenterTest() {
   VerifyAllDone();
+  task_manager_->ClearTasks();
 }
 
 void CallCenterTest::PushCall(const CallPtr &call) {
