@@ -17,10 +17,11 @@ namespace call_center {
 class Configuration : public std::enable_shared_from_this<Configuration> {
  public:
   static std::shared_ptr<Configuration> Create(
-      const std::shared_ptr<const log::LoggerProvider> &logger_provider
+      const std::shared_ptr<const log::LoggerProvider> &logger_provider,
+      std::string file_name = kDefaultFileName_
   );
 
-  static constexpr const auto kFileName_ = "config.json";
+  static constexpr const auto kDefaultFileName_ = "config.json";
   static constexpr const auto kCachingKey_ = "configuration_is_caching";
 
   Configuration(Configuration &other) = delete;
@@ -40,6 +41,8 @@ class Configuration : public std::enable_shared_from_this<Configuration> {
       T max = std::numeric_limits<T>::max()
   );
 
+  const std::string &GetFileName() const;
+
   void UpdateConfiguration();
 
  private:
@@ -50,8 +53,12 @@ class Configuration : public std::enable_shared_from_this<Configuration> {
   boost::json::object config_json_;
   mutable std::shared_mutex config_mutex_;
   core::containers::ConcurrentHashMap<std::string, std::any> cache_values_;
+  const std::string file_name_;
 
-  explicit Configuration(const std::shared_ptr<const log::LoggerProvider> &logger_provider);
+  explicit Configuration(
+      const std::shared_ptr<const log::LoggerProvider> &logger_provider,
+      std::string file_name = kDefaultFileName_
+  );
 
   void UpdateCaching();
 

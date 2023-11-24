@@ -5,22 +5,24 @@
 namespace call_center {
 
 std::shared_ptr<Configuration> Configuration::Create(
-    const std::shared_ptr<const log::LoggerProvider> &logger_provider
+    const std::shared_ptr<const log::LoggerProvider> &logger_provider, std::string file_name
 ) {
-  return std::shared_ptr<Configuration>(new Configuration(logger_provider));
+  return std::shared_ptr<Configuration>(new Configuration(logger_provider, std::move(file_name)));
 }
 
-Configuration::Configuration(const std::shared_ptr<const log::LoggerProvider> &logger_provider)
-    : logger_(logger_provider->Get("Configuration")) {
+Configuration::Configuration(
+    const std::shared_ptr<const log::LoggerProvider> &logger_provider, std::string file_name
+)
+    : logger_(logger_provider->Get("Configuration")), file_name_(std::move(file_name)) {
   UpdateConfiguration();
 }
 
 void Configuration::UpdateConfiguration() {
   std::lock_guard lock(config_mutex_);
 
-  std::ifstream config_file(kFileName_);
+  std::ifstream config_file(file_name_);
   if (!config_file) {
-    logger_->Warning() << "Couldn't open configuration file: " << kFileName_;
+    logger_->Warning() << "Couldn't open configuration file: " << file_name_;
     return;
   }
 
@@ -39,6 +41,10 @@ void Configuration::UpdateConfiguration() {
 
 void Configuration::UpdateCaching() {
   caching_ = ReadProperty<bool>(kCachingKey_).value_or(caching_);
+}
+
+const std::string &Configuration::GetFileName() const {
+  return file_name_;
 }
 
 }  // namespace call_center

@@ -14,9 +14,11 @@ void ConfigurationAdapter::SetOperatorCount(size_t count) {
 }
 
 void ConfigurationAdapter::UpdateConfiguration() const {
-  std::ofstream config_file(Configuration::kFileName_);
-  assert(config_file);
-  config_file << boost::json::serialize(config_json);
+  {
+    std::ofstream config_file(configuration_->GetFileName());
+    assert(config_file);
+    config_file << boost::json::serialize(config_json);
+  }
 
   configuration_->UpdateConfiguration();
 }

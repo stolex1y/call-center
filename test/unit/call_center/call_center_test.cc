@@ -31,13 +31,12 @@ class CallCenterTest : public testing::Test {
   void PushCalls(const CallsVector &calls);
   void PushCall(const CallPtr &call);
 
-  const std::shared_ptr<const LoggerProvider> logger_provider_ =
-      std::make_shared<LoggerProvider>(std::make_unique<Sink>(
-          testing::UnitTest::GetInstance()->current_test_info()->name(),
-          SeverityLevel::kTrace,
-          SIZE_MAX
-      ));
-  const std::shared_ptr<Configuration> configuration_ = Configuration::Create(logger_provider_);
+  const std::string test_name_ = testing::UnitTest::GetInstance()->current_test_info()->name();
+  const std::shared_ptr<const LoggerProvider> logger_provider_ = std::make_shared<LoggerProvider>(
+      std::make_unique<Sink>(test_name_, SeverityLevel::kTrace, SIZE_MAX)
+  );
+  const std::shared_ptr<Configuration> configuration_ =
+      Configuration::Create(logger_provider_, "config-" + test_name_);
   ConfigurationAdapter configuration_adapter_{configuration_};
   const std::shared_ptr<FakeTaskManager> task_manager_ = FakeTaskManager::Create(logger_provider_);
   const ClockInterface &clock_ = task_manager_->GetClock();
