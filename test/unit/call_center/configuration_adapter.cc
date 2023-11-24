@@ -24,7 +24,6 @@ void ConfigurationAdapter::UpdateConfiguration() const {
 }
 
 void ConfigurationAdapter::SetCallQueueCapacity(size_t capacity) {
-  assert(capacity > 0);
   config_json[CallQueue::kCapacityKey_] = capacity;
 }
 

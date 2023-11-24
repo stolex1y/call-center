@@ -33,10 +33,10 @@ class CallCenterTest : public testing::Test {
 
   const std::string test_name_ = testing::UnitTest::GetInstance()->current_test_info()->name();
   const std::shared_ptr<const LoggerProvider> logger_provider_ = std::make_shared<LoggerProvider>(
-      std::make_unique<Sink>(test_name_, SeverityLevel::kTrace, SIZE_MAX)
+      std::make_unique<Sink>(test_name_ + ".log", SeverityLevel::kTrace, SIZE_MAX)
   );
   const std::shared_ptr<Configuration> configuration_ =
-      Configuration::Create(logger_provider_, "config-" + test_name_);
+      Configuration::Create(logger_provider_, "config-" + test_name_ + ".json");
   ConfigurationAdapter configuration_adapter_{configuration_};
   const std::shared_ptr<FakeTaskManager> task_manager_ = FakeTaskManager::Create(logger_provider_);
   const ClockInterface &clock_ = task_manager_->GetClock();
@@ -285,6 +285,72 @@ TEST_F(CallCenterTest, FirstGroupInProcessing_SecondGroupIsClone_FirstGroupIsOk_
 
   VerifyCallsResult(processed_calls, CallStatus::kOk, operator_delay);
   VerifyCallsResult(processed_call_clones, CallStatus::kAlreadyInQueue, 0s);
+}
+
+TEST_F(CallCenterTest, FirstGroupInQueue_SecondGroupIsClone_FirstGroupIsOk_SecondIsRejected) {
+  const auto operator_delay = 3s;
+  const auto call_max_wait = 10s;
+  const auto operator_count = 10;
+
+  configuration_adapter_.SetOperatorCount(operator_count);
+  configuration_adapter_.SetOperatorDelay(operator_delay);
+  configuration_adapter_.SetCallMaxWait(call_max_wait);
+  configuration_adapter_.SetCallQueueCapacity(SIZE_MAX);
+  configuration_adapter_.UpdateConfiguration();
+
+  const auto calls_to_busy_operators = CreateUniqueCalls(operator_count);
+  const auto queued_calls = CreateUniqueCalls(operator_count);
+  const auto queued_calls_clones = DuplicateCalls(queued_calls);
+
+  PushCalls(calls_to_busy_operators);
+  PushCalls(queued_calls);
+  PushCalls(queued_calls_clones);
+  task_manager_->AdvanceTime(operator_delay * 2);
+  task_manager_->Stop();
+
+  VerifyCallsResult(calls_to_busy_operators, CallStatus::kOk, operator_delay);
+  VerifyCallsResult(queued_calls, CallStatus::kOk, operator_delay * 2);
+  VerifyCallsResult(queued_calls_clones, CallStatus::kAlreadyInQueue, 0s);
+}
+
+TEST_F(CallCenterTest, ZeroQueueCapacity_HasFreeOperators_CallsAreOk) {
+  const auto operator_delay = 3s;
+  const auto call_max_wait = 10s;
+  const auto operator_count = 10;
+
+  configuration_adapter_.SetOperatorCount(operator_count);
+  configuration_adapter_.SetOperatorDelay(operator_delay);
+  configuration_adapter_.SetCallMaxWait(call_max_wait);
+  configuration_adapter_.SetCallQueueCapacity(0);
+  configuration_adapter_.UpdateConfiguration();
+
+  const auto calls = CreateUniqueCalls(operator_count);
+
+  PushCalls(calls);
+  task_manager_->AdvanceTime(operator_delay);
+  task_manager_->Stop();
+
+  VerifyCallsResult(calls, CallStatus::kOk, operator_delay);
+}
+
+TEST_F(CallCenterTest, ZeroCallMaxWait_HasFreeOperators_CallsAreOk) {
+  const auto operator_delay = 3s;
+  const auto call_max_wait = 0s;
+  const auto operator_count = 10;
+
+  configuration_adapter_.SetOperatorCount(operator_count);
+  configuration_adapter_.SetOperatorDelay(operator_delay);
+  configuration_adapter_.SetCallMaxWait(call_max_wait);
+  configuration_adapter_.SetCallQueueCapacity(SIZE_MAX);
+  configuration_adapter_.UpdateConfiguration();
+
+  const auto calls = CreateUniqueCalls(operator_count);
+
+  PushCalls(calls);
+  task_manager_->AdvanceTime(operator_delay);
+  task_manager_->Stop();
+
+  VerifyCallsResult(calls, CallStatus::kOk, operator_delay);
 }
 
 }  // namespace call_center::test
