@@ -19,11 +19,11 @@ FetchContent_MakeAvailable(googletest)
 
 include(GoogleTest)
 #include(Coverage)
-#include(Memcheck)
+include(Memcheck)
 
 macro(AddTests target)
     target_link_libraries(${target} PRIVATE gtest_main gmock)
     gtest_discover_tests(${target})
 #    AddCoverage(${target})
-#    AddMemcheck(${target})
+    AddMemcheck(${target})
 endmacro()

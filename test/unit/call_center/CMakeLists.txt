@@ -13,11 +13,20 @@ add_executable(${TEST_TARGET}
         fake/fake_call_detailed_record.cc
         fake/fake_call_detailed_record.h
         fake/clock_interface.h
+        task_manager_impl_test.cc
 )
 
 # clang-format
 include(Format)
 Format(${TEST_TARGET} .)
+
+#clang-tidy
+#include(ClangTidy)
+#AddClangTidy(${TEST_TARGET})
+
+#iwyu
+include(IncludeWhatYouUse)
+AddIncludeWhatYouUse(${TEST_TARGET})
 
 target_link_libraries(${TEST_TARGET} PRIVATE ${STATIC_LIB_TARGET})
 

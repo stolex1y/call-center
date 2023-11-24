@@ -82,6 +82,14 @@ target_link_libraries(${RUNNABLE_TARGET} ${OBJ_LIB_TARGET})
 include(Format)
 Format(${RUNNABLE_TARGET} .)
 
+#clang-tidy
+#include(ClangTidy)
+#AddClangTidy(${RUNNABLE_TARGET})
+
+#iwyu
+include(IncludeWhatYouUse)
+AddIncludeWhatYouUse(${RUNNABLE_TARGET})
+
 # copy config.json
 add_custom_command(
         TARGET ${RUNNABLE_TARGET} POST_BUILD
