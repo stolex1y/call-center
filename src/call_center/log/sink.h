@@ -30,6 +30,7 @@ class Sink {
       const Formatter &formatter,
       size_t max_size = SIZE_MAX
   );
+  ~Sink();
   Sink(Sink &other) = delete;
   Sink(Sink &&other) = default;
   Sink &operator=(Sink &other) = delete;

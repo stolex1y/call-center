@@ -92,6 +92,11 @@ void FakeTaskManager::AdvanceTime(Duration_t duration) {
   }
 }
 
+void FakeTaskManager::ClearTasks() {
+  std::lock_guard lock(tasks_mutex_);
+  tasks_.clear();
+}
+
 void FakeTaskManager::AddTask(FakeClock::TimePoint time_point, std::function<Task> task) {
   std::lock_guard lock(tasks_mutex_);
   tasks_.emplace(time_point, MakeTaskWrapped(std::move(task)));

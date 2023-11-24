@@ -4,7 +4,6 @@
 #include <boost/log/core.hpp>
 #include <boost/log/expressions.hpp>
 #include <boost/log/sources/record_ostream.hpp>
-#include <boost/log/utility/setup/common_attributes.hpp>
 #include <fstream>
 #include <iostream>
 
@@ -44,14 +43,16 @@ Sink::Sink(
       stream_(std::move(ostream)),
       level_(level),
       max_size_(max_size) {
-  boost::log::add_common_attributes();
-
   sink_impl_->set_formatter(formatter);
   sink_impl_->set_filter(attrs::severity >= level_ && attrs::channel == id_);
   sink_impl_->locked_backend()->add_stream(stream_);
   sink_impl_->locked_backend()->auto_flush(true);
 
   boost::log::core::get()->add_sink(sink_impl_);
+}
+
+Sink::~Sink() {
+  boost::log::core::get()->remove_sink(sink_impl_);
 }
 
 const boost::uuids::uuid &Sink::Id() const {

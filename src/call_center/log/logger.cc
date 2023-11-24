@@ -19,6 +19,15 @@ Logger::Logger(std::string tag, const Sink &sink) {
   add_attribute(
       attrs::channel_type::get_name(), boost_attrs::constant<boost::uuids::uuid>(sink.Id())
   );
+  add_attribute(
+      attrs::line_id_type::get_name(),
+      boost::log::attributes::counter<unsigned int>(1));
+  add_attribute(
+      attrs::timestamp_type::get_name(),
+      boost::log::attributes::local_clock());
+  add_attribute(
+      attrs::thread_type::get_name(),
+      boost::log::attributes::current_thread_id());
 }
 
 Logger::Ostream Logger::Trace() {

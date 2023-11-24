@@ -25,6 +25,7 @@ class FakeTaskManager : public TaskManager {
   void PostTaskAtImpl(TimePoint_t time_point, std::function<Task> task) override;
   void AdvanceTime(Duration_t duration);
   const ClockInterface &GetClock() const;
+  void ClearTasks();
 
  private:
   static const size_t kThreadCount;
