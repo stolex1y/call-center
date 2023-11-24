@@ -64,4 +64,11 @@ jobs:
       - name: Test
         run: |
           cd build
-          ctest --output-on-failure --schedule-random -j 2
+          ctest --timeout 5 --output-on-failure --schedule-random -j 2
+
+      - name: Upload build logs if failed
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: Build
+          path: build/test
