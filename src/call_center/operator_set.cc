@@ -37,6 +37,10 @@ std::shared_ptr<Operator> OperatorSet::EraseFree() {
 
 void OperatorSet::InsertFree(const std::shared_ptr<Operator> &op) {
   std::lock_guard lock(mutex_);
+  if (!busy_operators_.contains(op)) {
+    logger_->Warning() << "Unknown operator " << op->GetId();
+    return;
+  }
   logger_->Debug() << "Return free operator " << op->GetId();
   free_operators_.emplace(op);
   busy_operators_.erase(op);

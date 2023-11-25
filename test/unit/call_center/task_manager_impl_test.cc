@@ -65,11 +65,6 @@ TaskManagerImplTest::~TaskManagerImplTest() {
   task_manager_->Stop();
 }
 
-template <typename T>
-auto CapturePromise(std::promise<T> &&promise) {
-  return std::make_shared<std::promise<T>>(std::move(promise));
-}
-
 TaskResult TaskManagerImplTest::PostTask(size_t id) {
   std::promise<bool> promise;
   TaskResult future = promise.get_future();

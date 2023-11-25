@@ -16,6 +16,9 @@ add_executable(${TEST_TARGET}
         task_manager_impl_test.cc
         utils.h
         utils.cc
+        operator_set_test.cc
+        fake/fake_operator.cc
+        fake/fake_operator.h
 )
 
 # clang-format

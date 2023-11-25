@@ -73,4 +73,8 @@ boost::uuids::uuid Operator::GetId() const {
   return id_;
 }
 
+bool Operator::operator==(const Operator &other) const {
+  return id_ == other.id_;
+}
+
 }  // namespace call_center

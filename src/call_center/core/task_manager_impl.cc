@@ -28,6 +28,10 @@ TaskManagerImpl::TaskManagerImpl(
       configuration_(std::move(configuration)) {
 }
 
+TaskManagerImpl::~TaskManagerImpl() {
+  Stop();
+}
+
 void TaskManagerImpl::Start() {
   if (stopped_.test()) {
     assert(!stopped_.test());

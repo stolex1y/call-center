@@ -27,10 +27,11 @@ class TaskManagerImpl : public TaskManager {
   );
   TaskManagerImpl(const TaskManagerImpl &other) = delete;
   TaskManagerImpl &operator=(const TaskManagerImpl &other) = delete;
+  ~TaskManagerImpl() override;
 
-  void Start() override;
-  void Stop() override;
-  void Join() override;
+  void Start() final;
+  void Stop() final;
+  void Join() final;
   boost::asio::io_context &IoContext() override;
   void PostTask(std::function<Task> task) override;
   [[nodiscard]] size_t GetUserThreadCount() const;

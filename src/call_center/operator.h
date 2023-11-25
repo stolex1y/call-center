@@ -31,10 +31,20 @@ class Operator : public std::enable_shared_from_this<Operator> {
 
   Operator(const Operator &other) = delete;
   Operator &operator=(const Operator &other) = delete;
+  virtual ~Operator() = default;
 
-  [[nodiscard]] boost::uuids::uuid GetId() const;
+  [[nodiscard]] virtual boost::uuids::uuid GetId() const;
+  virtual void HandleCall(
+      const std::shared_ptr<CallDetailedRecord> &call, const OnFinishHandle &on_finish
+  );
+  bool operator==(const Operator &other) const;
 
-  void HandleCall(const std::shared_ptr<CallDetailedRecord> &call, const OnFinishHandle &on_finish);
+ protected:
+  Operator(
+      std::shared_ptr<core::TaskManager> task_manager,
+      std::shared_ptr<Configuration> configuration,
+      const log::LoggerProvider &logger_provider
+  );
 
  private:
   using Distribution = std::uniform_int_distribution<uint64_t>;
@@ -52,12 +62,6 @@ class Operator : public std::enable_shared_from_this<Operator> {
   Generator generator_;
   Distribution distribution_{min_delay_, max_delay_};
   std::unique_ptr<log::Logger> logger_;
-
-  Operator(
-      std::shared_ptr<core::TaskManager> task_manager,
-      std::shared_ptr<Configuration> configuration,
-      const log::LoggerProvider &logger_provider
-  );
 
   [[nodiscard]] DelayDuration GetCallDelay();
   void UpdateDistributionParameters();
