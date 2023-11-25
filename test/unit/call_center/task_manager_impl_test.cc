@@ -3,7 +3,6 @@
 #include <gtest/gtest.h>
 
 #include <future>
-#include <iostream>
 
 #include "configuration_adapter.h"
 #include "utils.h"
@@ -25,13 +24,13 @@ class TaskManagerImplTest : public testing::Test {
 
   TaskResult PostTask(size_t id);
   TaskResults PostTasks(size_t task_count);
-  template<typename TimePoint>
+  template <typename TimePoint>
   TaskResult PostTaskAt(size_t id, const TimePoint &time_point);
-  template<typename TimePoint>
+  template <typename TimePoint>
   TaskResults PostTasksAt(const TimePoint &time_point, size_t task_count);
-  template<typename Duration>
+  template <typename Duration>
   TaskResult PostTaskDelayed(size_t id, const Duration &delay);
-  template<typename Duration>
+  template <typename Duration>
   TaskResults PostTasksDelayed(const Duration &delay, size_t task_count);
 
   const std::string test_name_;
@@ -66,7 +65,7 @@ TaskManagerImplTest::~TaskManagerImplTest() {
   task_manager_->Stop();
 }
 
-template<typename T>
+template <typename T>
 auto CapturePromise(std::promise<T> &&promise) {
   return std::make_shared<std::promise<T>>(std::move(promise));
 }
@@ -75,7 +74,7 @@ TaskResult TaskManagerImplTest::PostTask(size_t id) {
   std::promise<bool> promise;
   TaskResult future = promise.get_future();
   task_manager_->PostTask([id, logger = logger_, promise = CapturePromise(std::move(promise))](
-  ) mutable {
+                          ) mutable {
     promise->set_value(true);
     logger->Info() << "Task '" << id << "' executed";
   });
@@ -90,7 +89,7 @@ TaskResults TaskManagerImplTest::PostTasks(size_t task_count) {
   return results;
 }
 
-template<typename Duration>
+template <typename Duration>
 TaskResults TaskManagerImplTest::PostTasksDelayed(const Duration &delay, size_t task_count) {
   TaskResults results(task_count);
   for (size_t i = 0; i < task_count; ++i) {
@@ -99,7 +98,7 @@ TaskResults TaskManagerImplTest::PostTasksDelayed(const Duration &delay, size_t 
   return results;
 }
 
-template<typename Duration>
+template <typename Duration>
 TaskResult TaskManagerImplTest::PostTaskDelayed(size_t id, const Duration &delay) {
   std::promise<bool> promise;
   TaskResult future = promise.get_future();
@@ -113,7 +112,7 @@ TaskResult TaskManagerImplTest::PostTaskDelayed(size_t id, const Duration &delay
   return future;
 }
 
-template<typename TimePoint>
+template <typename TimePoint>
 TaskResults TaskManagerImplTest::PostTasksAt(const TimePoint &time_point, size_t task_count) {
   TaskResults results(task_count);
   for (size_t i = 0; i < task_count; ++i) {
@@ -122,7 +121,7 @@ TaskResults TaskManagerImplTest::PostTasksAt(const TimePoint &time_point, size_t
   return results;
 }
 
-template<typename TimePoint>
+template <typename TimePoint>
 TaskResult TaskManagerImplTest::PostTaskAt(size_t id, const TimePoint &time_point) {
   std::promise<bool> promise;
   TaskResult future = promise.get_future();
@@ -136,24 +135,24 @@ TaskResult TaskManagerImplTest::PostTaskAt(size_t id, const TimePoint &time_poin
   return future;
 }
 
-template<typename Duration>
+template <typename Duration>
 void VerifyTaskResult(TaskResult &result, const Duration &delay) {
   std::future_status status = result.wait_for(delay);
   ASSERT_EQ(std::future_status::ready, status) << "Task result must be ready.";
   ASSERT_TRUE(result.get()) << "Task result must be true.";
 }
 
-template<typename Duration = std::chrono::milliseconds>
+template <typename Duration = std::chrono::milliseconds>
 void VerifyTaskResults(TaskResults &results, const Duration &delay = 500ms) {
   const auto start = steady_clock::now();
   for (auto &result : results) {
     ASSERT_GE(delay, steady_clock::now() - start)
-                  << "Exceeded the time limit for waiting for the result of the work.";
+        << "Exceeded the time limit for waiting for the result of the work.";
     VerifyTaskResult(result, delay);
   }
 }
 
-template<typename TimePoint>
+template <typename TimePoint>
 void VerifyTaskResultsAt(const TimePoint &time_point, TaskResults &results) {
   while (utc_clock::now() < time_point) {
     for (auto &result : results) {
@@ -167,7 +166,7 @@ void VerifyTaskResultsAt(const TimePoint &time_point, TaskResults &results) {
   VerifyTaskResults(results);
 }
 
-template<typename Duration>
+template <typename Duration>
 void VerifyTaskResultsDelayed(const Duration &delay, TaskResults &results) {
   const auto waiting_time_end = utc_clock::now() + delay;
   while (utc_clock::now() < waiting_time_end) {

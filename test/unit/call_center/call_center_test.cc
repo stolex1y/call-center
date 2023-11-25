@@ -6,6 +6,7 @@
 #include "fake/clock_interface.h"
 #include "fake/fake_call_detailed_record.h"
 #include "fake/fake_task_manager.h"
+#include "utils.h"
 
 namespace call_center::test {
 
@@ -32,6 +33,7 @@ class CallCenterTest : public testing::Test {
   void PushCall(const CallPtr &call);
 
   const std::string test_name_;
+  const std::string test_group_name_;
   const std::shared_ptr<const LoggerProvider> logger_provider_;
   const std::shared_ptr<Configuration> configuration_;
   ConfigurationAdapter configuration_adapter_;
@@ -46,10 +48,13 @@ class CallCenterTest : public testing::Test {
 
 CallCenterTest::CallCenterTest()
     : test_name_(testing::UnitTest::GetInstance()->current_test_info()->name()),
-      logger_provider_(std::make_shared<LoggerProvider>(
-          std::make_unique<Sink>(test_name_ + ".log", SeverityLevel::kTrace, SIZE_MAX)
+      test_group_name_("CallCenterTest"),
+      logger_provider_(std::make_shared<LoggerProvider>(std::make_unique<Sink>(
+          test_group_name_ + "/logs/" + test_name_ + ".log", SeverityLevel::kTrace, SIZE_MAX
+      ))),
+      configuration_(Configuration::Create(
+          logger_provider_, test_group_name_ + "/configs/" + test_name_ + ".json"
       )),
-      configuration_(Configuration::Create(logger_provider_, "config-" + test_name_ + ".json")),
       configuration_adapter_(configuration_),
       task_manager_(FakeTaskManager::Create(logger_provider_)),
       clock_(task_manager_->GetClock()),
@@ -65,6 +70,8 @@ CallCenterTest::CallCenterTest()
           std::unique_ptr<CallQueue>(call_queue_)
       )),
       next_call_index_(1) {
+  CreateDirForLogs(test_group_name_);
+  CreateDirForConfigs(test_group_name_);
   configuration_adapter_.SetConfigurationCaching(false);
   configuration_adapter_.UpdateConfiguration();
   task_manager_->Start();
