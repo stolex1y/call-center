@@ -24,7 +24,7 @@ class HttpConnection : public std::enable_shared_from_this<HttpConnection> {
   static std::shared_ptr<HttpConnection> Create(
       tcp::socket &&socket,
       const std::unordered_map<std::string_view, std::shared_ptr<HttpRepository>> &repositories,
-      const std::shared_ptr<const log::LoggerProvider> &logger_provider
+      const log::LoggerProvider &logger_provider
   );
 
   HttpConnection(const HttpConnection &other) = delete;
@@ -36,7 +36,7 @@ class HttpConnection : public std::enable_shared_from_this<HttpConnection> {
   HttpConnection(
       tcp::socket &&socket,
       const std::unordered_map<std::string_view, std::shared_ptr<HttpRepository>> &repositories,
-      std::unique_ptr<log::Logger> logger
+      const log::LoggerProvider &logger_provider
   );
 
   static std::atomic_size_t next_id_;

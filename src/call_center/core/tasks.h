@@ -13,7 +13,7 @@ namespace call_center::core::tasks {
 template <typename Task>
 class TaskWrapped {
  public:
-  TaskWrapped(std::function<Task> &&task, log::Logger &logger);
+  TaskWrapped(std::function<Task> task, log::Logger &logger);
 
   void operator()() const;
 
@@ -27,7 +27,7 @@ class TimerTaskWrapped {
  public:
   using Timer = boost::asio::basic_waitable_timer<Clock>;
 
-  TimerTaskWrapped(std::function<Task> &&task, std::unique_ptr<Timer> timer, log::Logger &logger);
+  TimerTaskWrapped(std::function<Task> task, std::unique_ptr<Timer> timer, log::Logger &logger);
 
   void operator()(const boost::system::error_code &error) const;
 
@@ -48,13 +48,13 @@ void TimerTaskWrapped<Task, Clock>::operator()(const boost::system::error_code &
 
 template <typename Task, typename Clock>
 TimerTaskWrapped<Task, Clock>::TimerTaskWrapped(
-    std::function<Task> &&task, std::unique_ptr<Timer> timer, log::Logger &logger
+    std::function<Task> task, std::unique_ptr<Timer> timer, log::Logger &logger
 )
     : task_(std::move(task), logger), logger_(logger), timer_(std::move(timer)) {
 }
 
 template <typename Task>
-TaskWrapped<Task>::TaskWrapped(std::function<Task> &&task, log::Logger &logger)
+TaskWrapped<Task>::TaskWrapped(std::function<Task> task, log::Logger &logger)
     : task_(std::move(task)), logger_(logger) {
 }
 

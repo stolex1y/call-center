@@ -34,7 +34,7 @@ class CallCenterTest : public testing::Test {
 
   const std::string test_name_;
   const std::string test_group_name_;
-  const std::shared_ptr<const LoggerProvider> logger_provider_;
+  const log::LoggerProvider logger_provider_;
   const std::shared_ptr<Configuration> configuration_;
   ConfigurationAdapter configuration_adapter_;
   const std::shared_ptr<FakeTaskManager> task_manager_;
@@ -49,9 +49,9 @@ class CallCenterTest : public testing::Test {
 CallCenterTest::CallCenterTest()
     : test_name_(testing::UnitTest::GetInstance()->current_test_info()->name()),
       test_group_name_("CallCenterTest"),
-      logger_provider_(std::make_shared<LoggerProvider>(std::make_unique<Sink>(
+      logger_provider_(std::make_shared<Sink>(
           test_group_name_ + "/logs/" + test_name_ + ".log", SeverityLevel::kTrace, SIZE_MAX
-      ))),
+      )),
       configuration_(Configuration::Create(
           logger_provider_, test_group_name_ + "/configs/" + test_name_ + ".json"
       )),
@@ -59,7 +59,13 @@ CallCenterTest::CallCenterTest()
       task_manager_(FakeTaskManager::Create(logger_provider_)),
       clock_(task_manager_->GetClock()),
       journal_(new Journal(configuration_)),
-      operators_(new OperatorSet(configuration_, task_manager_, logger_provider_)),
+      operators_(new OperatorSet(
+          configuration_,
+          [this]() {
+            return Operator::Create(task_manager_, configuration_, logger_provider_);
+          },
+          logger_provider_
+      )),
       call_queue_(new CallQueue(configuration_, logger_provider_)),
       call_center_(CallCenter::Create(
           std::unique_ptr<Journal>(journal_),

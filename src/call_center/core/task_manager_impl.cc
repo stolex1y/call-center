@@ -12,8 +12,7 @@ const size_t TaskManagerImpl::kDefaultIoThreadCount =
     std::max(size_t(boost::thread::hardware_concurrency()), size_t(64));
 
 std::shared_ptr<TaskManagerImpl> TaskManagerImpl::Create(
-    std::shared_ptr<Configuration> configuration,
-    const std::shared_ptr<const log::LoggerProvider> &logger_provider
+    std::shared_ptr<Configuration> configuration, const log::LoggerProvider &logger_provider
 ) {
   return std::shared_ptr<TaskManagerImpl>(
       new TaskManagerImpl(std::move(configuration), logger_provider)
@@ -21,12 +20,11 @@ std::shared_ptr<TaskManagerImpl> TaskManagerImpl::Create(
 }
 
 TaskManagerImpl::TaskManagerImpl(
-    std::shared_ptr<Configuration> configuration,
-    const std::shared_ptr<const log::LoggerProvider> &logger_provider
+    std::shared_ptr<Configuration> configuration, const log::LoggerProvider &logger_provider
 )
     : user_work_guard_(asio::make_work_guard(user_context_)),
       io_work_guard_(asio::make_work_guard(io_context_)),
-      logger_(logger_provider->Get("TaskManagerImpl")),
+      logger_(logger_provider.Get("TaskManagerImpl")),
       configuration_(std::move(configuration)) {
 }
 

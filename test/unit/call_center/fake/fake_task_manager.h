@@ -12,9 +12,7 @@ namespace call_center::core {
 
 class FakeTaskManager : public TaskManager {
  public:
-  static std::shared_ptr<FakeTaskManager> Create(
-      const std::shared_ptr<const log::LoggerProvider> &logger_provider
-  );
+  static std::shared_ptr<FakeTaskManager> Create(const log::LoggerProvider &logger_provider);
 
   void Start() override;
   void Stop() override;
@@ -41,7 +39,7 @@ class FakeTaskManager : public TaskManager {
   std::condition_variable_any has_tasks_;
   std::condition_variable_any done_tasks_;
 
-  explicit FakeTaskManager(const std::shared_ptr<const log::LoggerProvider> &logger_provider);
+  explicit FakeTaskManager(const log::LoggerProvider &logger_provider);
 
   tasks::TaskWrapped<Task> MakeTaskWrapped(std::function<Task> task);
   void AddTask(FakeClock::TimePoint time_point, std::function<Task> task);

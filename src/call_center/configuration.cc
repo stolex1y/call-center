@@ -5,15 +5,13 @@
 namespace call_center {
 
 std::shared_ptr<Configuration> Configuration::Create(
-    const std::shared_ptr<const log::LoggerProvider> &logger_provider, std::string file_name
+    const log::LoggerProvider &logger_provider, std::string file_name
 ) {
   return std::shared_ptr<Configuration>(new Configuration(logger_provider, std::move(file_name)));
 }
 
-Configuration::Configuration(
-    const std::shared_ptr<const log::LoggerProvider> &logger_provider, std::string file_name
-)
-    : logger_(logger_provider->Get("Configuration")), file_name_(std::move(file_name)) {
+Configuration::Configuration(const log::LoggerProvider &logger_provider, std::string file_name)
+    : logger_(logger_provider.Get("Configuration")), file_name_(std::move(file_name)) {
   UpdateConfiguration();
 }
 

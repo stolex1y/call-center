@@ -16,7 +16,7 @@ class ConfigurationUpdater : public std::enable_shared_from_this<ConfigurationUp
   static std::shared_ptr<ConfigurationUpdater> Create(
       std::shared_ptr<Configuration> configuration,
       std::shared_ptr<core::TaskManager> task_manager,
-      const std::shared_ptr<const log::LoggerProvider> &logger_provider
+      const log::LoggerProvider &logger_provider
   );
 
   void StartUpdating();
@@ -35,7 +35,7 @@ class ConfigurationUpdater : public std::enable_shared_from_this<ConfigurationUp
   explicit ConfigurationUpdater(
       std::shared_ptr<Configuration> configuration,
       std::shared_ptr<core::TaskManager> task_manager,
-      const std::shared_ptr<const log::LoggerProvider> &logger_provider
+      const log::LoggerProvider &logger_provider
   );
 
   void ScheduleUpdating();

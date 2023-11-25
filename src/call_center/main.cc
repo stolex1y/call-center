@@ -12,8 +12,7 @@ using namespace call_center::log;
 using namespace call_center::core;
 
 int main() {
-  const auto logger_provider =
-      std::make_shared<LoggerProvider>(std::make_unique<Sink>(SeverityLevel::kTrace));
+  const LoggerProvider logger_provider(std::make_shared<Sink>(SeverityLevel::kTrace));
 
   const auto port = static_cast<unsigned short>(8080);
   const auto address = net::ip::address_v4::any();
@@ -21,12 +20,15 @@ int main() {
   const auto configuration = Configuration::Create(logger_provider);
   auto task_manager = TaskManagerImpl::Create(configuration, logger_provider);
   ConfigurationUpdater::Create(configuration, task_manager, logger_provider)->StartUpdating();
+  const auto operator_provider = [&task_manager, &configuration, &logger_provider]() {
+    return Operator::Create(task_manager, configuration, logger_provider);
+  };
   auto call_center = CallCenter::Create(
       std::make_unique<Journal>(configuration),
       configuration,
       task_manager,
       logger_provider,
-      std::make_unique<OperatorSet>(configuration, task_manager, logger_provider),
+      std::make_unique<OperatorSet>(configuration, operator_provider, logger_provider),
       std::make_unique<CallQueue>(configuration, logger_provider)
   );
   auto http_server =

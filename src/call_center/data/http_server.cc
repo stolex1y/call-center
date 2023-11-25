@@ -7,9 +7,7 @@
 namespace call_center::data {
 
 std::shared_ptr<HttpServer> HttpServer::Create(
-    net::io_context &ioc,
-    const tcp::endpoint &endpoint,
-    std::shared_ptr<const log::LoggerProvider> logger_provider
+    net::io_context &ioc, const tcp::endpoint &endpoint, log::LoggerProvider logger_provider
 ) {
   return std::shared_ptr<HttpServer>(new HttpServer(ioc, endpoint, std::move(logger_provider)));
 }
@@ -17,13 +15,13 @@ std::shared_ptr<HttpServer> HttpServer::Create(
 HttpServer::HttpServer(
     boost::asio::io_context &ioc,
     const boost::asio::ip::tcp::endpoint &endpoint,
-    std::shared_ptr<const log::LoggerProvider> logger_provider
+    log::LoggerProvider logger_provider
 )
     : ioc_(ioc),
       endpoint_(endpoint),
       acceptor_(ioc),
       logger_provider_(std::move(logger_provider)),
-      logger_(logger_provider_->Get("HttpServer")) {
+      logger_(logger_provider_.Get("HttpServer")) {
   Open();
 }
 

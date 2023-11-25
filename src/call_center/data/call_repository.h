@@ -18,7 +18,7 @@ class CallRepository : private boost::base_from_member<std::unique_ptr<log::Logg
   static std::shared_ptr<CallRepository> Create(
       std::shared_ptr<CallCenter> call_center,
       std::shared_ptr<Configuration> configuration,
-      const std::shared_ptr<const log::LoggerProvider> &logger_provider
+      const log::LoggerProvider &logger_provider
   );
 
   CallRepository(const CallRepository &other) = delete;

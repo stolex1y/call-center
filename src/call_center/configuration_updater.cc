@@ -5,7 +5,7 @@ namespace call_center {
 std::shared_ptr<ConfigurationUpdater> ConfigurationUpdater::Create(
     std::shared_ptr<Configuration> configuration,
     std::shared_ptr<core::TaskManager> task_manager,
-    const std::shared_ptr<const log::LoggerProvider> &logger_provider
+    const log::LoggerProvider &logger_provider
 ) {
   return std::shared_ptr<ConfigurationUpdater>(
       new ConfigurationUpdater(std::move(configuration), std::move(task_manager), logger_provider)
@@ -15,11 +15,11 @@ std::shared_ptr<ConfigurationUpdater> ConfigurationUpdater::Create(
 ConfigurationUpdater::ConfigurationUpdater(
     std::shared_ptr<Configuration> configuration,
     std::shared_ptr<core::TaskManager> task_manager,
-    const std::shared_ptr<const log::LoggerProvider> &logger_provider
+    const log::LoggerProvider &logger_provider
 )
     : task_manager_(std::move(task_manager)),
       configuration_(std::move(configuration)),
-      logger_(logger_provider->Get("ConfigurationUpdater")) {
+      logger_(logger_provider.Get("ConfigurationUpdater")) {
   UpdateUpdatingPeriod();
 }
 

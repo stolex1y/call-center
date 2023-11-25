@@ -11,21 +11,22 @@ std::atomic_size_t HttpConnection::next_id_ = 0;
 std::shared_ptr<HttpConnection> HttpConnection::Create(
     tcp::socket &&socket,
     const std::unordered_map<std::string_view, std::shared_ptr<HttpRepository>> &repositories,
-    const std::shared_ptr<const log::LoggerProvider> &logger_provider
+    const log::LoggerProvider &logger_provider
 ) {
-  return std::shared_ptr<HttpConnection>(new HttpConnection(
-      std::move(socket),
-      repositories,
-      logger_provider->Get("HttpConnection (" + std::to_string(next_id_.fetch_add(1)) + ")")
-  ));
+  return std::shared_ptr<HttpConnection>(
+      new HttpConnection(std::move(socket), repositories, logger_provider)
+  );
 }
 
 HttpConnection::HttpConnection(
     tcp::socket &&socket,
     const std::unordered_map<std::string_view, std::shared_ptr<HttpRepository>> &repositories,
-    std::unique_ptr<log::Logger> logger
+    const log::LoggerProvider &logger_provider
 )
-    : logger_(std::move(logger)), stream_(std::move(socket)), repositories_(repositories) {
+    : logger_(logger_provider.Get("HttpConnection (" + std::to_string(next_id_.fetch_add(1)) + ")")
+      ),
+      stream_(std::move(socket)),
+      repositories_(repositories) {
   stream_.expires_after(30s);
 }
 

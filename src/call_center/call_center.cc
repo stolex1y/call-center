@@ -14,7 +14,7 @@ std::shared_ptr<CallCenter> CallCenter::Create(
     std::unique_ptr<Journal> journal,
     std::shared_ptr<Configuration> configuration,
     std::shared_ptr<core::TaskManager> task_manager,
-    const std::shared_ptr<const log::LoggerProvider> &logger_provider,
+    const log::LoggerProvider &logger_provider,
     std::unique_ptr<OperatorSet> operator_set,
     std::unique_ptr<CallQueue> call_queue
 ) {
@@ -32,7 +32,7 @@ CallCenter::CallCenter(
     std::unique_ptr<Journal> journal,
     std::shared_ptr<Configuration> configuration,
     std::shared_ptr<core::TaskManager> task_manager,
-    const std::shared_ptr<const log::LoggerProvider> &logger_provider,
+    const log::LoggerProvider &logger_provider,
     std::unique_ptr<OperatorSet> operator_set,
     std::unique_ptr<CallQueue> call_queue
 )
@@ -41,7 +41,7 @@ CallCenter::CallCenter(
       calls_(std::move(call_queue)),
       task_manager_(std::move(task_manager)),
       configuration_(std::move(configuration)),
-      logger_(logger_provider->Get("CallCenter")) {
+      logger_(logger_provider.Get("CallCenter")) {
 }
 
 /**

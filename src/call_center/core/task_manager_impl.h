@@ -23,8 +23,7 @@ class TaskManagerImpl : public TaskManager {
   static constexpr const auto kIoThreadCountKey = "task_manager_io_thread_count";
 
   static std::shared_ptr<TaskManagerImpl> Create(
-      std::shared_ptr<Configuration> configuration,
-      const std::shared_ptr<const log::LoggerProvider> &logger_provider
+      std::shared_ptr<Configuration> configuration, const log::LoggerProvider &logger_provider
   );
   TaskManagerImpl(const TaskManagerImpl &other) = delete;
   TaskManagerImpl &operator=(const TaskManagerImpl &other) = delete;
@@ -62,8 +61,7 @@ class TaskManagerImpl : public TaskManager {
   );
 
   TaskManagerImpl(
-      std::shared_ptr<Configuration> configuration,
-      const std::shared_ptr<const log::LoggerProvider> &logger_provider
+      std::shared_ptr<Configuration> configuration, const log::LoggerProvider &logger_provider
   );
 
   tasks::TaskWrapped<Task> MakeTaskWrapped(std::function<Task> task);

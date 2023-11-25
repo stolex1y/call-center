@@ -8,14 +8,13 @@ namespace asio = boost::asio;
 
 const size_t FakeTaskManager::kThreadCount = boost::thread::hardware_concurrency();
 
-std::shared_ptr<FakeTaskManager> FakeTaskManager::Create(
-    const std::shared_ptr<const log::LoggerProvider> &logger_provider
+std::shared_ptr<FakeTaskManager> FakeTaskManager::Create(const log::LoggerProvider &logger_provider
 ) {
   return std::shared_ptr<FakeTaskManager>(new FakeTaskManager(logger_provider));
 }
 
-FakeTaskManager::FakeTaskManager(const std::shared_ptr<const log::LoggerProvider> &logger_provider)
-    : logger_(logger_provider->Get("TaskManagerImpl")) {
+FakeTaskManager::FakeTaskManager(const log::LoggerProvider &logger_provider)
+    : logger_(logger_provider.Get("TaskManagerImpl")) {
 }
 
 void FakeTaskManager::Start() {

@@ -16,7 +16,7 @@ Journal::Journal(std::shared_ptr<Configuration> configuration)
   file_name_ = ReadFileName();
   max_size_ = ReadMaxSize();
   sink_ = MakeSink();
-  logger_ = std::make_unique<log::Logger>("Journal", *sink_);
+  logger_ = std::make_unique<log::Logger>("Journal", sink_);
 }
 
 void Journal::Formatter(const boost::log::record_view &rec, boost::log::formatting_ostream &out) {
@@ -91,12 +91,12 @@ void Journal::UpdateSink() {
     file_name_ = std::move(new_file_name);
     max_size_ = new_max_size;
     sink_ = MakeSink();
-    logger_ = std::make_unique<log::Logger>("Journal", *sink_);
+    logger_ = std::make_unique<log::Logger>("Journal", sink_);
   }
 }
 
-std::unique_ptr<log::Sink> Journal::MakeSink() {
-  return std::make_unique<log::Sink>(
+std::shared_ptr<log::Sink> Journal::MakeSink() {
+  return std::make_shared<log::Sink>(
       boost::make_shared<std::ofstream>(file_name_, std::ios_base::app),
       log::SeverityLevel::kTrace,
       Journal::Formatter,

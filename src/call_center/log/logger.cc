@@ -12,22 +12,16 @@ namespace keywords = boost::log::keywords;
 
 namespace call_center::log {
 
-Logger::Logger(std::string tag, const Sink &sink) {
+Logger::Logger(std::string tag, std::shared_ptr<Sink> sink) : sink_(std::move(sink)) {
   add_attribute(
       attrs::tag_attr_type::get_name(), boost_attrs::constant<std::string>(std::move(tag))
   );
   add_attribute(
-      attrs::channel_type::get_name(), boost_attrs::constant<boost::uuids::uuid>(sink.Id())
+      attrs::channel_type::get_name(), boost_attrs::constant<boost::uuids::uuid>(sink_->Id())
   );
-  add_attribute(
-      attrs::line_id_type::get_name(),
-      boost::log::attributes::counter<unsigned int>(1));
-  add_attribute(
-      attrs::timestamp_type::get_name(),
-      boost::log::attributes::local_clock());
-  add_attribute(
-      attrs::thread_type::get_name(),
-      boost::log::attributes::current_thread_id());
+  add_attribute(attrs::line_id_type::get_name(), boost::log::attributes::counter<unsigned int>(1));
+  add_attribute(attrs::timestamp_type::get_name(), boost::log::attributes::local_clock());
+  add_attribute(attrs::thread_type::get_name(), boost::log::attributes::current_thread_id());
 }
 
 Logger::Ostream Logger::Trace() {

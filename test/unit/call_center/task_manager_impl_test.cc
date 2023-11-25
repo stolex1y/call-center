@@ -35,7 +35,7 @@ class TaskManagerImplTest : public testing::Test {
 
   const std::string test_name_;
   const std::string test_group_name_;
-  const std::shared_ptr<const LoggerProvider> logger_provider_;
+  const log::LoggerProvider logger_provider_;
   const std::shared_ptr<Configuration> configuration_;
   ConfigurationAdapter configuration_adapter_;
   const std::shared_ptr<TaskManagerImpl> task_manager_;
@@ -45,15 +45,15 @@ class TaskManagerImplTest : public testing::Test {
 TaskManagerImplTest::TaskManagerImplTest()
     : test_name_(testing::UnitTest::GetInstance()->current_test_info()->name()),
       test_group_name_("TaskManagerImplTest"),
-      logger_provider_(std::make_shared<LoggerProvider>(std::make_unique<Sink>(
+      logger_provider_(std::make_shared<Sink>(
           test_group_name_ + "/logs/" + test_name_ + ".log", SeverityLevel::kTrace, SIZE_MAX
-      ))),
+      )),
       configuration_(Configuration::Create(
           logger_provider_, test_group_name_ + "/configs/" + test_name_ + ".json"
       )),
       configuration_adapter_(configuration_),
       task_manager_(TaskManagerImpl::Create(configuration_, logger_provider_)),
-      logger_(logger_provider_->Get(test_group_name_)) {
+      logger_(logger_provider_.Get(test_group_name_)) {
   CreateDirForLogs(test_group_name_);
   CreateDirForConfigs(test_group_name_);
   configuration_adapter_.SetConfigurationCaching(false);

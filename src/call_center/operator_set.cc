@@ -11,13 +11,12 @@ using namespace core::utils;
 
 OperatorSet::OperatorSet(
     std::shared_ptr<Configuration> configuration,
-    std::shared_ptr<core::TaskManager> task_manager,
-    const std::shared_ptr<const log::LoggerProvider> &logger_provider
+    OperatorProvider operator_provider,
+    const log::LoggerProvider &logger_provider
 )
     : configuration_(std::move(configuration)),
-      task_manager_(std::move(task_manager)),
-      logger_provider_(logger_provider),
-      logger_(logger_provider->Get("OperatorSet")) {
+      logger_(logger_provider.Get("OperatorSet")),
+      operator_provider_(std::move(operator_provider)) {
   operator_count_ = ReadOperatorCount();
   AddOperators(operator_count_);
 }
@@ -80,7 +79,7 @@ void OperatorSet::UpdateOperatorCount() {
 
 void OperatorSet::AddOperators(size_t count) {
   for (size_t i = 0; i < count; ++i) {
-    free_operators_.emplace(Operator::Create(task_manager_, configuration_, logger_provider_));
+    free_operators_.emplace(operator_provider_());
   }
 }
 

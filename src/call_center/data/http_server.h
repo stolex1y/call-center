@@ -20,9 +20,7 @@ class HttpServer : public std::enable_shared_from_this<HttpServer> {
   HttpServer &operator=(const HttpServer &other) = delete;
 
   static std::shared_ptr<HttpServer> Create(
-      net::io_context &ioc,
-      const tcp::endpoint &endpoint,
-      std::shared_ptr<const log::LoggerProvider> logger_provider
+      net::io_context &ioc, const tcp::endpoint &endpoint, log::LoggerProvider logger_provider
   );
 
   void AddRepository(const std::shared_ptr<HttpRepository> &repository);
@@ -34,14 +32,12 @@ class HttpServer : public std::enable_shared_from_this<HttpServer> {
   net::io_context &ioc_;
   const tcp::endpoint &endpoint_;
   tcp::acceptor acceptor_;
-  const std::shared_ptr<const log::LoggerProvider> logger_provider_;
+  const log::LoggerProvider logger_provider_;
   const std::unique_ptr<log::Logger> logger_;
   std::atomic_bool stopped_ = true;
 
   HttpServer(
-      net::io_context &ioc,
-      const tcp::endpoint &endpoint,
-      std::shared_ptr<const log::LoggerProvider> logger_provider
+      net::io_context &ioc, const tcp::endpoint &endpoint, log::LoggerProvider logger_provider
   );
 
   void OnAccept(beast::error_code error, tcp::socket socket);

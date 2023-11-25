@@ -10,12 +10,12 @@ namespace call_center::log {
 
 class LoggerProvider {
  public:
-  explicit LoggerProvider(std::unique_ptr<Sink> sink);
+  explicit LoggerProvider(std::shared_ptr<Sink> sink);
 
   [[nodiscard]] std::unique_ptr<Logger> Get(std::string tag = "") const;
 
  private:
-  std::unique_ptr<Sink> sink_;
+  std::shared_ptr<Sink> sink_;
 };
 
 }  // namespace call_center::log

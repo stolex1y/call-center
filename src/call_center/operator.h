@@ -26,7 +26,7 @@ class Operator : public std::enable_shared_from_this<Operator> {
   static std::shared_ptr<Operator> Create(
       std::shared_ptr<core::TaskManager> task_manager,
       std::shared_ptr<Configuration> configuration,
-      const std::shared_ptr<const log::LoggerProvider> &logger_provider
+      const log::LoggerProvider &logger_provider
   );
 
   Operator(const Operator &other) = delete;
@@ -56,7 +56,7 @@ class Operator : public std::enable_shared_from_this<Operator> {
   Operator(
       std::shared_ptr<core::TaskManager> task_manager,
       std::shared_ptr<Configuration> configuration,
-      const std::shared_ptr<const log::LoggerProvider> &logger_provider
+      const log::LoggerProvider &logger_provider
   );
 
   [[nodiscard]] DelayDuration GetCallDelay();

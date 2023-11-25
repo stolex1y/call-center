@@ -7,7 +7,7 @@ namespace call_center {
 std::shared_ptr<Operator> Operator::Create(
     std::shared_ptr<core::TaskManager> task_manager,
     std::shared_ptr<Configuration> configuration,
-    const std::shared_ptr<const log::LoggerProvider> &logger_provider
+    const log::LoggerProvider &logger_provider
 ) {
   return std::shared_ptr<Operator>(
       new Operator(std::move(task_manager), std::move(configuration), logger_provider)
@@ -17,12 +17,12 @@ std::shared_ptr<Operator> Operator::Create(
 Operator::Operator(
     std::shared_ptr<core::TaskManager> task_manager,
     std::shared_ptr<Configuration> configuration,
-    const std::shared_ptr<const log::LoggerProvider> &logger_provider
+    const log::LoggerProvider &logger_provider
 )
     : task_manager_(std::move(task_manager)),
       configuration_(std::move(configuration)),
       generator_(boost::hash_value(id_)),
-      logger_(logger_provider->Get("Operator (" + boost::uuids::to_string(id_) + ")")) {
+      logger_(logger_provider.Get("Operator (" + boost::uuids::to_string(id_) + ")")) {
   InitDistributionParameters();
 }
 

@@ -20,8 +20,7 @@ class CallQueue {
   static constexpr const auto kCapacityKey_ = "queue_capacity";
 
   CallQueue(
-      std::shared_ptr<Configuration> configuration,
-      const std::shared_ptr<const log::LoggerProvider> &logger_provider
+      std::shared_ptr<Configuration> configuration, const log::LoggerProvider &logger_provider
   );
   CallQueue(const CallQueue &other) = delete;
   CallQueue &operator=(const CallQueue &other) = delete;

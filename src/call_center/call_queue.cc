@@ -3,17 +3,12 @@
 #include <boost/functional/hash.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
-#include "core/utils/uuids.h"
-
 namespace call_center {
 
-using namespace core::utils;
-
 CallQueue::CallQueue(
-    std::shared_ptr<Configuration> configuration,
-    const std::shared_ptr<const log::LoggerProvider> &logger_provider
+    std::shared_ptr<Configuration> configuration, const log::LoggerProvider &logger_provider
 )
-    : logger_(logger_provider->Get("CallQueue")), configuration_(std::move(configuration)) {
+    : logger_(logger_provider.Get("CallQueue")), configuration_(std::move(configuration)) {
   UpdateCapacity();
 }
 

@@ -17,8 +17,7 @@ namespace call_center {
 class Configuration : public std::enable_shared_from_this<Configuration> {
  public:
   static std::shared_ptr<Configuration> Create(
-      const std::shared_ptr<const log::LoggerProvider> &logger_provider,
-      std::string file_name = kDefaultFileName_
+      const log::LoggerProvider &logger_provider, std::string file_name = kDefaultFileName_
   );
 
   static constexpr const auto kDefaultFileName_ = "config.json";
@@ -56,8 +55,7 @@ class Configuration : public std::enable_shared_from_this<Configuration> {
   const std::string file_name_;
 
   explicit Configuration(
-      const std::shared_ptr<const log::LoggerProvider> &logger_provider,
-      std::string file_name = kDefaultFileName_
+      const log::LoggerProvider &logger_provider, std::string file_name = kDefaultFileName_
   );
 
   void UpdateCaching();

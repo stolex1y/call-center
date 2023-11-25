@@ -34,7 +34,7 @@ class Logger : private boost::log::sources::severity_logger_mt<SeverityLevel> {
     OstreamImpl ostream_impl_;
   };
 
-  Logger(std::string tag, const Sink &sink);
+  Logger(std::string tag, std::shared_ptr<Sink> sink);
   Logger(const Logger &other) = delete;
   Logger &operator=(const Logger &other) = delete;
 
@@ -44,6 +44,9 @@ class Logger : private boost::log::sources::severity_logger_mt<SeverityLevel> {
   Ostream Warning();
   Ostream Error();
   Ostream Fatal();
+
+ private:
+  std::shared_ptr<Sink> sink_;
 };
 
 }  // namespace call_center::log

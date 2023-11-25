@@ -36,7 +36,7 @@ class Journal {
   std::shared_ptr<Configuration> configuration_;
   std::string file_name_ = kDefaultFileName_;
   size_t max_size_ = kDefaultMaxSize_;
-  std::unique_ptr<log::Sink> sink_;
+  std::shared_ptr<log::Sink> sink_;
   std::unique_ptr<log::Logger> logger_;
 
   static void Formatter(const boost::log::record_view &rec, boost::log::formatting_ostream &out);
@@ -52,7 +52,7 @@ class Journal {
   [[nodiscard]] std::string ReadFileName() const;
   [[nodiscard]] size_t ReadMaxSize() const;
   void UpdateSink();
-  std::unique_ptr<log::Sink> MakeSink();
+  std::shared_ptr<log::Sink> MakeSink();
 };
 
 }  // namespace call_center
