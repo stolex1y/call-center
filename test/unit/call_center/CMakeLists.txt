@@ -14,6 +14,8 @@ add_executable(${TEST_TARGET}
         fake/fake_call_detailed_record.h
         fake/clock_interface.h
         task_manager_impl_test.cc
+        utils.h
+        utils.cc
 )
 
 # clang-format

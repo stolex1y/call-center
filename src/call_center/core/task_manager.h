@@ -54,9 +54,7 @@ void TaskManager::PostTaskDelayed(const Duration &delay, const std::function<Tas
 template <typename TimePoint>
 void TaskManager::PostTaskAt(const TimePoint &time_point, const std::function<Task> &task) {
   PostTaskAtImpl(
-      std::chrono::time_point_cast<Duration_t, Clock_t, typename TimePoint::duration>(
-          std::move(time_point)
-      ),
+      std::chrono::time_point_cast<Duration_t, Clock_t, typename TimePoint::duration>(time_point),
       task
   );
 }

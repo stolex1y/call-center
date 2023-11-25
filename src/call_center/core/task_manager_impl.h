@@ -34,6 +34,8 @@ class TaskManagerImpl : public TaskManager {
   void Join() override;
   boost::asio::io_context &IoContext() override;
   void PostTask(std::function<Task> task) override;
+  [[nodiscard]] size_t GetUserThreadCount() const;
+  [[nodiscard]] size_t GetIoThreadCount() const;
 
  protected:
   void PostTaskDelayedImpl(Duration_t delay, std::function<Task> task) override;
@@ -46,14 +48,14 @@ class TaskManagerImpl : public TaskManager {
   boost::asio::io_context user_context_;
   boost::asio::executor_work_guard<boost::asio::io_context::executor_type> user_work_guard_;
   boost::asio::executor_work_guard<boost::asio::io_context::executor_type> io_work_guard_;
-  bool stopped_ = true;
-  std::mutex stop_mutex_;
+  std::atomic_flag stopped_ = false;
+  std::atomic_flag started_ = false;
   const std::unique_ptr<log::Logger> logger_;
   const std::shared_ptr<Configuration> configuration_;
   boost::thread_group user_threads_;
   boost::thread_group io_threads_;
-  size_t user_thread_count_ = kDefaultUserThreadCount;
-  size_t io_thread_count_ = kDefaultIoThreadCount;
+  std::atomic_size_t user_thread_count_ = kDefaultUserThreadCount;
+  std::atomic_size_t io_thread_count_ = kDefaultIoThreadCount;
 
   static void AddThreadsToGroup(
       boost::thread_group &thread_group, size_t thread_count, boost::asio::io_context &context
@@ -66,7 +68,7 @@ class TaskManagerImpl : public TaskManager {
 
   tasks::TaskWrapped<Task> MakeTaskWrapped(std::function<Task> task);
   tasks::TimerTaskWrapped<Task, Clock_t> MakeTimerTaskWrapped(
-      std::function<Task>,
+      std::function<Task> task,
       std::unique_ptr<typename tasks::TimerTaskWrapped<Task, Clock_t>::Timer> timer
   );
   [[nodiscard]] size_t ReadUserThreadCount() const;

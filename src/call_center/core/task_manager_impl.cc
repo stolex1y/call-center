@@ -31,11 +31,12 @@ TaskManagerImpl::TaskManagerImpl(
 }
 
 void TaskManagerImpl::Start() {
-  {
-    std::lock_guard lock(stop_mutex_);
-    if (!stopped_)
-      return;
-    stopped_ = false;
+  if (stopped_.test()) {
+    assert(!stopped_.test());
+    return;
+  }
+  if (started_.test_and_set()) {
+    return;
   }
   io_thread_count_ = ReadIoThreadCount();
   AddThreadsToGroup(io_threads_, io_thread_count_, io_context_);
@@ -45,11 +46,8 @@ void TaskManagerImpl::Start() {
 }
 
 void TaskManagerImpl::Stop() {
-  {
-    std::lock_guard lock(stop_mutex_);
-    if (stopped_)
-      return;
-    stopped_ = true;
+  if (stopped_.test_and_set()) {
+    return;
   }
   io_work_guard_.reset();
   user_work_guard_.reset();
@@ -117,6 +115,14 @@ void TaskManagerImpl::AddThreadsToGroup(
       context.run();
     }));
   }
+}
+
+size_t TaskManagerImpl::GetUserThreadCount() const {
+  return user_thread_count_;
+}
+
+size_t TaskManagerImpl::GetIoThreadCount() const {
+  return io_thread_count_;
 }
 
 }  // namespace call_center::core
