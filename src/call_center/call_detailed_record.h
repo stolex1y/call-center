@@ -7,57 +7,57 @@
 
 #include "call_status.h"
 #include "configuration.h"
+#include "queueing_system/request.h"
 
 namespace call_center {
 
-class CallDetailedRecord {
- public:
+class CallDetailedRecord : public qs::Request {
+public:
   using OnFinish = std::function<void(const CallDetailedRecord &cdr)>;
   using Clock = std::chrono::utc_clock;
   using Duration = std::chrono::milliseconds;
   using WaitingDuration = std::chrono::seconds;
   using TimePoint = std::chrono::time_point<Clock, Duration>;
 
-  static constexpr const auto kMaxWaitKey_ = "call_max_wait";
+  static constexpr auto kMaxWaitKey_ = "call_max_wait";
 
   CallDetailedRecord(
       std::string caller_phone_number,
       std::shared_ptr<Configuration> configuration,
       OnFinish on_finish
   );
-  virtual ~CallDetailedRecord() = default;
+  ~CallDetailedRecord() override = default;
 
-  virtual void SetReceiptTime();
-  virtual void StartProcessing(boost::uuids::uuid operator_id);
-  virtual void FinishProcessing(CallStatus status);
-  [[nodiscard]] virtual bool WasProcessed() const;
-  [[nodiscard]] virtual std::optional<Duration> GetProcessingDuration() const;
-  [[nodiscard]] virtual std::optional<Duration> GetTotalTime() const;
-  [[nodiscard]] virtual std::optional<TimePoint> GetReceiptTime() const;
-  [[nodiscard]] virtual std::optional<TimePoint> GetEndProcessingTime() const;
-  [[nodiscard]] virtual std::optional<TimePoint> GetStartProcessingTime() const;
-  [[nodiscard]] virtual boost::uuids::uuid GetId() const;
+  [[nodiscard]] std::optional<Duration> GetServiceTime() const override;
+  [[nodiscard]] std::optional<Duration> GetTotalTime() const override;
+  [[nodiscard]] std::optional<TimePoint> GetArrivalTime() const override;
+  [[nodiscard]] std::optional<TimePoint> GetServiceCompleteTime() const override;
+  [[nodiscard]] std::optional<TimePoint> GetServiceStartTime() const override;
+  [[nodiscard]] std::optional<Duration> GetWaitTime() const override;
+  [[nodiscard]] bool WasFinished() const override;
+  [[nodiscard]] bool WasServiced() const override;
+  [[nodiscard]] bool WasArrived() const override;
+  [[nodiscard]] bool IsTimeout() const override;
+
+  virtual void SetArrivalTime();
+  virtual void StartService(boost::uuids::uuid operator_id);
+  virtual void CompleteService(CallStatus status);
   [[nodiscard]] virtual const std::string &GetCallerPhoneNumber() const;
   [[nodiscard]] virtual std::optional<CallStatus> GetStatus() const;
   [[nodiscard]] virtual std::optional<boost::uuids::uuid> GetOperatorId() const;
   [[nodiscard]] virtual WaitingDuration GetMaxWait() const;
-  [[nodiscard]] virtual bool IsTimeout() const;
   [[nodiscard]] virtual std::optional<TimePoint> GetTimeoutPoint() const;
-  [[nodiscard]] virtual std::optional<Duration> GetWaitingDuration() const;
-  [[nodiscard]] virtual bool WasFinished() const;
-  [[nodiscard]] virtual bool operator==(const CallDetailedRecord &other) const;
 
  protected:
-  static constexpr const WaitingDuration kDefaultMaxWait_{30};
+  static constexpr WaitingDuration kDefaultMaxWait_{30};
 
   mutable std::shared_mutex mutex_;
   const std::shared_ptr<Configuration> configuration_;
-  std::optional<TimePoint> receipt_time_;
-  std::optional<TimePoint> end_processing_time_;
-  std::optional<TimePoint> start_processing_time_;
+  std::optional<TimePoint> arrival_time_;
+  std::optional<TimePoint> complete_service_time_;
+  std::optional<TimePoint> start_service_time_;
   WaitingDuration max_wait_ = kDefaultMaxWait_;
   std::optional<TimePoint> timeout_point_;
-  const boost::uuids::uuid id_;
   const std::string caller_phone_number_;
   std::optional<CallStatus> status_ = std::nullopt;
   std::optional<boost::uuids::uuid> operator_id_ = std::nullopt;
@@ -65,8 +65,8 @@ class CallDetailedRecord {
 
   [[nodiscard]] uint64_t ReadMaxWait() const;
   [[nodiscard]] bool WasFinished_() const;
-  [[nodiscard]] bool WasProcessed_() const;
-  [[nodiscard]] bool WasReceipt_() const;
+  [[nodiscard]] bool WasServiced_() const;
+  [[nodiscard]] bool WasArrived_() const;
 };
 
 }  // namespace call_center

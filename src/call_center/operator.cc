@@ -26,6 +26,14 @@ Operator::Operator(
   InitDistributionParameters();
 }
 
+bool Operator::IsFree() const {
+  return status_ == Status::kFree;
+}
+
+bool Operator::IsBusy() const {
+  return status_ == Status::kBusy;
+}
+
 void Operator::HandleCall(
     const std::shared_ptr<CallDetailedRecord> &call, const OnFinishHandle &on_finish
 ) {
@@ -67,14 +75,6 @@ void Operator::InitDistributionParameters() {
 Operator::DelayDuration Operator::GetCallDelay() {
   UpdateDistributionParameters();
   return DelayDuration(distribution_(generator_));
-}
-
-boost::uuids::uuid Operator::GetId() const {
-  return id_;
-}
-
-bool Operator::operator==(const Operator &other) const {
-  return id_ == other.id_;
 }
 
 }  // namespace call_center

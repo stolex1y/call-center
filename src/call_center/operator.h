@@ -10,18 +10,19 @@
 #include "call_detailed_record.h"
 #include "configuration.h"
 #include "core/task_manager.h"
+#include "queueing_system/server.h"
 
 namespace call_center {
 
-class Operator : public std::enable_shared_from_this<Operator> {
- public:
+class Operator : public std::enable_shared_from_this<Operator>, public qs::Server {
+public:
   enum class Status { kFree, kBusy };
 
   using OnFinishHandle = std::function<void()>;
   using DelayDuration = std::chrono::seconds;
 
-  static constexpr const auto kMinDelayKey_ = "operator_min_delay";
-  static constexpr const auto kMaxDelayKey_ = "operator_max_delay";
+  static constexpr auto kMinDelayKey_ = "operator_min_delay";
+  static constexpr auto kMaxDelayKey_ = "operator_max_delay";
 
   static std::shared_ptr<Operator> Create(
       std::shared_ptr<core::TaskManager> task_manager,
@@ -31,13 +32,14 @@ class Operator : public std::enable_shared_from_this<Operator> {
 
   Operator(const Operator &other) = delete;
   Operator &operator=(const Operator &other) = delete;
-  virtual ~Operator() = default;
+  ~Operator() override = default;
 
-  [[nodiscard]] virtual boost::uuids::uuid GetId() const;
+  [[nodiscard]] bool IsFree() const override;
+  [[nodiscard]] bool IsBusy() const override;
+
   virtual void HandleCall(
       const std::shared_ptr<CallDetailedRecord> &call, const OnFinishHandle &on_finish
   );
-  bool operator==(const Operator &other) const;
 
  protected:
   Operator(
@@ -50,11 +52,10 @@ class Operator : public std::enable_shared_from_this<Operator> {
   using Distribution = std::uniform_int_distribution<uint64_t>;
   using Generator = std::mt19937_64;
 
-  static constexpr const uint64_t kDefaultMinDelay_ = 10;
-  static constexpr const uint64_t kDefaultMaxDelay_ = 60;
+  static constexpr uint64_t kDefaultMinDelay_ = 10;
+  static constexpr uint64_t kDefaultMaxDelay_ = 60;
 
-  const boost::uuids::uuid id_ = boost::uuids::random_generator_mt19937()();
-  Status status_ = Status::kFree;
+  std::atomic<Status> status_ = Status::kFree;
   const std::shared_ptr<core::TaskManager> task_manager_;
   const std::shared_ptr<Configuration> configuration_;
   uint64_t min_delay_ = kDefaultMinDelay_;

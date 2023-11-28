@@ -123,16 +123,15 @@ bool CallQueue::CallEquals::operator()(const CallPtr &first, const CallPtr &seco
   if (first == nullptr)
     return true;
 
-  return *first == *second;
+  return first->GetCallerPhoneNumber() == second->GetCallerPhoneNumber();
 }
 
 size_t CallQueue::CallHash::operator()(const CallPtr &call) const {
-  assert(call);
   return std::hash<std::string>()(call->GetCallerPhoneNumber());
 }
 
 bool CallQueue::ReceiptOrder::operator()(const CallPtr &first, const CallPtr &second) const {
-  return first->GetReceiptTime() < second->GetReceiptTime();
+  return first->GetArrivalTime() < second->GetArrivalTime();
 }
 
 bool CallQueue::TimeoutPointOrder::operator()(const CallPtr &first, const CallPtr &second) const {
