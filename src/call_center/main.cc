@@ -10,6 +10,7 @@ using namespace call_center;
 using namespace call_center::data;
 using namespace call_center::log;
 using namespace call_center::core;
+using namespace call_center::qs::metrics;
 
 int main() {
   const LoggerProvider logger_provider(std::make_shared<Sink>(SeverityLevel::kTrace));
@@ -23,15 +24,17 @@ int main() {
   const auto operator_provider = [&task_manager, &configuration, &logger_provider]() {
     return Operator::Create(task_manager, configuration, logger_provider);
   };
-  auto call_center = CallCenter::Create(
+  const auto metrics = QueueingSystemMetrics::Create(task_manager, configuration, logger_provider);
+  const auto call_center = CallCenter::Create(
       std::make_unique<Journal>(configuration),
       configuration,
       task_manager,
       logger_provider,
       std::make_unique<OperatorSet>(configuration, operator_provider, logger_provider),
-      std::make_unique<CallQueue>(configuration, logger_provider)
+      std::make_unique<CallQueue>(configuration, logger_provider),
+      metrics
   );
-  auto http_server =
+  const auto http_server =
       HttpServer::Create(task_manager->IoContext(), tcp::endpoint{address, port}, logger_provider);
   http_server->AddRepository(CallRepository::Create(call_center, configuration, logger_provider));
   task_manager->Start();

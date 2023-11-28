@@ -4,8 +4,8 @@
 #include <chrono>
 
 namespace call_center {
-
 using namespace std::chrono_literals;
+using namespace qs::metrics;
 
 /**
  * Creating an instance of a class.
@@ -14,9 +14,10 @@ std::shared_ptr<CallCenter> CallCenter::Create(
     std::unique_ptr<Journal> journal,
     std::shared_ptr<Configuration> configuration,
     std::shared_ptr<core::TaskManager> task_manager,
-    const log::LoggerProvider &logger_provider,
+    const log::LoggerProvider& logger_provider,
     std::unique_ptr<OperatorSet> operator_set,
-    std::unique_ptr<CallQueue> call_queue
+    std::unique_ptr<CallQueue> call_queue,
+    std::shared_ptr<QueueingSystemMetrics> metrics
 ) {
   return std::shared_ptr<CallCenter>(new CallCenter(
       std::move(journal),
@@ -24,7 +25,8 @@ std::shared_ptr<CallCenter> CallCenter::Create(
       std::move(task_manager),
       logger_provider,
       std::move(operator_set),
-      std::move(call_queue)
+      std::move(call_queue),
+      std::move(metrics)
   ));
 }
 
@@ -32,24 +34,28 @@ CallCenter::CallCenter(
     std::unique_ptr<Journal> journal,
     std::shared_ptr<Configuration> configuration,
     std::shared_ptr<core::TaskManager> task_manager,
-    const log::LoggerProvider &logger_provider,
+    const log::LoggerProvider& logger_provider,
     std::unique_ptr<OperatorSet> operator_set,
-    std::unique_ptr<CallQueue> call_queue
+    std::unique_ptr<CallQueue> call_queue,
+    std::shared_ptr<QueueingSystemMetrics> metrics
 )
     : journal_(std::move(journal)),
       operators_(std::move(operator_set)),
       calls_(std::move(call_queue)),
       task_manager_(std::move(task_manager)),
       configuration_(std::move(configuration)),
-      logger_(logger_provider.Get("CallCenter")) {
+      logger_(logger_provider.Get("CallCenter")),
+      metrics_(std::move(metrics)) {
+  metrics_->Start();
 }
 
 /**
  * Placing a new call in the queue to processing.
  * @param call - call for processing.
  */
-void CallCenter::PushCall(const CallPtr &call) {
-  call->SetReceiptTime();
+void CallCenter::PushCall(const CallPtr& call) {
+  call->SetArrivalTime();
+  metrics_->RecordRequestArrival(call);
   // try to bypass the queue
   const auto started = StartCallProcessingIfPossible(call);
   if (started)
@@ -106,9 +112,10 @@ void CallCenter::PerformCallProcessingIteration() {
  * @param call - next call from the queue;
  * @param op - free operator who will handle the call.
  */
-void CallCenter::StartCallProcessing(const CallPtr &call, const OperatorPtr &op) {
+void CallCenter::StartCallProcessing(const CallPtr& call, const OperatorPtr& op) {
   logger_->Debug() << "Start call (" << boost::uuids::to_string(call->GetId()) << ") processing";
-  call->StartProcessing(op->GetId());
+  call->StartService(op->GetId());
+  metrics_->RecordServiceStart(call);
   op->HandleCall(call, [call, op, call_center = shared_from_this()]() {
     call_center->FinishCallProcessing(call, op);
   });
@@ -121,7 +128,7 @@ void CallCenter::StartCallProcessing(const CallPtr &call, const OperatorPtr &op)
  * @param call - call for processing.
  * @return True if processing has stopped_, otherwise - false.
  */
-bool CallCenter::StartCallProcessingIfPossible(const CallPtr &call) {
+bool CallCenter::StartCallProcessingIfPossible(const CallPtr& call) {
   if (!calls_->QueueIsEmpty())
     return false;
 
@@ -144,9 +151,10 @@ bool CallCenter::StartCallProcessingIfPossible(const CallPtr &call) {
  * @param call - handled call;
  * @param op - operator who processed the call.
  */
-void CallCenter::FinishCallProcessing(const CallPtr &call, const OperatorPtr &op) {
+void CallCenter::FinishCallProcessing(const CallPtr& call, const OperatorPtr& op) {
   logger_->Debug() << "Finish call processing (" << boost::uuids::to_string(call->GetId()) << ")";
-  call->FinishProcessing(CallStatus::kOk);
+  call->CompleteService(CallStatus::kOk);
+  metrics_->RecordServiceComplete(call, op);
   calls_->EraseFromProcessing(call);
   operators_->InsertFree(op);
   journal_->AddRecord(*call);
@@ -164,7 +172,7 @@ void CallCenter::FinishCallProcessing(const CallPtr &call, const OperatorPtr &op
  * @param time_point - time of execution of the new iteration of call
  * processing.
  */
-void CallCenter::ScheduleCallProcessingIteration(const CallDetailedRecord::TimePoint &time_point) {
+void CallCenter::ScheduleCallProcessingIteration(const CallDetailedRecord::TimePoint& time_point) {
   logger_->Debug() << "Add task to call processing at: " << time_point;
 
   const auto task = [call_center = shared_from_this()]() {
@@ -178,21 +186,21 @@ void CallCenter::ScheduleCallProcessingIteration(const CallDetailedRecord::TimeP
  * @param call - call to reject;
  * @param reason - reason for rejection.
  */
-void CallCenter::RejectCall(const CallPtr &call, CallStatus reason) {
+void CallCenter::RejectCall(const CallPtr& call, CallStatus reason) const {
   logger_->Info() << "Reject call (" << boost::uuids::to_string(call->GetId()) << ") - " << reason;
-  call->FinishProcessing(reason);
+  call->CompleteService(reason);
+  metrics_->RecordRequestDropout(call);
   journal_->AddRecord(*call);
 }
 
 /**
  * Cancel all calls with expired waiting time.
  */
-void CallCenter::RejectAllTimeoutCalls() {
+void CallCenter::RejectAllTimeoutCalls() const {
   auto to_reject = calls_->EraseTimeoutCallFromQueue();
   while (to_reject) {
     RejectCall(to_reject, CallStatus::kTimeout);
     to_reject = calls_->EraseTimeoutCallFromQueue();
   }
 }
-
 }  // namespace call_center

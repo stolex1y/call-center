@@ -8,17 +8,21 @@
 namespace call_center {
 
 using namespace core::utils;
+using namespace qs::metrics;
 
 OperatorSet::OperatorSet(
     std::shared_ptr<Configuration> configuration,
     OperatorProvider operator_provider,
-    const log::LoggerProvider &logger_provider
+    const log::LoggerProvider& logger_provider,
+    std::shared_ptr<QueueingSystemMetrics> metrics
 )
     : configuration_(std::move(configuration)),
       logger_(logger_provider.Get("OperatorSet")),
-      operator_provider_(std::move(operator_provider)) {
+      operator_provider_(std::move(operator_provider)),
+      metrics_(std::move(metrics)) {
   operator_count_ = ReadOperatorCount();
   AddOperators(operator_count_);
+  metrics_->SetServers(free_operators_);
 }
 
 std::shared_ptr<Operator> OperatorSet::EraseFree() {
@@ -78,6 +82,7 @@ void OperatorSet::UpdateOperatorCount() {
       const auto removed = RemoveOperators(to_remove);
       operator_count_ -= removed;
     }
+    metrics_->SetServers(free_operators_);
   }
 }
 
@@ -111,8 +116,6 @@ bool OperatorSet::OperatorEquals::operator()(const OperatorPtr &first, const Ope
 }
 
 size_t OperatorSet::OperatorHash::operator()(const OperatorPtr &op) const {
-  assert(op);
-  return boost::hash<boost::uuids::uuid>()(op->GetId());
+  return op->hash();
 }
-
-}  // namespace call_center
+} // namespace call_center

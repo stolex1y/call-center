@@ -12,6 +12,7 @@
 #include "log/logger.h"
 #include "log/logger_provider.h"
 #include "operator_set.h"
+#include "queueing_system/metrics/queueing_system_metrics.h"
 
 namespace call_center {
 
@@ -26,7 +27,8 @@ class CallCenter : public std::enable_shared_from_this<CallCenter> {
       std::shared_ptr<core::TaskManager> task_manager,
       const log::LoggerProvider &logger_provider,
       std::unique_ptr<OperatorSet> operator_set,
-      std::unique_ptr<CallQueue> call_queue
+      std::unique_ptr<CallQueue> call_queue,
+      std::shared_ptr<qs::metrics::QueueingSystemMetrics> metrics
   );
 
   CallCenter(const CallCenter &other) = delete;
@@ -42,7 +44,8 @@ class CallCenter : public std::enable_shared_from_this<CallCenter> {
       std::shared_ptr<core::TaskManager> task_manager,
       const log::LoggerProvider &logger_provider,
       std::unique_ptr<OperatorSet> operator_set,
-      std::unique_ptr<CallQueue> call_queue
+      std::unique_ptr<CallQueue> call_queue,
+      std::shared_ptr<qs::metrics::QueueingSystemMetrics> metrics
   );
 
  private:
@@ -52,6 +55,7 @@ class CallCenter : public std::enable_shared_from_this<CallCenter> {
   const std::shared_ptr<core::TaskManager> task_manager_;
   const std::shared_ptr<Configuration> configuration_;
   const std::unique_ptr<log::Logger> logger_;
+  const std::shared_ptr<qs::metrics::QueueingSystemMetrics> metrics_;
 
   void PerformCallProcessingIteration();
   void FinishCallProcessing(const CallPtr &call, const OperatorPtr &op);
@@ -59,8 +63,8 @@ class CallCenter : public std::enable_shared_from_this<CallCenter> {
   void StartCallProcessing(const CallPtr &call, const OperatorPtr &op);
 
   void ScheduleCallProcessingIteration(const CallDetailedRecord::TimePoint &time_point);
-  void RejectCall(const CallPtr &call, CallStatus reason);
-  void RejectAllTimeoutCalls();
+  void RejectCall(const CallPtr &call, CallStatus reason) const;
+  void RejectAllTimeoutCalls() const;
 };
 
 }  // namespace call_center

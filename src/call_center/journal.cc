@@ -31,14 +31,14 @@ std::string Journal::FormatCallDetailedRecord(const CallDetailedRecord &cdr) {
   return std::vformat(
       "{};{};{};{};{};{};{};{}",
       std::make_format_args(
-          FormatTimePoint(cdr.GetReceiptTime()),
+          FormatTimePoint(cdr.GetArrivalTime()),
           FormatUuid(cdr.GetId()),
           cdr.GetCallerPhoneNumber(),
-          FormatTimePoint(cdr.GetEndProcessingTime()),
+          FormatTimePoint(cdr.GetServiceCompleteTime()),
           to_string(*cdr.GetStatus()),
-          FormatTimePoint(cdr.GetStartProcessingTime()),
+          FormatTimePoint(cdr.GetServiceStartTime()),
           FormatUuid(cdr.GetOperatorId()),
-          FormatDuration(cdr.GetProcessingDuration())
+          FormatDuration(cdr.GetServiceTime())
       )
   );
 }

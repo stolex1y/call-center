@@ -7,34 +7,34 @@
 
 #include "configuration.h"
 #include "core/containers/concurrent_hash_set.h"
-#include "core/task_manager.h"
 #include "operator.h"
+#include "queueing_system/metrics/queueing_system_metrics.h"
 
 namespace call_center {
 
 class OperatorSet {
  public:
-  using OperatorProvider = std::function<std::shared_ptr<Operator>()>;
+  using OperatorPtr = std::shared_ptr<Operator>;
+  using OperatorProvider = std::function<OperatorPtr()>;
 
   static constexpr const auto kOperatorCountKey_ = "operator_count";
 
   OperatorSet(
       std::shared_ptr<Configuration> configuration,
       OperatorProvider operator_provider,
-      const log::LoggerProvider &logger_provider
+      const log::LoggerProvider& logger_provider,
+      std::shared_ptr<qs::metrics::QueueingSystemMetrics> metrics
   );
   OperatorSet(const OperatorSet &other) = delete;
   OperatorSet &operator=(const OperatorSet &other) = delete;
 
   std::shared_ptr<Operator> EraseFree();
-  void InsertFree(const std::shared_ptr<Operator> &op);
+  void InsertFree(const OperatorPtr& op);
   [[nodiscard]] size_t GetSize() const;
   [[nodiscard]] size_t GetFreeOperatorCount() const;
   [[nodiscard]] size_t GetBusyOperatorCount() const;
 
  private:
-  using OperatorPtr = std::shared_ptr<Operator>;
-
   struct OperatorEquals {
     bool operator()(const OperatorPtr &first, const OperatorPtr &second) const;
   };
@@ -52,6 +52,7 @@ class OperatorSet {
   mutable std::shared_mutex mutex_;
   std::unique_ptr<log::Logger> logger_;
   OperatorProvider operator_provider_;
+  std::shared_ptr<qs::metrics::QueueingSystemMetrics> metrics_;
 
   [[nodiscard]] size_t ReadOperatorCount() const;
   void UpdateOperatorCount();

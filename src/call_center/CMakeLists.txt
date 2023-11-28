@@ -56,6 +56,17 @@ add_library(${OBJ_LIB_TARGET} OBJECT
         core/utils/uuids.h
         core/utils/uuids.cc
         core/task_manager_impl.h
+        queueing_system/metrics/queueing_system_metrics.cc
+        queueing_system/metrics/queueing_system_metrics.h
+        queueing_system/metrics/metric.h
+        queueing_system/metrics/request_metrics.cc
+        queueing_system/metrics/request_metrics.h
+        queueing_system/metrics/service_metrics.cc
+        queueing_system/metrics/service_metrics.h
+        queueing_system/server.h
+        queueing_system/request.h
+        queueing_system/request.cc
+        queueing_system/server.cc
 )
 
 #warnings
