@@ -1,16 +1,18 @@
 #include "call_center.h"
 #include "configuration.h"
 #include "configuration_updater.h"
+#include "core/http/http_server.h"
 #include "core/task_manager_impl.h"
-#include "data/call_repository.h"
-#include "data/http_server.h"
 #include "journal.h"
+#include "repository/call/call_repository.h"
+#include "repository/metrics/metrics_repository.h"
 
 using namespace call_center;
-using namespace call_center::data;
+using namespace call_center::core::http;
 using namespace call_center::log;
 using namespace call_center::core;
 using namespace call_center::qs::metrics;
+using namespace call_center::repository;
 
 int main() {
   const LoggerProvider logger_provider(std::make_shared<Sink>(SeverityLevel::kTrace));
@@ -37,6 +39,7 @@ int main() {
   const auto http_server =
       HttpServer::Create(task_manager->IoContext(), tcp::endpoint{address, port}, logger_provider);
   http_server->AddRepository(CallRepository::Create(call_center, configuration, logger_provider));
+  http_server->AddRepository(MetricsRepository::Create(metrics, logger_provider));
   task_manager->Start();
   http_server->Start();
   task_manager->Join();

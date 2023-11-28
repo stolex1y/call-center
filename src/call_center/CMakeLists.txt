@@ -17,25 +17,25 @@ add_library(${OBJ_LIB_TARGET} OBJECT
         operator.h
         call_detailed_record.cc
         call_detailed_record.h
-        data/call_repository.cc
-        data/call_repository.h
-        data/http_repository.cc
-        data/http_repository.h
-        data/http_server.cc
-        data/http_server.h
-        data/http.h
-        data/http_connection.cc
-        data/http_connection.h
+        repository/call/call_repository.cc
+        repository/call/call_repository.h
+        core/http/http_repository.cc
+        core/http/http_repository.h
+        core/http/http_server.cc
+        core/http/http_server.h
+        core/http/http.h
+        core/http/http_connection.cc
+        core/http/http_connection.h
         operator_set.cc
         operator_set.h
         call_queue.cc
         call_queue.h
         call_status.cc
         call_status.h
-        data/call_request_dto.cc
-        data/call_request_dto.h
-        data/call_response_dto.cc
-        data/call_response_dto.h
+        repository/call/call_request_dto.cc
+        repository/call/call_request_dto.h
+        repository/call/call_response_dto.cc
+        repository/call/call_response_dto.h
         core/task_manager_impl.cc
         core/task_manager.h
         log/sink.cc
@@ -67,6 +67,11 @@ add_library(${OBJ_LIB_TARGET} OBJECT
         queueing_system/request.h
         queueing_system/request.cc
         queueing_system/server.cc
+        repository/metrics/metrics_repository.cc
+        repository/metrics/metrics_repository.h
+        repository/metrics/metrics_response_dto.cc
+        repository/metrics/metrics_response_dto.h
+        core/utils/numbers.h
 )
 
 #warnings

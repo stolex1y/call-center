@@ -48,8 +48,8 @@ class QueueingSystemMetrics : public std::enable_shared_from_this<QueueingSystem
   void RecordRequestDropout(const RequestPtr &request);
 
   [[nodiscard]] Metric<Duration> GetWaitTimeMetric() const;
-  [[nodiscard]] Metric<size_t> GetQueueSizeMetric() const;
-  [[nodiscard]] Metric<size_t> GetBusyServerCountMetric() const;
+  [[nodiscard]] Metric<size_t, double> GetQueueSizeMetric() const;
+  [[nodiscard]] Metric<size_t, double> GetBusyServerCountMetric() const;
   [[nodiscard]] double GetServiceLoadInErlang() const;
 
  private:
@@ -61,7 +61,7 @@ class QueueingSystemMetrics : public std::enable_shared_from_this<QueueingSystem
     size_t operator()(const ServerPtr &server) const;
   };
 
-  static constexpr uint64_t kDefaultMetricsUpdateTime = 30;
+  static constexpr uint64_t kDefaultMetricsUpdateTime = 10;
 
   std::atomic_flag started_ = false;
   const std::shared_ptr<Configuration> configuration_;
@@ -74,7 +74,7 @@ class QueueingSystemMetrics : public std::enable_shared_from_this<QueueingSystem
   std::optional<TimePoint> prev_arrival_;
   size_t arrival_count_ = 0;
   Metric<Duration> wait_time_{Duration(0)};
-  Metric<size_t> queue_size_{0};
+  Metric<size_t, double> queue_size_{0};
   size_t current_queue_size_ = 0;
   mutable std::shared_mutex queue_mutex_;
 
@@ -83,7 +83,7 @@ class QueueingSystemMetrics : public std::enable_shared_from_this<QueueingSystem
   mutable std::shared_mutex dropout_mutex_;
 
   std::unordered_map<ServerPtr, ServiceMetrics, ServerHash, ServerEquals> servers_metrics_;
-  Metric<size_t> busy_server_count_{0};
+  Metric<size_t, double> busy_server_count_{0};
   mutable std::shared_mutex service_mutex_;
 
   QueueingSystemMetrics(
@@ -102,10 +102,10 @@ class QueueingSystemMetrics : public std::enable_shared_from_this<QueueingSystem
 };
 
 template <typename ServerImplSet>
-void QueueingSystemMetrics::SetServers(
-    const ServerImplSet &server_impls
-) {
-  const std::unordered_set<ServerPtr, ServerHash, ServerEquals> servers(server_impls.begin(), server_impls.end());
+void QueueingSystemMetrics::SetServers(const ServerImplSet &server_impls) {
+  const std::unordered_set<ServerPtr, ServerHash, ServerEquals> servers(
+      server_impls.begin(), server_impls.end()
+  );
   std::lock_guard lock(service_mutex_);
   erase_if(servers_metrics_, [&servers](const auto &p) {
     return !servers.contains(p.first);

@@ -15,7 +15,7 @@
 namespace call_center {
 
 class Operator : public std::enable_shared_from_this<Operator>, public qs::Server {
-public:
+ public:
   enum class Status { kFree, kBusy };
 
   using OnFinishHandle = std::function<void()>;

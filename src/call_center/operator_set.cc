@@ -13,51 +13,48 @@ using namespace qs::metrics;
 OperatorSet::OperatorSet(
     std::shared_ptr<Configuration> configuration,
     OperatorProvider operator_provider,
-    const log::LoggerProvider& logger_provider,
+    const log::LoggerProvider &logger_provider,
     std::shared_ptr<QueueingSystemMetrics> metrics
 )
     : configuration_(std::move(configuration)),
       logger_(logger_provider.Get("OperatorSet")),
       operator_provider_(std::move(operator_provider)),
       metrics_(std::move(metrics)) {
-  operator_count_ = ReadOperatorCount();
-  AddOperators(operator_count_);
-  metrics_->SetServers(free_operators_);
+  AddOperators(ReadOperatorCount());
+  metrics_->SetServers(operators_);
 }
 
 std::shared_ptr<Operator> OperatorSet::EraseFree() {
   std::lock_guard lock(mutex_);
 
+  UpdateOperatorCount();
   if (free_operators_.empty())
     return nullptr;
 
   auto erased = *free_operators_.begin();
-  busy_operators_.emplace(erased);
   free_operators_.erase(free_operators_.begin());
   logger_->Debug() << "Take free operator " << erased->GetId();
-  UpdateOperatorCount();
   return erased;
 }
 
 void OperatorSet::InsertFree(const std::shared_ptr<Operator> &op) {
   std::lock_guard lock(mutex_);
-  if (!busy_operators_.contains(op)) {
+  if (!operators_.contains(op)) {
     logger_->Warning() << "Unknown operator " << op->GetId();
     return;
   }
   logger_->Debug() << "Return free operator " << op->GetId();
   free_operators_.emplace(op);
-  busy_operators_.erase(op);
   UpdateOperatorCount();
 }
 
-size_t OperatorSet::ReadOperatorCount() const {
-  return configuration_->GetNumber<size_t>(kOperatorCountKey_, operator_count_, 1);
+size_t OperatorSet::ReadOperatorCount(size_t default_value) const {
+  return configuration_->GetNumber<size_t>(kOperatorCountKey_, default_value, 1);
 }
 
 size_t OperatorSet::GetSize() const {
   std::shared_lock lock(mutex_);
-  return operator_count_;
+  return operators_.size();
 }
 
 size_t OperatorSet::GetFreeOperatorCount() const {
@@ -67,20 +64,19 @@ size_t OperatorSet::GetFreeOperatorCount() const {
 
 size_t OperatorSet::GetBusyOperatorCount() const {
   std::shared_lock lock(mutex_);
-  return busy_operators_.size();
+  return operators_.size() - free_operators_.size();
 }
 
 void OperatorSet::UpdateOperatorCount() {
-  const size_t new_count = ReadOperatorCount();
-  if (new_count != operator_count_) {
-    if (new_count > operator_count_) {
-      const auto to_add = new_count - operator_count_;
+  const auto cur_count = operators_.size();
+  const size_t new_count = ReadOperatorCount(cur_count);
+  if (new_count != cur_count) {
+    if (new_count > cur_count) {
+      const auto to_add = new_count - cur_count;
       AddOperators(to_add);
-      operator_count_ = new_count;
     } else {
-      const auto to_remove = operator_count_ - new_count;
-      const auto removed = RemoveOperators(to_remove);
-      operator_count_ -= removed;
+      const auto to_remove = cur_count - new_count;
+      RemoveOperators(to_remove);
     }
     metrics_->SetServers(free_operators_);
   }
@@ -88,20 +84,21 @@ void OperatorSet::UpdateOperatorCount() {
 
 void OperatorSet::AddOperators(size_t count) {
   for (size_t i = 0; i < count; ++i) {
-    free_operators_.emplace(operator_provider_());
+    const auto op = operator_provider_();
+    operators_.emplace(op);
+    free_operators_.emplace(op);
   }
 }
 
-size_t OperatorSet::RemoveOperators(size_t count) {
-  size_t removed = 0;
+void OperatorSet::RemoveOperators(size_t count) {
   for (size_t i = 0; i < count; ++i) {
     if (free_operators_.empty()) {
       break;
     }
-    free_operators_.erase(free_operators_.begin());
-    ++removed;
+    const auto erased = *free_operators_.begin();
+    operators_.erase(erased);
+    free_operators_.erase(erased);
   }
-  return removed;
 }
 
 bool OperatorSet::OperatorEquals::operator()(const OperatorPtr &first, const OperatorPtr &second)
@@ -118,4 +115,4 @@ bool OperatorSet::OperatorEquals::operator()(const OperatorPtr &first, const Ope
 size_t OperatorSet::OperatorHash::operator()(const OperatorPtr &op) const {
   return op->hash();
 }
-} // namespace call_center
+}  // namespace call_center

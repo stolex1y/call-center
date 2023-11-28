@@ -22,14 +22,14 @@ class OperatorSet {
   OperatorSet(
       std::shared_ptr<Configuration> configuration,
       OperatorProvider operator_provider,
-      const log::LoggerProvider& logger_provider,
+      const log::LoggerProvider &logger_provider,
       std::shared_ptr<qs::metrics::QueueingSystemMetrics> metrics
   );
   OperatorSet(const OperatorSet &other) = delete;
   OperatorSet &operator=(const OperatorSet &other) = delete;
 
   std::shared_ptr<Operator> EraseFree();
-  void InsertFree(const OperatorPtr& op);
+  void InsertFree(const OperatorPtr &op);
   [[nodiscard]] size_t GetSize() const;
   [[nodiscard]] size_t GetFreeOperatorCount() const;
   [[nodiscard]] size_t GetBusyOperatorCount() const;
@@ -46,18 +46,17 @@ class OperatorSet {
   static constexpr const size_t kDefaultOperatorCount_ = 10;
 
   std::unordered_set<OperatorPtr, OperatorHash, OperatorEquals> free_operators_;
-  std::unordered_set<OperatorPtr, OperatorHash, OperatorEquals> busy_operators_;
+  std::unordered_set<OperatorPtr, OperatorHash, OperatorEquals> operators_;
   const std::shared_ptr<Configuration> configuration_;
-  size_t operator_count_ = kDefaultOperatorCount_;
   mutable std::shared_mutex mutex_;
   std::unique_ptr<log::Logger> logger_;
   OperatorProvider operator_provider_;
   std::shared_ptr<qs::metrics::QueueingSystemMetrics> metrics_;
 
-  [[nodiscard]] size_t ReadOperatorCount() const;
+  [[nodiscard]] size_t ReadOperatorCount(size_t default_value = kDefaultOperatorCount_) const;
   void UpdateOperatorCount();
   void AddOperators(size_t count);
-  size_t RemoveOperators(size_t count);
+  void RemoveOperators(size_t count);
 };
 
 }  // namespace call_center

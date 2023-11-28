@@ -4,7 +4,7 @@
 
 namespace call_center::qs::metrics {
 
-template <typename T>
+template <typename T, typename AvgT = T>
 class Metric {
  public:
   explicit Metric(T default_value);
@@ -12,45 +12,46 @@ class Metric {
   void AddValue(T value);
   [[nodiscard]] T GetMin() const;
   [[nodiscard]] T GetMax() const;
-  [[nodiscard]] T GetAvg() const;
+  [[nodiscard]] AvgT GetAvg() const;
   [[nodiscard]] size_t GetCount() const;
 
  private:
   T min_;
   T max_;
-  T avg_;
+  AvgT avg_;
   size_t count_ = 0;
 };
 
-template <typename T>
-Metric<T>::Metric(T default_value) : min_(default_value), max_(default_value), avg_(default_value) {
+template <typename T, typename AvgT>
+Metric<T, AvgT>::Metric(T default_value)
+    : min_(default_value), max_(default_value), avg_(default_value) {
 }
 
-template <typename T>
-void Metric<T>::AddValue(T value) {
+template <typename T, typename AvgT>
+void Metric<T, AvgT>::AddValue(T value) {
   ++count_;
   min_ = std::min(value, min_);
   max_ = std::max(value, max_);
-  avg_ += (value - T(1)) / count_;
+  avg_ += AvgT(value - avg_) / count_;
 }
 
-template <typename T>
-T Metric<T>::GetMin() const {
+template <typename T, typename AvgT>
+T Metric<T, AvgT>::GetMin() const {
   return min_;
 }
 
-template <typename T>
-T Metric<T>::GetMax() const {
+template <typename T, typename AvgT>
+T Metric<T, AvgT>::GetMax() const {
   return max_;
 }
 
-template <typename T>
-T Metric<T>::GetAvg() const {
+template <typename T, typename AvgT>
+AvgT Metric<T, AvgT>::GetAvg() const {
   return avg_;
 }
 
-template <typename T>
-size_t Metric<T>::GetCount() const {
+template <typename T, typename AvgT>
+size_t Metric<T, AvgT>::GetCount() const {
   return count_;
 }
 

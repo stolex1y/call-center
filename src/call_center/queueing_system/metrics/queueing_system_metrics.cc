@@ -25,18 +25,20 @@ QueueingSystemMetrics::QueueingSystemMetrics(
 )
     : configuration_(std::move(configuration)),
       task_manager_(std::move(task_manager)),
-      logger_(logger_provider.Get()) {
-}
+      logger_(logger_provider.Get("QueueingSystemMetrics")) {
+  }
 
 void QueueingSystemMetrics::Start() {
   if (started_.test_and_set()) {
     return;
   }
-  recording_start_time_ = std::chrono::time_point_cast<Duration>(Clock::now());
+  logger_->Info() << "Start periodic metrics updating";
+  Reset();
   ScheduleUpdatePeriodicMetrics();
 }
 
 void QueueingSystemMetrics::Reset() {
+  logger_->Info() << "Reset recording start time";
   recording_start_time_ = std::chrono::time_point_cast<Duration>(Clock::now());
 }
 
@@ -44,6 +46,7 @@ void QueueingSystemMetrics::Stop() {
   if (!started_.test()) {
     return;
   }
+  logger_->Info() << "Stop periodic metrics updating";
   started_.clear();
 }
 
@@ -147,29 +150,31 @@ Metric<QueueingSystemMetrics::Duration> QueueingSystemMetrics::GetWaitTimeMetric
   return wait_time_;
 }
 
-Metric<size_t> QueueingSystemMetrics::GetQueueSizeMetric() const {
+Metric<size_t, double> QueueingSystemMetrics::GetQueueSizeMetric() const {
   std::shared_lock lock(queue_mutex_);
   return queue_size_;
 }
 
-Metric<size_t> QueueingSystemMetrics::GetBusyServerCountMetric() const {
+Metric<size_t, double> QueueingSystemMetrics::GetBusyServerCountMetric() const {
   std::shared_lock lock(service_mutex_);
   return busy_server_count_;
 }
 
 double QueueingSystemMetrics::GetServiceLoadInErlang() const {
+  using DoubleHours = std::chrono::duration<double, std::chrono::hours::period>;
   std::shared_lock lock(service_mutex_);
   Duration total_service_time(0);
   for (const auto &service_metrics : std::views::values(servers_metrics_)) {
     total_service_time += service_metrics.GetTotalServiceTime();
   }
-  return static_cast<double>(
-      std::chrono::duration_cast<std::chrono::hours>(total_service_time).count()
-  );
+  return std::chrono::duration_cast<DoubleHours>(
+    total_service_time).count();
 }
 
-bool QueueingSystemMetrics::ServerEquals::operator()(const ServerPtr& first,
-  const ServerPtr& second) const {
+bool QueueingSystemMetrics::ServerEquals::operator()(
+  const ServerPtr& first,
+  const ServerPtr& second
+) const {
   if ((first == nullptr) ^ (second == nullptr))
     return false;
 

@@ -12,7 +12,7 @@
 namespace call_center {
 
 class CallDetailedRecord : public qs::Request {
-public:
+ public:
   using OnFinish = std::function<void(const CallDetailedRecord &cdr)>;
   using Clock = std::chrono::utc_clock;
   using Duration = std::chrono::milliseconds;
