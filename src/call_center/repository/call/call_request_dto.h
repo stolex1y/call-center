@@ -4,8 +4,7 @@
 #include <boost/json.hpp>
 #include <string>
 
-namespace call_center::data {
-
+namespace call_center::repository {
 namespace json = boost::json;
 
 struct CallRequestDto {
@@ -16,6 +15,6 @@ struct CallRequestDto {
   );
 };
 
-}  // namespace call_center::data
+}  // namespace call_center::repository
 
 #endif  // CALL_CENTER_SRC_CALL_CENTER_DATA_CALL_REQUEST_DTO_H_

@@ -1,11 +1,11 @@
 #include "http_connection.h"
 
+#include <boost/beast/version.hpp>
 #include <chrono>
 
 using namespace std::chrono_literals;
 
-namespace call_center::data {
-
+namespace call_center::core::http {
 std::atomic_size_t HttpConnection::next_id_ = 0;
 
 std::shared_ptr<HttpConnection> HttpConnection::Create(
@@ -116,4 +116,4 @@ HttpRepository::Response HttpConnection::MakeNotFoundResponse() {
   return response;
 }
 
-}  // namespace call_center::data
+}  // namespace call_center::core::http

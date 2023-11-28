@@ -6,8 +6,7 @@
 
 #include "call_status.h"
 
-namespace call_center::data {
-
+namespace call_center::repository {
 namespace json = boost::json;
 
 struct CallResponseDto {
@@ -20,6 +19,6 @@ struct CallResponseDto {
   );
 };
 
-}  // namespace call_center::data
+}  // namespace call_center::repository
 
 #endif  // CALL_CENTER_SRC_CALL_CENTER_DATA_CALL_RESPONSE_DTO_H_

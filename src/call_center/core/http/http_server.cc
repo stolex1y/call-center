@@ -4,8 +4,7 @@
 
 #include "http_connection.h"
 
-namespace call_center::data {
-
+namespace call_center::core::http {
 std::shared_ptr<HttpServer> HttpServer::Create(
     net::io_context &ioc, const tcp::endpoint &endpoint, log::LoggerProvider logger_provider
 ) {
@@ -93,4 +92,4 @@ void HttpServer::AddRepository(const std::shared_ptr<HttpRepository> &repository
   repositories_.emplace(repository->GetRootPath(), repository);
 }
 
-}  // namespace call_center::data
+}  // namespace call_center::core::http

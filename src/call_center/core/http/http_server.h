@@ -3,7 +3,6 @@
 
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/beast/http.hpp>
-#include <string>
 #include <unordered_map>
 
 #include "configuration.h"
@@ -12,8 +11,7 @@
 #include "log/logger.h"
 #include "log/sink.h"
 
-namespace call_center::data {
-
+namespace call_center::core::http {
 class HttpServer : public std::enable_shared_from_this<HttpServer> {
  public:
   HttpServer(const HttpServer &other) = delete;
@@ -44,6 +42,6 @@ class HttpServer : public std::enable_shared_from_this<HttpServer> {
   void Open();
 };
 
-}  // namespace call_center::data
+}  // namespace call_center::core::http
 
 #endif  // CALL_CENTER_SRC_CALL_CENTER_DATA_HTTP_SERVER_H_
