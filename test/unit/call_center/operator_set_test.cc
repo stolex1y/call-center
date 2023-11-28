@@ -17,6 +17,7 @@ using namespace call_center::log;
 using namespace std::chrono_literals;
 using namespace std::chrono;
 using namespace call_center::core;
+using namespace call_center::qs::metrics;
 
 using OperatorPtr = std::shared_ptr<Operator>;
 using Operators = std::vector<OperatorPtr>;
@@ -30,10 +31,11 @@ class OperatorSetTest : public testing::Test {
 
   const std::string test_name_;
   const std::string test_group_name_;
-  const log::LoggerProvider logger_provider_;
+  const LoggerProvider logger_provider_;
   const std::shared_ptr<Configuration> configuration_;
   ConfigurationAdapter configuration_adapter_;
   const std::shared_ptr<TaskManagerImpl> task_manager_;
+  std::shared_ptr<QueueingSystemMetrics> metrics_;
   OperatorSet operator_set_;
   std::shared_ptr<Logger> logger_;
   std::future<OperatorPtr> EraseOperatorMt();
@@ -53,12 +55,14 @@ OperatorSetTest::OperatorSetTest()
       )),
       configuration_adapter_(configuration_),
       task_manager_(TaskManagerImpl::Create(configuration_, logger_provider_)),
+      metrics_(QueueingSystemMetrics::Create(task_manager_, configuration_, logger_provider_)),
       operator_set_(
           configuration_,
           [logger_provider = logger_provider_, config = configuration_]() {
             return FakeOperator::Create(config, logger_provider);
           },
-          logger_provider_
+          logger_provider_,
+          metrics_
       ),
       logger_(logger_provider_.Get(test_group_name_)) {
   CreateDirForLogs(test_group_name_);

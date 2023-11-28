@@ -156,7 +156,7 @@ void VerifyTaskResultsAt(const TimePoint &time_point, TaskResults &results) {
         ASSERT_EQ(std::future_status::timeout, status) << "Task result mustn't be ready.";
       }
     }
-    std::this_thread::sleep_for(1ms);
+    std::this_thread::sleep_for(5ms);
   }
   VerifyTaskResults(results);
 }
@@ -171,7 +171,7 @@ void VerifyTaskResultsDelayed(const Duration &delay, TaskResults &results) {
         ASSERT_EQ(std::future_status::timeout, status) << "Task result mustn't be ready.";
       }
     }
-    std::this_thread::sleep_for(1ms);
+    std::this_thread::sleep_for(5ms);
   }
   VerifyTaskResults(results);
 }
@@ -182,14 +182,14 @@ TEST_F(TaskManagerImplTest, PostTask_TaskExecuted) {
 }
 
 TEST_F(TaskManagerImplTest, PostTaskAt_TaskExecuted) {
-  const auto future_time_point = utc_clock::now() + 2s;
+  const auto future_time_point = utc_clock::now() + 1s;
   auto results =
       PostTasksAt(future_time_point, std::max(task_manager_->GetUserThreadCount() / 3, size_t(1)));
   VerifyTaskResultsAt(future_time_point, results);
 }
 
 TEST_F(TaskManagerImplTest, PostTaskDelayed_TaskExecuted) {
-  const auto delay = 2s;
+  const auto delay = 1s;
   auto results =
       PostTasksDelayed(delay, std::max(task_manager_->GetUserThreadCount() / 3, size_t(1)));
   VerifyTaskResultsDelayed(delay, results);

@@ -22,9 +22,9 @@ class FakeCallDetailedRecord : public CallDetailedRecord {
       OnFinish on_finish
   );
 
-  void SetReceiptTime() override;
-  void StartProcessing(boost::uuids::uuid operator_id) override;
-  void FinishProcessing(CallStatus status) override;
+  void SetArrivalTime() override;
+  void StartService(boost::uuids::uuid operator_id) override;
+  void CompleteService(CallStatus status) override;
   bool IsTimeout() const override;
 
  private:

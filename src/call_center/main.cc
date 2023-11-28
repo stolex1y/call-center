@@ -30,7 +30,7 @@ int main() {
       configuration,
       task_manager,
       logger_provider,
-      std::make_unique<OperatorSet>(configuration, operator_provider, logger_provider),
+      std::make_unique<OperatorSet>(configuration, operator_provider, logger_provider, metrics),
       std::make_unique<CallQueue>(configuration, logger_provider),
       metrics
   );

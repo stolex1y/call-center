@@ -14,6 +14,7 @@ using namespace log;
 using namespace core;
 using namespace std::chrono_literals;
 using namespace std::chrono;
+using namespace qs::metrics;
 
 using CallPtr = std::shared_ptr<CallDetailedRecord>;
 using CallsVector = std::vector<CallPtr>;
@@ -34,12 +35,13 @@ class CallCenterTest : public testing::Test {
 
   const std::string test_name_;
   const std::string test_group_name_;
-  const log::LoggerProvider logger_provider_;
+  const LoggerProvider logger_provider_;
   const std::shared_ptr<Configuration> configuration_;
   ConfigurationAdapter configuration_adapter_;
   const std::shared_ptr<FakeTaskManager> task_manager_;
   const ClockInterface &clock_;
   Journal *journal_;
+  const std::shared_ptr<QueueingSystemMetrics> metrics_;
   OperatorSet *operators_;
   CallQueue *call_queue_;
   std::shared_ptr<CallCenter> call_center_;
@@ -59,12 +61,14 @@ CallCenterTest::CallCenterTest()
       task_manager_(FakeTaskManager::Create(logger_provider_)),
       clock_(task_manager_->GetClock()),
       journal_(new Journal(configuration_)),
+      metrics_(QueueingSystemMetrics::Create(task_manager_, configuration_, logger_provider_)),
       operators_(new OperatorSet(
           configuration_,
           [this]() {
             return Operator::Create(task_manager_, configuration_, logger_provider_);
           },
-          logger_provider_
+          logger_provider_,
+          metrics_
       )),
       call_queue_(new CallQueue(configuration_, logger_provider_)),
       call_center_(CallCenter::Create(
@@ -73,7 +77,8 @@ CallCenterTest::CallCenterTest()
           task_manager_,
           logger_provider_,
           std::unique_ptr<OperatorSet>(operators_),
-          std::unique_ptr<CallQueue>(call_queue_)
+          std::unique_ptr<CallQueue>(call_queue_),
+          metrics_
       )),
       next_call_index_(1) {
   CreateDirForLogs(test_group_name_);

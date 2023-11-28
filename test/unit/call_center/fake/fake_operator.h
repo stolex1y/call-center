@@ -13,13 +13,10 @@ class FakeOperator : public Operator {
       std::shared_ptr<Configuration> configuration, const log::LoggerProvider &logger_provider
   );
 
-  boost::uuids::uuid GetId() const override;
   void HandleCall(const std::shared_ptr<CallDetailedRecord> &call, const OnFinishHandle &on_finish)
       override;
 
  private:
-  boost::uuids::uuid id_ = boost::uuids::random_generator_mt19937()();
-
   FakeOperator(
       std::shared_ptr<Configuration> configuration, const log::LoggerProvider &logger_provider
   );
