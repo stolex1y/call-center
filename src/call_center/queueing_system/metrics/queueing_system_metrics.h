@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "core/clock_adapter.h"
 #include "core/task_manager.h"
 #include "metric.h"
 #include "operator.h"
@@ -20,7 +21,6 @@ class QueueingSystemMetrics : public std::enable_shared_from_this<QueueingSystem
  public:
   using RequestPtr = std::shared_ptr<const Request>;
   using ServerPtr = std::shared_ptr<const Server>;
-  using Clock = Request::Clock;
   using Duration = Request::Duration;
   using TimePoint = Request::TimePoint;
   using MetricsUpdateDuration = std::chrono::seconds;
@@ -30,7 +30,8 @@ class QueueingSystemMetrics : public std::enable_shared_from_this<QueueingSystem
   static std::shared_ptr<QueueingSystemMetrics> Create(
       std::shared_ptr<core::TaskManager> task_manager,
       std::shared_ptr<Configuration> configuration,
-      const log::LoggerProvider &logger_provider
+      const log::LoggerProvider &logger_provider,
+      std::shared_ptr<const core::ClockAdapter> clock = core::ClockAdapter::default_clock
   );
 
   QueueingSystemMetrics(const QueueingSystemMetrics &other) = delete;
@@ -51,6 +52,12 @@ class QueueingSystemMetrics : public std::enable_shared_from_this<QueueingSystem
   [[nodiscard]] Metric<size_t, double> GetQueueSizeMetric() const;
   [[nodiscard]] Metric<size_t, double> GetBusyServerCountMetric() const;
   [[nodiscard]] double GetServiceLoadInErlang() const;
+  [[nodiscard]] Metric<Duration> GetTimeBetweenRequestsMetric() const;
+  [[nodiscard]] size_t GetDropoutCount() const;
+  [[nodiscard]] Metric<Duration> GetRefusedWaitTimeMetric() const;
+  [[nodiscard]] Duration GetAverageServiceTime() const;
+  [[nodiscard]] Metric<size_t, double> GetRequestCountInSystemMetric() const;
+  [[nodiscard]] double GetProbabilityOfLoss() const;
 
  private:
   struct ServerEquals {
@@ -62,6 +69,8 @@ class QueueingSystemMetrics : public std::enable_shared_from_this<QueueingSystem
   };
 
   static constexpr uint64_t kDefaultMetricsUpdateTime = 10;
+
+  std::shared_ptr<const core::ClockAdapter> clock_;
 
   std::atomic_flag started_ = false;
   const std::shared_ptr<Configuration> configuration_;
@@ -75,7 +84,9 @@ class QueueingSystemMetrics : public std::enable_shared_from_this<QueueingSystem
   size_t arrival_count_ = 0;
   Metric<Duration> wait_time_{Duration(0)};
   Metric<size_t, double> queue_size_{0};
+  Metric<size_t, double> in_system_count_{0};
   size_t current_queue_size_ = 0;
+  size_t current_in_system_count_ = 0;
   mutable std::shared_mutex queue_mutex_;
 
   std::size_t dropout_count_ = 0;
@@ -89,7 +100,8 @@ class QueueingSystemMetrics : public std::enable_shared_from_this<QueueingSystem
   QueueingSystemMetrics(
       std::shared_ptr<core::TaskManager> task_manager,
       std::shared_ptr<Configuration> configuration,
-      const log::LoggerProvider &logger_provider
+      const log::LoggerProvider &logger_provider,
+      std::shared_ptr<const core::ClockAdapter> clock
   );
 
   void UpdatePeriodicMetrics();
