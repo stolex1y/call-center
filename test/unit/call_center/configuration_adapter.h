@@ -5,7 +5,6 @@
 #include <memory>
 
 #include "call_detailed_record.h"
-#include "call_queue.h"
 #include "configuration.h"
 #include "operator.h"
 #include "operator_set.h"
@@ -23,6 +22,7 @@ class ConfigurationAdapter {
   void SetOperatorDelay(Operator::DelayDuration min_delay, Operator::DelayDuration max_delay);
   void SetOperatorDelay(Operator::DelayDuration delay);
   void SetCallMaxWait(CallDetailedRecord::WaitingDuration max_wait);
+  void SetMetricsUpdateTime(qs::metrics::QueueingSystemMetrics::MetricsUpdateDuration delay);
 
  private:
   const std::shared_ptr<Configuration> configuration_;

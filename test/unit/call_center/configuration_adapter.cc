@@ -2,6 +2,8 @@
 
 #include <fstream>
 
+#include "call_queue.h"
+
 namespace call_center {
 
 ConfigurationAdapter::ConfigurationAdapter(std::shared_ptr<Configuration> configuration)
@@ -47,4 +49,9 @@ void ConfigurationAdapter::SetCallMaxWait(CallDetailedRecord::WaitingDuration ma
   config_json[CallDetailedRecord::kMaxWaitKey_] = max_wait.count();
 }
 
+void ConfigurationAdapter::SetMetricsUpdateTime(
+    qs::metrics::QueueingSystemMetrics::MetricsUpdateDuration delay
+) {
+  config_json[qs::metrics::QueueingSystemMetrics::kMetricsUpdateTimeKey] = delay.count();
+}
 }  // namespace call_center

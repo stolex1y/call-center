@@ -12,14 +12,17 @@ add_executable(${TEST_TARGET}
         fake/fake_task_manager.h
         fake/fake_call_detailed_record.cc
         fake/fake_call_detailed_record.h
-        fake/clock_interface.h
         task_manager_impl_test.cc
         utils.h
         utils.cc
         operator_set_test.cc
         fake/fake_operator.cc
         fake/fake_operator.h
+        queueing_system/metrics/queueing_system_metrics_test.cc
+        fake/fake_service_loader.cc
+        fake/fake_service_loader.h
 )
+target_include_directories(${TEST_TARGET} PRIVATE "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>")
 
 # clang-format
 include(Format)
