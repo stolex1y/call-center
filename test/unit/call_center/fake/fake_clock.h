@@ -4,11 +4,11 @@
 #include <chrono>
 #include <shared_mutex>
 
-#include "clock_interface.h"
+#include "core/clock_adapter.h"
 
 namespace call_center {
 
-class FakeClock : public ClockInterface {
+class FakeClock : public core::ClockAdapter {
  public:
   void AdvanceTo(TimePoint target_time);
   void AdvanceOn(Duration duration);
@@ -17,7 +17,7 @@ class FakeClock : public ClockInterface {
 
  private:
   Duration relative_{0};
-  TimePoint absolute_{std::chrono::floor<Duration>(Clock::now())};
+  TimePoint absolute_{std::chrono::floor<Duration>(Clock_t::now())};
   mutable std::shared_mutex mutex_;
 };
 

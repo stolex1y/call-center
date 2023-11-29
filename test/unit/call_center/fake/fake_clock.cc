@@ -2,7 +2,7 @@
 
 namespace call_center {
 
-void FakeClock::AdvanceTo(FakeClock::TimePoint target_time) {
+void FakeClock::AdvanceTo(TimePoint target_time) {
   std::lock_guard lock(mutex_);
   if (target_time > absolute_) {
     relative_ += target_time - absolute_;
@@ -20,7 +20,7 @@ FakeClock::Duration FakeClock::GetRelativeTime() const {
   return relative_;
 }
 
-void FakeClock::AdvanceOn(ClockInterface::Duration duration) {
+void FakeClock::AdvanceOn(Duration duration) {
   AdvanceTo(Now() + duration);
 }
 
