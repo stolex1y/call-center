@@ -161,9 +161,7 @@ void CallCenter::FinishCallProcessing(const CallPtr& call, const OperatorPtr& op
 
   // now there is at least one free operator
   if (!calls_->QueueIsEmpty()) {
-    task_manager_->PostTask([call_center = shared_from_this()]() {
-      call_center->PerformCallProcessingIteration();
-    });
+    PerformCallProcessingIteration();
   }
 }
 
