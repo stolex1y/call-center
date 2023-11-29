@@ -2,7 +2,6 @@
 #define CALL_CENTER_SRC_CALL_CENTER_DATA_CALL_RESPONSE_DTO_H_
 
 #include <boost/json.hpp>
-#include <string>
 
 #include "core/utils/numbers.h"
 #include "queueing_system/metrics/metric.h"
@@ -16,7 +15,6 @@ using namespace std::chrono;
 using namespace core::utils::numbers;
 
 struct MetricsReponseDto {
-  using Clock = QueueingSystemMetrics::Clock;
   using Duration = QueueingSystemMetrics::Duration;
   using TimePoint = QueueingSystemMetrics::TimePoint;
 
