@@ -72,6 +72,8 @@ add_library(${OBJ_LIB_TARGET} OBJECT
         repository/metrics/metrics_response_dto.cc
         repository/metrics/metrics_response_dto.h
         core/utils/numbers.h
+        core/clock_adapter.h
+        core/clock_adapter.cc
 )
 
 #warnings
