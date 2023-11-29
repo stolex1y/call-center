@@ -14,7 +14,7 @@ std::shared_ptr<FakeTaskManager> FakeTaskManager::Create(const log::LoggerProvid
 }
 
 FakeTaskManager::FakeTaskManager(const log::LoggerProvider &logger_provider)
-    : logger_(logger_provider.Get("TaskManagerImpl")) {
+  : logger_(logger_provider.Get("TaskManagerImpl")), clock_(std::make_shared<FakeClock>()) {
 }
 
 void FakeTaskManager::Start() {
@@ -45,7 +45,7 @@ boost::asio::io_context &FakeTaskManager::IoContext() {
 }
 
 void FakeTaskManager::PostTask(std::function<Task> task) {
-  AddTask(clock_.Now(), std::move(task));
+  AddTask(clock_->Now(), std::move(task));
   has_tasks_.notify_one();
 }
 
@@ -53,17 +53,17 @@ void FakeTaskManager::PostTaskDelayedImpl(Duration_t delay, std::function<Task> 
   if (delay == Duration_t(0)) {
     PostTask(std::move(task));
   } else {
-    AddTask(clock_.Now() + delay, std::move(task));
+    AddTask(clock_->Now() + delay, std::move(task));
   }
 }
 
 void FakeTaskManager::PostTaskAtImpl(TimePoint_t time_point, std::function<Task> task) {
-  if (time_point == clock_.Now()) {
+  if (time_point == clock_->Now()) {
     PostTask(std::move(task));
   } else {
     AddTask(
-        std::chrono::time_point_cast<FakeClock::Duration, FakeClock::Clock>(time_point),
-        std::move(task)
+      std::chrono::time_point_cast<FakeClock::Duration, FakeClock::Clock_t>(time_point),
+      std::move(task)
     );
   }
 }
@@ -74,15 +74,15 @@ tasks::TaskWrapped<TaskManager::Task> FakeTaskManager::MakeTaskWrapped(std::func
 
 void FakeTaskManager::AdvanceTime(Duration_t duration) {
   std::lock_guard clock_advance_lock(advance_mutex_);
-  const auto target_time = clock_.Now() + duration;
+  const auto target_time = clock_->Now() + duration;
   std::shared_lock tasks_lock(tasks_mutex_);
-  while (clock_.Now() < target_time) {
+  while (clock_->Now() < target_time) {
     if (tasks_.empty()) {
       tasks_lock.unlock();
-      clock_.AdvanceTo(target_time);
+      clock_->AdvanceTo(target_time);
       return;
     } else {
-      clock_.AdvanceTo(std::min(target_time, tasks_.begin()->first));
+      clock_->AdvanceTo(std::min(target_time, tasks_.begin()->first));
       has_tasks_.notify_all();
       done_tasks_.wait(tasks_lock, [this]() {
         return !HasTasks();
@@ -142,10 +142,10 @@ bool FakeTaskManager::HasTasks() const {
   if (tasks_.empty()) {
     return false;
   }
-  return tasks_.begin()->first <= clock_.Now();
+  return tasks_.begin()->first <= clock_->Now();
 }
 
-const ClockInterface &FakeTaskManager::GetClock() const {
+std::shared_ptr<const ClockAdapter> FakeTaskManager::GetClock() const {
   return clock_;
 }
 

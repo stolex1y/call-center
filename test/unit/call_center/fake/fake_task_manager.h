@@ -4,6 +4,7 @@
 #include <boost/asio.hpp>
 #include <map>
 
+#include "core/clock_adapter.h"
 #include "core/task_manager.h"
 #include "core/tasks.h"
 #include "fake_clock.h"
@@ -22,14 +23,14 @@ class FakeTaskManager : public TaskManager {
   void PostTaskDelayedImpl(Duration_t delay, std::function<Task> task) override;
   void PostTaskAtImpl(TimePoint_t time_point, std::function<Task> task) override;
   void AdvanceTime(Duration_t duration);
-  const ClockInterface &GetClock() const;
+  std::shared_ptr<const ClockAdapter> GetClock() const;
   void ClearTasks();
 
  private:
   static const size_t kThreadCount;
 
   std::multimap<FakeClock::TimePoint, tasks::TaskWrapped<Task>> tasks_;
-  FakeClock clock_;
+  std::shared_ptr<FakeClock> clock_;
   boost::thread_group threads_;
   const std::unique_ptr<log::Logger> logger_;
   std::atomic_bool stopped_ = true;

@@ -3,7 +3,6 @@
 #include <gtest/gtest.h>
 
 #include "configuration_adapter.h"
-#include "fake/clock_interface.h"
 #include "fake/fake_call_detailed_record.h"
 #include "fake/fake_task_manager.h"
 #include "utils.h"
@@ -39,7 +38,7 @@ class CallCenterTest : public testing::Test {
   const std::shared_ptr<Configuration> configuration_;
   ConfigurationAdapter configuration_adapter_;
   const std::shared_ptr<FakeTaskManager> task_manager_;
-  const ClockInterface &clock_;
+  std::shared_ptr<const ClockAdapter> clock_;
   Journal *journal_;
   const std::shared_ptr<QueueingSystemMetrics> metrics_;
   OperatorSet *operators_;
