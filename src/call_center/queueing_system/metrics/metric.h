@@ -32,7 +32,11 @@ void Metric<T, AvgT>::AddValue(T value) {
   ++count_;
   min_ = std::min(value, min_);
   max_ = std::max(value, max_);
-  avg_ += AvgT(value - avg_) / count_;
+  if (value > avg_) {
+    avg_ += AvgT(value - avg_) / count_;
+  } else {
+    avg_ -= AvgT(avg_ - value) / count_;
+  }
 }
 
 template <typename T, typename AvgT>
