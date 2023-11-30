@@ -33,13 +33,16 @@ TaskManagerImpl::~TaskManagerImpl() {
 }
 
 void TaskManagerImpl::Start() {
-  if (stopped_.test()) {
-    assert(!stopped_.test());
+  std::lock_guard lock(start_mutex_);
+  if (stopped_) {
+    logger_->Warning() << "Start after stop isn't working!";
     return;
   }
-  if (started_.test_and_set()) {
+  if (started_) {
     return;
   }
+  started_ = true;
+
   io_thread_count_ = ReadIoThreadCount();
   AddThreadsToGroup(io_threads_, io_thread_count_, io_context_);
 
@@ -48,13 +51,18 @@ void TaskManagerImpl::Start() {
 }
 
 void TaskManagerImpl::Stop() {
-  if (stopped_.test_and_set()) {
-    return;
+  {
+    std::lock_guard lock(start_mutex_);
+    if (stopped_) {
+      return;
+    }
+    stopped_ = true;
+
+    io_work_guard_.reset();
+    user_work_guard_.reset();
+    io_context_.stop();
+    user_context_.stop();
   }
-  io_work_guard_.reset();
-  user_work_guard_.reset();
-  io_context_.stop();
-  user_context_.stop();
   Join();
 }
 

@@ -48,8 +48,9 @@ class TaskManagerImpl : public TaskManager {
   boost::asio::io_context user_context_;
   boost::asio::executor_work_guard<boost::asio::io_context::executor_type> user_work_guard_;
   boost::asio::executor_work_guard<boost::asio::io_context::executor_type> io_work_guard_;
-  std::atomic_flag stopped_ = false;
-  std::atomic_flag started_ = false;
+  bool stopped_ = false;
+  bool started_ = false;
+  mutable std::mutex start_mutex_;
   const std::unique_ptr<log::Logger> logger_;
   const std::shared_ptr<Configuration> configuration_;
   boost::thread_group user_threads_;
