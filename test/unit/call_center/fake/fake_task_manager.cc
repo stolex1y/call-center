@@ -6,7 +6,8 @@ namespace call_center::core {
 
 namespace asio = boost::asio;
 
-const size_t FakeTaskManager::kThreadCount = boost::thread::hardware_concurrency();
+const size_t FakeTaskManager::kThreadCount =
+    std::max(static_cast<int>(boost::thread::hardware_concurrency() / 2), 1);
 
 std::shared_ptr<FakeTaskManager> FakeTaskManager::Create(const log::LoggerProvider &logger_provider
 ) {
@@ -14,13 +15,19 @@ std::shared_ptr<FakeTaskManager> FakeTaskManager::Create(const log::LoggerProvid
 }
 
 FakeTaskManager::FakeTaskManager(const log::LoggerProvider &logger_provider)
-  : logger_(logger_provider.Get("TaskManagerImpl")), clock_(std::make_shared<FakeClock>()) {
+    : clock_(std::make_shared<FakeClock>()), logger_(logger_provider.Get("TaskManagerImpl")) {
 }
 
 void FakeTaskManager::Start() {
-  bool was_stopped = true;
-  if (!stopped_.compare_exchange_strong(was_stopped, false))
+  std::lock_guard lock(start_mutex_);
+  if (stopped_) {
+    logger_->Warning() << "Start after stop isn't working!";
     return;
+  }
+  if (started_) {
+    return;
+  }
+  started_ = true;
   for (size_t i = 0; i < kThreadCount; ++i) {
     threads_.add_thread(new boost::thread([this]() {
       HandleTasks();
@@ -29,10 +36,14 @@ void FakeTaskManager::Start() {
 }
 
 void FakeTaskManager::Stop() {
-  bool was_stopped = false;
-  if (!stopped_.compare_exchange_strong(was_stopped, true))
-    return;
-  has_tasks_.notify_all();
+  {
+    std::lock_guard lock(start_mutex_);
+    if (stopped_) {
+      return;
+    }
+    stopped_ = true;
+  }
+  ClearTasks();
   Join();
 }
 
@@ -40,32 +51,32 @@ void FakeTaskManager::Join() {
   threads_.join_all();
 }
 
-boost::asio::io_context &FakeTaskManager::IoContext() {
+asio::io_context &FakeTaskManager::IoContext() {
   throw std::runtime_error("Not implemented!");
 }
 
 void FakeTaskManager::PostTask(std::function<Task> task) {
+  if (IsStopped()) {
+    return;
+  }
   AddTask(clock_->Now(), std::move(task));
-  has_tasks_.notify_one();
 }
 
 void FakeTaskManager::PostTaskDelayedImpl(Duration_t delay, std::function<Task> task) {
-  if (delay == Duration_t(0)) {
-    PostTask(std::move(task));
-  } else {
-    AddTask(clock_->Now() + delay, std::move(task));
+  if (IsStopped()) {
+    return;
   }
+  AddTask(clock_->Now() + delay, std::move(task));
 }
 
 void FakeTaskManager::PostTaskAtImpl(TimePoint_t time_point, std::function<Task> task) {
-  if (time_point == clock_->Now()) {
-    PostTask(std::move(task));
-  } else {
-    AddTask(
+  if (IsStopped()) {
+    return;
+  }
+  AddTask(
       std::chrono::time_point_cast<FakeClock::Duration, FakeClock::Clock_t>(time_point),
       std::move(task)
-    );
-  }
+  );
 }
 
 tasks::TaskWrapped<TaskManager::Task> FakeTaskManager::MakeTaskWrapped(std::function<Task> task) {
@@ -94,23 +105,26 @@ void FakeTaskManager::AdvanceTime(Duration_t duration) {
 void FakeTaskManager::ClearTasks() {
   std::lock_guard lock(tasks_mutex_);
   tasks_.clear();
+  has_tasks_.notify_all();
 }
 
 void FakeTaskManager::AddTask(FakeClock::TimePoint time_point, std::function<Task> task) {
   std::lock_guard lock(tasks_mutex_);
   tasks_.emplace(time_point, MakeTaskWrapped(std::move(task)));
+  if (time_point == clock_->Now()) {
+    has_tasks_.notify_one();
+  }
 }
 
 void FakeTaskManager::HandleTasks() {
-  std::shared_lock tasks_lock(tasks_mutex_, std::defer_lock);
+  std::shared_lock tasks_lock(tasks_mutex_);
   while (true) {
-    if (stopped_) {
+    if (IsStopped()) {
       return;
     }
 
-    tasks_lock.lock();
-    has_tasks_.wait(tasks_lock, [this]() {
-      return HasTasks() || stopped_;
+    has_tasks_.wait(tasks_lock, [this] {
+      return HasTasks() || IsStopped();
     });
     tasks_lock.unlock();
 
@@ -120,7 +134,6 @@ void FakeTaskManager::HandleTasks() {
     if (!HasTasks() && handle_count_ == 0) {
       done_tasks_.notify_all();
     }
-    tasks_lock.unlock();
   }
 }
 
@@ -149,4 +162,8 @@ std::shared_ptr<const ClockAdapter> FakeTaskManager::GetClock() const {
   return clock_;
 }
 
+bool FakeTaskManager::IsStopped() const {
+  std::shared_lock lock(start_mutex_);
+  return stopped_;
+}
 }  // namespace call_center::core

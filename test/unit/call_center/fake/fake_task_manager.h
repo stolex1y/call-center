@@ -24,7 +24,6 @@ class FakeTaskManager : public TaskManager {
   void PostTaskAtImpl(TimePoint_t time_point, std::function<Task> task) override;
   void AdvanceTime(Duration_t duration);
   std::shared_ptr<const ClockAdapter> GetClock() const;
-  void ClearTasks();
 
  private:
   static const size_t kThreadCount;
@@ -33,7 +32,9 @@ class FakeTaskManager : public TaskManager {
   std::shared_ptr<FakeClock> clock_;
   boost::thread_group threads_;
   const std::unique_ptr<log::Logger> logger_;
-  std::atomic_bool stopped_ = true;
+  bool started_ = false;
+  bool stopped_ = false;
+  mutable std::shared_mutex start_mutex_;
   mutable std::shared_mutex tasks_mutex_;
   mutable std::mutex advance_mutex_;
   std::atomic_int handle_count_ = 0;
@@ -47,6 +48,8 @@ class FakeTaskManager : public TaskManager {
   bool HasTasks() const;
   void HandleTasks();
   void HandleFirstTask();
+  [[nodiscard]] bool IsStopped() const;
+  void ClearTasks();
 };
 
 }  // namespace call_center::core

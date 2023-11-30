@@ -89,7 +89,6 @@ CallCenterTest::CallCenterTest()
 
 CallCenterTest::~CallCenterTest() {
   VerifyAllDone();
-  task_manager_->ClearTasks();
 }
 
 void CallCenterTest::PushCall(const CallPtr &call) {
