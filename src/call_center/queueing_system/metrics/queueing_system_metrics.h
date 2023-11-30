@@ -58,8 +58,10 @@ class QueueingSystemMetrics : public std::enable_shared_from_this<QueueingSystem
   [[nodiscard]] Duration GetAverageServiceTime() const;
   [[nodiscard]] Metric<size_t, double> GetRequestCountInSystemMetric() const;
   [[nodiscard]] double GetProbabilityOfLoss() const;
+  [[nodiscard]] size_t GetServicedCount() const;
+  [[nodiscard]] size_t GetArrivalCount() const;
 
- private:
+private:
   struct ServerEquals {
     bool operator()(const ServerPtr &first, const ServerPtr &second) const;
   };
@@ -109,7 +111,7 @@ class QueueingSystemMetrics : public std::enable_shared_from_this<QueueingSystem
   [[nodiscard]] size_t GetCurrentBusyServerCount() const;
   void UpdateAvgTimeBetweenRequests(TimePoint last_arrival_time_);
   ServiceMetrics &GetServerMetrics(const ServerPtr &server);
-  [[nodiscard]] size_t GetServicedCount() const;
+  // [[nodiscard]] size_t GetServicedCount() const;
   void UpdateMetricsUpdateTime();
 };
 

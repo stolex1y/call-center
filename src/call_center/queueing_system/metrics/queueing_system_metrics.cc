@@ -153,6 +153,11 @@ size_t QueueingSystemMetrics::GetServicedCount() const {
   return count;
 }
 
+size_t QueueingSystemMetrics::GetArrivalCount() const {
+  std::shared_lock lock(queue_mutex_);
+  return arrival_count_;
+}
+
 void QueueingSystemMetrics::UpdateMetricsUpdateTime() {
   metrics_update_time_ = configuration_->GetProperty(kMetricsUpdateTimeKey, metrics_update_time_);
 }
