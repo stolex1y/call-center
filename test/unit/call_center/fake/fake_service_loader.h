@@ -4,7 +4,6 @@
 #include <random>
 
 #include "call_center.h"
-#include "fake_task_manager.h"
 
 namespace call_center {
 
@@ -13,7 +12,7 @@ class FakeServiceLoader : public std::enable_shared_from_this<FakeServiceLoader>
   using CallProvider = std::function<std::shared_ptr<CallDetailedRecord>()>;
 
   static std::shared_ptr<FakeServiceLoader> Create(
-      std::shared_ptr<core::FakeTaskManager> task_manager,
+      std::shared_ptr<core::TaskManager> task_manager,
       std::shared_ptr<CallCenter> call_center,
       CallProvider call_provider
   );
@@ -25,14 +24,14 @@ class FakeServiceLoader : public std::enable_shared_from_this<FakeServiceLoader>
   using Generator = std::mt19937_64;
   using DelayDuration = std::chrono::duration<double>;
 
-  std::shared_ptr<core::FakeTaskManager> task_manager_;
+  std::shared_ptr<core::TaskManager> task_manager_;
   std::shared_ptr<CallCenter> call_center_;
   Generator generator_;
   Distribution distribution_;
   CallProvider call_provider_;
 
   FakeServiceLoader(
-      std::shared_ptr<core::FakeTaskManager> task_manager,
+      std::shared_ptr<core::TaskManager> task_manager,
       std::shared_ptr<CallCenter> call_center,
       CallProvider call_provider
   );

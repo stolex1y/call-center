@@ -5,7 +5,7 @@
 namespace call_center {
 
 FakeServiceLoader::FakeServiceLoader(
-    std::shared_ptr<core::FakeTaskManager> task_manager,
+    std::shared_ptr<core::TaskManager> task_manager,
     std::shared_ptr<CallCenter> call_center,
     CallProvider call_provider
 )
@@ -16,7 +16,7 @@ FakeServiceLoader::FakeServiceLoader(
 }
 
 std::shared_ptr<FakeServiceLoader> FakeServiceLoader::Create(
-    std::shared_ptr<core::FakeTaskManager> task_manager,
+    std::shared_ptr<core::TaskManager> task_manager,
     std::shared_ptr<CallCenter> call_center,
     CallProvider call_provider
 ) {
