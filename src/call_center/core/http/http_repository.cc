@@ -3,6 +3,7 @@
 #include <boost/beast/version.hpp>
 
 namespace call_center::core::http {
+
 HttpRepository::HttpRepository(std::string root) : root_(std::move(root)) {
 }
 
@@ -11,7 +12,7 @@ std::string_view HttpRepository::GetRootPath() const {
 }
 
 HttpRepository::Response HttpRepository::MakeResponse(
-    http::status status, bool keep_alive, std::string &&body
+    const http::status status, const bool keep_alive, std::string &&body
 ) {
   Response response{};
   response.result(status);

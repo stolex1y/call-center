@@ -4,7 +4,7 @@
 
 namespace call_center {
 
-std::string to_string(CallStatus status) {
+std::string to_string(const CallStatus status) {
   switch (status) {
     case CallStatus::kOk: {
       return "ok";
@@ -24,7 +24,7 @@ std::string to_string(CallStatus status) {
   }
 }
 
-std::ostream &operator<<(std::ostream &out, CallStatus status) {
+std::ostream &operator<<(std::ostream &out, const CallStatus status) {
   return out << to_string(status);
 }
 

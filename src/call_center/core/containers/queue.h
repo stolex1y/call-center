@@ -1,7 +1,6 @@
 #ifndef CALL_CENTER_SRC_CALL_CENTER_UTILS_CONCURRENT_QUEUE_H_
 #define CALL_CENTER_SRC_CALL_CENTER_UTILS_CONCURRENT_QUEUE_H_
 
-#include <mutex>
 #include <optional>
 #include <queue>
 #include <unordered_set>
@@ -10,18 +9,23 @@
 
 namespace call_center::core::containers {
 
+/**
+ * @brief Реализация очереди, поддерживающая операцию @link Contains @endlink за O(1).
+ */
 template <NoThrowCopyConstructor T, typename Hash = std::hash<T>, typename Equal = std::equal_to<T>>
 class Queue {
  public:
-  explicit Queue(size_t capacity = SIZE_MAX) : capacity_(capacity) {
-  }
-  Queue(const Queue<T, Hash, Equal> &other) = delete;
-  Queue &operator=(const Queue<T, Hash, Equal> &other) = delete;
+  explicit Queue(size_t capacity = SIZE_MAX);
+  Queue(const Queue &other) = delete;
+  Queue &operator=(const Queue &other) = delete;
 
   bool Push(const T &t);
   std::optional<T> Pop();
   [[nodiscard]] bool IsEmpty() const;
   [[nodiscard]] bool IsFull() const;
+  /**
+   * @brief Проверка наличия заданного элемента в очереди за O(1).
+   */
   bool Contains(const T &t);
   [[nodiscard]] std::optional<T> Peek() const;
   void SetCapacity(size_t capacity);
@@ -33,7 +37,7 @@ class Queue {
 };
 
 template <NoThrowCopyConstructor T, typename Hash, typename Equal>
-void Queue<T, Hash, Equal>::SetCapacity(size_t capacity) {
+void Queue<T, Hash, Equal>::SetCapacity(const size_t capacity) {
   capacity_ = capacity;
 }
 
@@ -64,6 +68,10 @@ std::optional<T> Queue<T, Hash, Equal>::Pop() {
   queue_.pop();
   set_.erase(set_.find(item));
   return item;
+}
+
+template <NoThrowCopyConstructor T, typename Hash, typename Equal>
+Queue<T, Hash, Equal>::Queue(const size_t capacity) : capacity_(capacity) {
 }
 
 template <NoThrowCopyConstructor T, typename Hash, typename Equal>

@@ -1,4 +1,4 @@
-#include "core/task_manager_impl.h"
+#include "core/tasks/task_manager_impl.h"
 
 #include <gtest/gtest.h>
 
@@ -7,7 +7,7 @@
 #include "configuration_adapter.h"
 #include "utils.h"
 
-namespace call_center::core::test {
+namespace call_center::core::tasks::test {
 
 using namespace log;
 using namespace std::chrono_literals;
@@ -76,7 +76,7 @@ TaskResult TaskManagerImplTest::PostTask(size_t id) {
   return future;
 }
 
-TaskResults TaskManagerImplTest::PostTasks(size_t task_count) {
+TaskResults TaskManagerImplTest::PostTasks(const size_t task_count) {
   TaskResults results(task_count);
   for (size_t i = 0; i < task_count; ++i) {
     results[i] = PostTask(i + 1);
@@ -85,7 +85,7 @@ TaskResults TaskManagerImplTest::PostTasks(size_t task_count) {
 }
 
 template <typename Duration>
-TaskResults TaskManagerImplTest::PostTasksDelayed(const Duration &delay, size_t task_count) {
+TaskResults TaskManagerImplTest::PostTasksDelayed(const Duration &delay, const size_t task_count) {
   TaskResults results(task_count);
   for (size_t i = 0; i < task_count; ++i) {
     results[i] = PostTaskDelayed(i + 1, delay);
@@ -108,7 +108,7 @@ TaskResult TaskManagerImplTest::PostTaskDelayed(size_t id, const Duration &delay
 }
 
 template <typename TimePoint>
-TaskResults TaskManagerImplTest::PostTasksAt(const TimePoint &time_point, size_t task_count) {
+TaskResults TaskManagerImplTest::PostTasksAt(const TimePoint &time_point, const size_t task_count) {
   TaskResults results(task_count);
   for (size_t i = 0; i < task_count; ++i) {
     results[i] = PostTaskAt(i + 1, time_point);
@@ -132,7 +132,7 @@ TaskResult TaskManagerImplTest::PostTaskAt(size_t id, const TimePoint &time_poin
 
 template <typename Duration>
 void VerifyTaskResult(TaskResult &result, const Duration &delay) {
-  std::future_status status = result.wait_for(delay);
+  const std::future_status status = result.wait_for(delay);
   ASSERT_EQ(std::future_status::ready, status) << "Task result must be ready.";
   ASSERT_TRUE(result.get()) << "Task result must be true.";
 }
@@ -177,22 +177,25 @@ void VerifyTaskResultsDelayed(const Duration &delay, TaskResults &results) {
 }
 
 TEST_F(TaskManagerImplTest, PostTask_TaskExecuted) {
-  auto results = PostTasks(std::max(task_manager_->GetUserThreadCount() / 3, size_t(1)));
+  auto results =
+      PostTasks(std::max(task_manager_->GetUserThreadCount() / 3, static_cast<size_t>(1)));
   VerifyTaskResults(results);
 }
 
 TEST_F(TaskManagerImplTest, PostTaskAt_TaskExecuted) {
   const auto future_time_point = utc_clock::now() + 1s;
-  auto results =
-      PostTasksAt(future_time_point, std::max(task_manager_->GetUserThreadCount() / 3, size_t(1)));
+  auto results = PostTasksAt(
+      future_time_point, std::max(task_manager_->GetUserThreadCount() / 3, static_cast<size_t>(1))
+  );
   VerifyTaskResultsAt(future_time_point, results);
 }
 
 TEST_F(TaskManagerImplTest, PostTaskDelayed_TaskExecuted) {
   const auto delay = 1s;
-  auto results =
-      PostTasksDelayed(delay, std::max(task_manager_->GetUserThreadCount() / 3, size_t(1)));
+  auto results = PostTasksDelayed(
+      delay, std::max(task_manager_->GetUserThreadCount() / 3, static_cast<size_t>(1))
+  );
   VerifyTaskResultsDelayed(delay, results);
 }
 
-}  // namespace call_center::core::test
+}  // namespace call_center::core::tasks::test

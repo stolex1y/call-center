@@ -8,8 +8,14 @@
 
 #include "core/utils/concepts.h"
 
+/// Специлизированные структуры данных.
 namespace call_center::core::containers {
 
+using namespace utils::concepts;
+
+/**
+ * @brief Потокобезопасная реализация структуры std::unordered_map.
+ */
 template <
     NoThrowMoveConstructor K,
     NoThrowMoveConstructor V,
@@ -18,7 +24,7 @@ template <
 class ConcurrentHashMap {
  public:
   ConcurrentHashMap() = default;
-  ConcurrentHashMap(const ConcurrentHashMap<V, Hash, Equal> &other) = delete;
+  explicit ConcurrentHashMap(const ConcurrentHashMap<V, Hash, Equal> &other) = delete;
   ConcurrentHashMap &operator=(const ConcurrentHashMap<V, Hash, Equal> &other) = delete;
 
   void Set(K key, V value);

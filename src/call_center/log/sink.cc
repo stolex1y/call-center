@@ -16,35 +16,38 @@ namespace keywords = boost::log::keywords;
 
 namespace call_center::log {
 
-Sink::Sink(SeverityLevel level) : Sink(level, Sink::DefaultFormatter) {
+Sink::Sink(const SeverityLevel level) : Sink(level, DefaultFormatter) {
 }
 
-Sink::Sink(const std::string &file_name, SeverityLevel level, size_t max_size)
-    : Sink(file_name, level, max_size, Sink::DefaultFormatter) {
+Sink::Sink(const std::string &file_name, const SeverityLevel level, const size_t max_size)
+    : Sink(file_name, level, max_size, DefaultFormatter) {
 }
 
-Sink::Sink(SeverityLevel level, const Formatter &formatter)
+Sink::Sink(const SeverityLevel level, const Formatter &formatter)
     : Sink(boost::shared_ptr<std::ostream>(&std::cout, [](std::ostream *) {}), level, formatter) {
 }
 
 Sink::Sink(
-    const std::string &file_name, SeverityLevel level, size_t max_size, const Formatter &formatter
+    const std::string &file_name,
+    const SeverityLevel level,
+    const size_t max_size,
+    const Formatter &formatter
 )
     : Sink(boost::make_shared<std::ofstream>(file_name), level, formatter, max_size) {
 }
 
 Sink::Sink(
     boost::shared_ptr<std::ostream> ostream,
-    SeverityLevel level,
+    const SeverityLevel level,
     const Formatter &formatter,
-    size_t max_size
+    const size_t max_size
 )
     : sink_impl_(new SinkImpl(keywords::max_size = max_size * 1024 * 1024)),
       stream_(std::move(ostream)),
       level_(level),
       max_size_(max_size) {
   sink_impl_->set_formatter(formatter);
-  sink_impl_->set_filter(attrs::severity >= level_ && attrs::channel == id_);
+  sink_impl_->set_filter((attrs::severity >= level_) && (attrs::channel == id_));
   sink_impl_->locked_backend()->add_stream(stream_);
   sink_impl_->locked_backend()->auto_flush(true);
 

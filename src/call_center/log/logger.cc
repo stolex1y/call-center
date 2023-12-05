@@ -13,39 +13,35 @@ namespace keywords = boost::log::keywords;
 namespace call_center::log {
 
 Logger::Logger(std::string tag, std::shared_ptr<Sink> sink) : sink_(std::move(sink)) {
-  add_attribute(
-      attrs::tag_attr_type::get_name(), boost_attrs::constant<std::string>(std::move(tag))
-  );
-  add_attribute(
-      attrs::channel_type::get_name(), boost_attrs::constant<boost::uuids::uuid>(sink_->Id())
-  );
+  add_attribute(attrs::tag_attr_type::get_name(), boost_attrs::constant(std::move(tag)));
+  add_attribute(attrs::channel_type::get_name(), boost_attrs::constant(sink_->Id()));
   add_attribute(attrs::line_id_type::get_name(), boost::log::attributes::counter<unsigned int>(1));
   add_attribute(attrs::timestamp_type::get_name(), boost::log::attributes::local_clock());
   add_attribute(attrs::thread_type::get_name(), boost::log::attributes::current_thread_id());
 }
 
 Logger::Ostream Logger::Trace() {
-  return Logger::Ostream(*this, SeverityLevel::kTrace);
+  return Ostream(*this, SeverityLevel::kTrace);
 }
 
 Logger::Ostream Logger::Debug() {
-  return Logger::Ostream(*this, SeverityLevel::kDebug);
+  return Ostream(*this, SeverityLevel::kDebug);
 }
 
 Logger::Ostream Logger::Info() {
-  return Logger::Ostream(*this, SeverityLevel::kInfo);
+  return Ostream(*this, SeverityLevel::kInfo);
 }
 
 Logger::Ostream Logger::Warning() {
-  return Logger::Ostream(*this, SeverityLevel::kWarning);
+  return Ostream(*this, SeverityLevel::kWarning);
 }
 
 Logger::Ostream Logger::Error() {
-  return Logger::Ostream(*this, SeverityLevel::kError);
+  return Ostream(*this, SeverityLevel::kError);
 }
 
 Logger::Ostream Logger::Fatal() {
-  return Logger::Ostream(*this, SeverityLevel::kFatal);
+  return Ostream(*this, SeverityLevel::kFatal);
 }
 
 Logger::Ostream::Ostream(Logger &logger, SeverityLevel level)

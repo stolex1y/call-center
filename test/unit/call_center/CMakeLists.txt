@@ -1,6 +1,6 @@
-set(OBJ_LIB_TARGET callcenter)
-set(STATIC_LIB_TARGET "${OBJ_LIB_TARGET}_static")
-set(TEST_TARGET "${OBJ_LIB_TARGET}_test")
+set(OBJ_LIB_TARGET ${CMAKE_PROJECT_NAME})
+set(STATIC_LIB_TARGET "${OBJ_LIB_TARGET}-static")
+set(TEST_TARGET "${OBJ_LIB_TARGET}-test")
 
 add_executable(${TEST_TARGET}
         call_center_test.cc
@@ -12,13 +12,13 @@ add_executable(${TEST_TARGET}
         fake/fake_task_manager.h
         fake/fake_call_detailed_record.cc
         fake/fake_call_detailed_record.h
-        task_manager_impl_test.cc
+        core/tasks/task_manager_impl_test.cc
         utils.h
         utils.cc
         operator_set_test.cc
-        fake/fake_operator.cc
-        fake/fake_operator.h
-        queueing_system/metrics/queueing_system_metrics_test.cc
+        mock/mock_operator.cc
+        mock/mock_operator.h
+        core/queueing_system/metrics/queueing_system_metrics_test.cc
         fake/fake_service_loader.cc
         fake/fake_service_loader.h
 )

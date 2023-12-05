@@ -2,7 +2,7 @@
 
 #include <memory>
 
-namespace call_center {
+namespace call_center::test {
 
 std::shared_ptr<FakeCallDetailedRecord> FakeCallDetailedRecord::Create(
     std::shared_ptr<const core::ClockAdapter> clock,
@@ -56,4 +56,4 @@ void FakeCallDetailedRecord::SetArrivalTime() {
   timeout_point_ = *arrival_time_ + max_wait_;
 }
 
-}  // namespace call_center
+}  // namespace call_center::test

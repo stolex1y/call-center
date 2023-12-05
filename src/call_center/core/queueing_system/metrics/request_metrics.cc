@@ -1,6 +1,6 @@
 #include "request_metrics.h"
 
-namespace call_center::qs::metrics {
+namespace call_center::core::qs::metrics {
 
 std::optional<RequestMetrics::Duration> RequestMetrics::GetServiceTime() const {
   if (!service_complete_time_) {
@@ -23,4 +23,4 @@ std::optional<RequestMetrics::Duration> RequestMetrics::GetTotalTime() const {
   return *service_complete_time_ - arrival_time_;
 }
 
-}  // namespace call_center::qs::metrics
+}  // namespace call_center::core::qs::metrics

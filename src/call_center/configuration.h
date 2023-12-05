@@ -2,7 +2,6 @@
 #define CALL_CENTER_SRC_CALL_CENTER_CONFIGURATION_H_
 
 #include <any>
-#include <boost/core/ignore_unused.hpp>
 #include <boost/json.hpp>
 #include <optional>
 #include <shared_mutex>
@@ -13,25 +12,45 @@
 #include "log/logger_provider.h"
 
 namespace call_center {
+using namespace core::utils::concepts;
 
+/**
+ * @brief Класс, выполняющий чтение конфигурации из файла.
+ */
 class Configuration : public std::enable_shared_from_this<Configuration> {
  public:
   static std::shared_ptr<Configuration> Create(
-      const log::LoggerProvider &logger_provider, std::string file_name = kDefaultFileName_
+      const log::LoggerProvider &logger_provider, std::string file_name = kDefaultFileName
   );
 
-  static constexpr const auto kDefaultFileName_ = "config.json";
-  static constexpr const auto kCachingKey_ = "configuration_is_caching";
+  static constexpr auto kDefaultFileName = "config.json";
+  /// Ключ в конфигурации, соответствующий значению свойства кеширования других значений из
+  /// конфигурации.
+  static constexpr auto kCachingKey = "configuration_is_caching";
 
   Configuration(Configuration &other) = delete;
   Configuration &operator=(Configuration &other) = delete;
 
+  /**
+   * @brief Получить значение свойства по ключу.
+   * @return std::nullopt - если ключе не был найден.
+   */
   template <typename T>
   std::optional<T> GetProperty(const std::string &key);
 
+  /**
+   * @brief Получить значение свойства по ключу либо переданное значение по умолчанию.
+   */
   template <typename T>
   T GetProperty(const std::string &key, const T &default_value);
 
+  /**
+   * @brief Получить числовое значение из конфигурации либо переданное значение по умолчанию, если
+   * значение в конфигурации не лежит в заданных пределах либо такой ключ не найден. @param key ключ
+   * @param default_value значение по умолчанию
+   * @param min минимально допустимое значение
+   * @param max максимально допустимое значение
+   */
   template <Arithmetic T>
   T GetNumber(
       const std::string &key,
@@ -40,12 +59,18 @@ class Configuration : public std::enable_shared_from_this<Configuration> {
       T max = std::numeric_limits<T>::max()
   );
 
+  /**
+   * @brief Имя файла с конфигурацией.
+   */
   const std::string &GetFileName() const;
 
+  /**
+   * @brief Повторно прочитать конфигураию из файла.
+   */
   void UpdateConfiguration();
 
  private:
-  static constexpr const bool kDefaultCaching_ = true;
+  static constexpr bool kDefaultCaching_ = true;
 
   std::atomic_bool caching_ = kDefaultCaching_;
   std::unique_ptr<log::Logger> logger_;
@@ -55,11 +80,17 @@ class Configuration : public std::enable_shared_from_this<Configuration> {
   const std::string file_name_;
 
   explicit Configuration(
-      const log::LoggerProvider &logger_provider, std::string file_name = kDefaultFileName_
+      const log::LoggerProvider &logger_provider, std::string file_name = kDefaultFileName
   );
 
+  /**
+   * @brief Обновить значение свойства кеширования из конфигурации.
+   */
   void UpdateCaching();
 
+  /**
+   * @brief Базовый метод для остальных, непосредственно читающий значение из конфигурации.
+   */
   template <typename T>
   std::optional<T> ReadProperty(const std::string &key);
 };

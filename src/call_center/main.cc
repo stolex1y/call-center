@@ -2,7 +2,7 @@
 #include "configuration.h"
 #include "configuration_updater.h"
 #include "core/http/http_server.h"
-#include "core/task_manager_impl.h"
+#include "core/tasks/task_manager_impl.h"
 #include "journal.h"
 #include "repository/call/call_repository.h"
 #include "repository/metrics/metrics_repository.h"
@@ -11,19 +11,20 @@ using namespace call_center;
 using namespace call_center::core::http;
 using namespace call_center::log;
 using namespace call_center::core;
-using namespace call_center::qs::metrics;
+using namespace call_center::core::tasks;
+using namespace call_center::core::qs::metrics;
 using namespace call_center::repository;
 
 int main() {
   const LoggerProvider logger_provider(std::make_shared<Sink>(SeverityLevel::kTrace));
 
-  const auto port = static_cast<unsigned short>(8080);
+  constexpr auto port = static_cast<unsigned short>(8080);
   const auto address = net::ip::address_v4::any();
 
   const auto configuration = Configuration::Create(logger_provider);
   auto task_manager = TaskManagerImpl::Create(configuration, logger_provider);
   ConfigurationUpdater::Create(configuration, task_manager, logger_provider)->StartUpdating();
-  const auto operator_provider = [&task_manager, &configuration, &logger_provider]() {
+  const auto operator_provider = [&task_manager, &configuration, &logger_provider] {
     return Operator::Create(task_manager, configuration, logger_provider);
   };
   const auto metrics = QueueingSystemMetrics::Create(task_manager, configuration, logger_provider);

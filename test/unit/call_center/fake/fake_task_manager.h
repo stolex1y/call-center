@@ -5,12 +5,22 @@
 #include <map>
 
 #include "core/clock_adapter.h"
-#include "core/task_manager.h"
-#include "core/tasks.h"
+#include "core/tasks/task_manager.h"
+#include "core/tasks/tasks.h"
 #include "fake_clock.h"
+#include "log/logger_provider.h"
 
-namespace call_center::core {
+/// Для тестирования
+namespace call_center::core::tasks::test {
 
+using namespace call_center::test;
+
+/**
+ * @brief Менеджер задач, использующий @link FakeClock виртуальное время@endlink.
+ *
+ * Используя данный менеджер задач, можно продвигать его вперед на необходимое время,
+ * это позволяет сократить время выполнения тестов, где нужно планировать задачи на будущее время.
+ */
 class FakeTaskManager : public TaskManager {
  public:
   static std::shared_ptr<FakeTaskManager> Create(const log::LoggerProvider &logger_provider);
@@ -22,13 +32,16 @@ class FakeTaskManager : public TaskManager {
   void PostTask(std::function<Task> task) override;
   void PostTaskDelayedImpl(Duration_t delay, std::function<Task> task) override;
   void PostTaskAtImpl(TimePoint_t time_point, std::function<Task> task) override;
+  /**
+   * @brief Продвинуть время вперед и выполнить запланированные раннее задачи.
+   */
   void AdvanceTime(Duration_t duration);
   std::shared_ptr<const ClockAdapter> GetClock() const;
 
  private:
   static const size_t kThreadCount;
 
-  std::multimap<FakeClock::TimePoint, tasks::TaskWrapped<Task>> tasks_;
+  std::multimap<FakeClock::TimePoint, TaskWrapped<Task>> tasks_;
   std::shared_ptr<FakeClock> clock_;
   boost::thread_group threads_;
   const std::unique_ptr<log::Logger> logger_;
@@ -43,7 +56,7 @@ class FakeTaskManager : public TaskManager {
 
   explicit FakeTaskManager(const log::LoggerProvider &logger_provider);
 
-  tasks::TaskWrapped<Task> MakeTaskWrapped(std::function<Task> task);
+  TaskWrapped<Task> MakeTaskWrapped(std::function<Task> task) const;
   void AddTask(FakeClock::TimePoint time_point, std::function<Task> task);
   bool HasTasks() const;
   void HandleTasks();
@@ -52,6 +65,6 @@ class FakeTaskManager : public TaskManager {
   void ClearTasks();
 };
 
-}  // namespace call_center::core
+}  // namespace call_center::core::tasks::test
 
 #endif  // CALL_CENTER_TEST_UNIT_CALL_CENTER_FAKE_FAKE_TASK_MANAGER_H_

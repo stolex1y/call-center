@@ -1,8 +1,9 @@
 #include "fake_task_manager.h"
 
+#include <boost/thread/detail/thread.hpp>
 #include <stdexcept>
 
-namespace call_center::core {
+namespace call_center::core::tasks::test {
 
 namespace asio = boost::asio;
 
@@ -62,28 +63,28 @@ void FakeTaskManager::PostTask(std::function<Task> task) {
   AddTask(clock_->Now(), std::move(task));
 }
 
-void FakeTaskManager::PostTaskDelayedImpl(Duration_t delay, std::function<Task> task) {
+void FakeTaskManager::PostTaskDelayedImpl(const Duration_t delay, std::function<Task> task) {
   if (IsStopped()) {
     return;
   }
   AddTask(clock_->Now() + delay, std::move(task));
 }
 
-void FakeTaskManager::PostTaskAtImpl(TimePoint_t time_point, std::function<Task> task) {
+void FakeTaskManager::PostTaskAtImpl(const TimePoint_t time_point, std::function<Task> task) {
   if (IsStopped()) {
     return;
   }
   AddTask(
-      std::chrono::time_point_cast<FakeClock::Duration, FakeClock::Clock_t>(time_point),
+      std::chrono::time_point_cast<FakeClock::Duration, FakeClock::Clock>(time_point),
       std::move(task)
   );
 }
 
-tasks::TaskWrapped<TaskManager::Task> FakeTaskManager::MakeTaskWrapped(std::function<Task> task) {
+TaskWrapped<TaskManager::Task> FakeTaskManager::MakeTaskWrapped(std::function<Task> task) const {
   return {std::move(task), *logger_};
 }
 
-void FakeTaskManager::AdvanceTime(Duration_t duration) {
+void FakeTaskManager::AdvanceTime(const Duration_t duration) {
   std::lock_guard clock_advance_lock(advance_mutex_);
   const auto target_time = clock_->Now() + duration;
   std::shared_lock tasks_lock(tasks_mutex_);
@@ -92,13 +93,12 @@ void FakeTaskManager::AdvanceTime(Duration_t duration) {
       tasks_lock.unlock();
       clock_->AdvanceTo(target_time);
       return;
-    } else {
-      clock_->AdvanceTo(std::min(target_time, tasks_.begin()->first));
-      has_tasks_.notify_all();
-      done_tasks_.wait(tasks_lock, [this]() {
-        return !HasTasks();
-      });
     }
+    clock_->AdvanceTo(std::min(target_time, tasks_.begin()->first));
+    has_tasks_.notify_all();
+    done_tasks_.wait(tasks_lock, [this] {
+      return !HasTasks();
+    });
   }
 }
 
@@ -166,4 +166,4 @@ bool FakeTaskManager::IsStopped() const {
   std::shared_lock lock(start_mutex_);
   return stopped_;
 }
-}  // namespace call_center::core
+}  // namespace call_center::core::tasks::test

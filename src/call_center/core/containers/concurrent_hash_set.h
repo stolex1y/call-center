@@ -11,6 +11,9 @@ namespace call_center::core::containers {
 
 using namespace core::utils::concepts;
 
+/**
+ * @brief Потокобезопасная реализация структуры std::unordered_set.
+ */
 template <NoThrowMoveConstructor T, typename Hash = std::hash<T>, typename Equal = std::equal_to<T>>
 class ConcurrentHashSet {
  public:

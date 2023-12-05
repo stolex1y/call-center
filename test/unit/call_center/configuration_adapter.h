@@ -9,8 +9,15 @@
 #include "operator.h"
 #include "operator_set.h"
 
-namespace call_center {
+namespace call_center::test {
 
+using namespace core::qs;
+
+/**
+ * @brief Адаптер @link Configuration @endlink для тестирования.
+ *
+ * Позволяет задавать параметры конфигурации.
+ */
 class ConfigurationAdapter {
  public:
   explicit ConfigurationAdapter(std::shared_ptr<Configuration> configuration);
@@ -22,13 +29,13 @@ class ConfigurationAdapter {
   void SetOperatorDelay(Operator::DelayDuration min_delay, Operator::DelayDuration max_delay);
   void SetOperatorDelay(Operator::DelayDuration delay);
   void SetCallMaxWait(CallDetailedRecord::WaitingDuration max_wait);
-  void SetMetricsUpdateTime(qs::metrics::QueueingSystemMetrics::MetricsUpdateDuration delay);
+  void SetMetricsUpdateTime(metrics::QueueingSystemMetrics::MetricsUpdateDuration delay);
 
  private:
   const std::shared_ptr<Configuration> configuration_;
   boost::json::object config_json;
 };
 
-}  // namespace call_center
+}  // namespace call_center::test
 
 #endif  // CALL_CENTER_TEST_UNIT_CALL_CENTER_CONFIGURATION_ADAPTER_H_

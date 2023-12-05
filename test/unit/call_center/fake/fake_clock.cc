@@ -1,8 +1,8 @@
 #include "fake_clock.h"
 
-namespace call_center {
+namespace call_center::test {
 
-void FakeClock::AdvanceTo(TimePoint target_time) {
+void FakeClock::AdvanceTo(const TimePoint target_time) {
   std::lock_guard lock(mutex_);
   if (target_time > absolute_) {
     relative_ += target_time - absolute_;
@@ -24,4 +24,4 @@ void FakeClock::AdvanceOn(Duration duration) {
   AdvanceTo(Now() + duration);
 }
 
-}  // namespace call_center
+}  // namespace call_center::test

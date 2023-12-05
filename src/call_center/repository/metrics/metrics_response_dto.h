@@ -3,14 +3,15 @@
 
 #include <boost/json.hpp>
 
+#include "core/queueing_system/metrics/metric.h"
+#include "core/queueing_system/metrics/queueing_system_metrics.h"
 #include "core/utils/numbers.h"
-#include "queueing_system/metrics/metric.h"
-#include "queueing_system/metrics/queueing_system_metrics.h"
 
 namespace call_center::repository {
+
 namespace json = boost::json;
 
-using namespace qs::metrics;
+using namespace core::qs::metrics;
 using namespace std::chrono;
 using namespace core::utils::numbers;
 
@@ -24,16 +25,22 @@ struct MetricsReponseDto {
   double service_load_in_erlang;
 
   MetricsReponseDto(
-      Metric<Duration> wait_time_metric,
-      Metric<size_t, double> queue_size_metric,
-      Metric<size_t, double> busy_operators_count_metric,
+      const Metric<Duration> &wait_time_metric,
+      const Metric<size_t, double> &queue_size_metric,
+      const Metric<size_t, double> &busy_operators_count_metric,
       double service_load_in_erlang
   );
 
+  /**
+   * @brief Преобразование из объекта в json.
+   */
   friend void tag_invoke(
       const json::value_from_tag &, json::value &json, const MetricsReponseDto &call_response
   );
 
+  /**
+   * @brief Преобразование метрики в json.
+   */
   template <typename Metric>
   static json::value MetricToJson(Metric metric);
 };
@@ -46,7 +53,7 @@ json::value MetricsReponseDto::MetricToJson(Metric metric) {
 
 template <>
 inline json::value MetricsReponseDto::MetricToJson<Metric<MetricsReponseDto::Duration>>(
-    Metric<Duration> metric
+    const Metric<Duration> metric
 ) {
   return json::object{
       {"min", floor<seconds>(metric.GetMin()).count()},

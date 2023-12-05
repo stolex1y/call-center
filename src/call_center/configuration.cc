@@ -38,7 +38,7 @@ void Configuration::UpdateConfiguration() {
 }
 
 void Configuration::UpdateCaching() {
-  caching_ = ReadProperty<bool>(kCachingKey_).value_or(caching_);
+  caching_ = ReadProperty<bool>(kCachingKey).value_or(caching_);
 }
 
 const std::string &Configuration::GetFileName() const {

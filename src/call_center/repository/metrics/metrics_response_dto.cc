@@ -14,10 +14,10 @@ void tag_invoke(
 }
 
 MetricsReponseDto::MetricsReponseDto(
-    Metric<Duration> wait_time_metric,
-    Metric<size_t, double> queue_size_metric,
-    Metric<size_t, double> busy_operators_count_metric,
-    double service_load_in_erlang
+    const Metric<Duration> &wait_time_metric,
+    const Metric<size_t, double> &queue_size_metric,
+    const Metric<size_t, double> &busy_operators_count_metric,
+    const double service_load_in_erlang
 )
     : wait_time_metric(wait_time_metric),
       queue_size_metric(queue_size_metric),

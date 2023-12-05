@@ -7,19 +7,23 @@
 
 #include "call_status.h"
 #include "configuration.h"
-#include "queueing_system/request.h"
+#include "core/queueing_system/request.h"
 
 namespace call_center {
 
-class CallDetailedRecord : public qs::Request {
+/**
+ * @brief В центре обработки вызовов каждый запрос представлен экземпляром данного класса.
+ *
+ * Помимо различных моментов времени, связанных с обслуживанием вызова, содержит обратный вызов при
+ * завершении обработки, а также результат обслуживания.
+ */
+class CallDetailedRecord : public core::qs::Request {
  public:
+  /// Обратный вызов при завершении обслуживания.
   using OnFinish = std::function<void(const CallDetailedRecord &cdr)>;
-  using Clock = std::chrono::utc_clock;
-  using Duration = std::chrono::milliseconds;
-  using WaitingDuration = std::chrono::seconds;
-  using TimePoint = std::chrono::time_point<Clock, Duration>;
 
-  static constexpr auto kMaxWaitKey_ = "call_max_wait";
+  /// Ключ в конфигурации, соответствующий значению максимального времени ожидания в секундах.
+  static constexpr auto kMaxWaitKey = "call_max_wait";
 
   CallDetailedRecord(
       std::string caller_phone_number,
@@ -39,13 +43,42 @@ class CallDetailedRecord : public qs::Request {
   [[nodiscard]] bool WasArrived() const override;
   [[nodiscard]] bool IsTimeout() const override;
 
+  /**
+   * @brief Зафиксировать время прибытия запроса в систему.
+   */
   virtual void SetArrivalTime();
+  /**
+   * @brief Зафиксировать время начала обслуживания.
+   * @param operator_id идентификатор оператора, занимающегося обслуживанием
+   */
   virtual void StartService(boost::uuids::uuid operator_id);
+  /**
+   * @brief Зафиксировать время завершения обслуживания.
+   * @param status результат обслуживания
+   */
   virtual void CompleteService(CallStatus status);
+  /**
+   * @brief Номер инициатора вызова.
+   */
   [[nodiscard]] virtual const std::string &GetCallerPhoneNumber() const;
+  /**
+   * @brief Результат обработки вызова.
+   * @return std::nullopt - если обслуживание не было завершено.
+   */
   [[nodiscard]] virtual std::optional<CallStatus> GetStatus() const;
+  /**
+   * @brief Идентификатор оператора, который занимался обслуживанием звонка.
+   * @return std::nullopt - если обслуживание так и не было начато.
+   */
   [[nodiscard]] virtual std::optional<boost::uuids::uuid> GetOperatorId() const;
+  /**
+   * @brief Максимальное время ожидания вызова.
+   */
   [[nodiscard]] virtual WaitingDuration GetMaxWait() const;
+  /**
+   * @brief Время окончания ожидания.
+   * @return std::nullopt - если запрос ещё не был получен системой.
+   */
   [[nodiscard]] virtual std::optional<TimePoint> GetTimeoutPoint() const;
 
  protected:
@@ -63,9 +96,22 @@ class CallDetailedRecord : public qs::Request {
   std::optional<boost::uuids::uuid> operator_id_ = std::nullopt;
   const OnFinish on_finish_;
 
+  /**
+   * @brief Прочитать максимальное время ожидания из конфигурации.
+   */
   [[nodiscard]] uint64_t ReadMaxWait() const;
+  /**
+   * @brief Был ли завершен вызов, в отличие от @link WasFinished @endlink не защищен мьютексом.
+   */
   [[nodiscard]] bool WasFinished_() const;
+  /**
+   * @brief Был ли обслужен запрос, в отличие от @link WasServiced @endlink не защищен мьютексом.
+   */
   [[nodiscard]] bool WasServiced_() const;
+  /**
+   * @brief Был ли запрос получен системой, в отличие от @link WasArrived @endlink не защищен
+   * мьютексом.
+   */
   [[nodiscard]] bool WasArrived_() const;
 };
 

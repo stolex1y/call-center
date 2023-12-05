@@ -2,9 +2,9 @@
 
 #include <boost/container_hash/hash.hpp>
 
-namespace call_center::qs {
+namespace call_center::core::qs {
 
-Request::Request(Id id) : id_(id) {
+Request::Request(const Id id) : id_(id) {
 }
 
 bool Request::operator==(const Request& other) const {
@@ -19,4 +19,4 @@ Request::Id Request::GetId() const {
   return id_;
 }
 
-}  // namespace call_center::qs
+}  // namespace call_center::core::qs

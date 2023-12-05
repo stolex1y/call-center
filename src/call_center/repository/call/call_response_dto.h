@@ -7,6 +7,7 @@
 #include "call_status.h"
 
 namespace call_center::repository {
+
 namespace json = boost::json;
 
 struct CallResponseDto {
@@ -14,6 +15,9 @@ struct CallResponseDto {
 
   explicit CallResponseDto(CallStatus status);
 
+  /**
+   * @brief Преоразование из объекта в json.
+   */
   friend void tag_invoke(
       const json::value_from_tag &, json::value &json, const CallResponseDto &call_response
   );

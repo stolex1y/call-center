@@ -1,18 +1,44 @@
 #ifndef METRIC_H
 #define METRIC_H
+
 #include <algorithm>
 
-namespace call_center::qs::metrics {
+namespace call_center::core::qs::metrics {
 
+/**
+ * @brief Класс для хранения информации по конкретному показателю.
+ *
+ * Он сохраняет минимальное, максимальное и среднее значение данного показателя.
+ * @tparam T значение показателя
+ * @tparam AvgT среднее значение показателя
+ */
 template <typename T, typename AvgT = T>
 class Metric {
  public:
+  /**
+   * @param default_value значение показателя по умолчанию
+   */
   explicit Metric(T default_value);
 
+  /**
+   * @brief Добавить новое значение показателя.
+   */
   void AddValue(T value);
+  /**
+   * @brief Минимальное значение показателя.
+   */
   [[nodiscard]] T GetMin() const;
+  /**
+   * @brief Максимальное значение показателя.
+   */
   [[nodiscard]] T GetMax() const;
+  /**
+   * @brief Среднее значение показателя.
+   */
   [[nodiscard]] AvgT GetAvg() const;
+  /**
+   * @brief Количество зафиксированных значений.
+   */
   [[nodiscard]] size_t GetCount() const;
 
  private:
@@ -59,6 +85,6 @@ size_t Metric<T, AvgT>::GetCount() const {
   return count_;
 }
 
-}  // namespace call_center::qs::metrics
+}  // namespace call_center::core::qs::metrics
 
 #endif  // METRIC_H

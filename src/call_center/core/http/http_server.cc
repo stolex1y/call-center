@@ -5,6 +5,7 @@
 #include "http_connection.h"
 
 namespace call_center::core::http {
+
 std::shared_ptr<HttpServer> HttpServer::Create(
     net::io_context &ioc, const tcp::endpoint &endpoint, log::LoggerProvider logger_provider
 ) {
@@ -26,10 +27,9 @@ HttpServer::HttpServer(
 
 void HttpServer::Open() {
   beast::error_code error;
-  boost::system::error_code system_error;
 
   // Open the acceptor
-  system_error = acceptor_.open(endpoint_.protocol(), error);
+  boost::system::error_code system_error = acceptor_.open(endpoint_.protocol(), error);
   boost::ignore_unused(system_error);
   if (error) {
     throw std::runtime_error("Failed on open acceptor with error: " + error.message());
@@ -64,7 +64,7 @@ void HttpServer::Start() {
   if (!acceptor_.is_open()) {
     Open();
   }
-  acceptor_.async_accept(ioc_, [this](beast::error_code ec, tcp::socket socket) {
+  acceptor_.async_accept(ioc_, [this](const beast::error_code &ec, tcp::socket socket) {
     this->OnAccept(ec, std::move(socket));
   });
 }
@@ -75,7 +75,7 @@ void HttpServer::Stop() {
   logger_->Info() << "Server stopped";
 }
 
-void HttpServer::OnAccept(beast::error_code error, tcp::socket socket) {
+void HttpServer::OnAccept(const beast::error_code &error, tcp::socket socket) {
   if (error || stopped_) {
     if (error)
       logger_->Error() << "Failed on accept with error: " << error.message();

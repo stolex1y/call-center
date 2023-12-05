@@ -4,7 +4,7 @@ namespace call_center {
 
 std::shared_ptr<ConfigurationUpdater> ConfigurationUpdater::Create(
     std::shared_ptr<Configuration> configuration,
-    std::shared_ptr<core::TaskManager> task_manager,
+    std::shared_ptr<core::tasks::TaskManager> task_manager,
     const log::LoggerProvider &logger_provider
 ) {
   return std::shared_ptr<ConfigurationUpdater>(
@@ -14,7 +14,7 @@ std::shared_ptr<ConfigurationUpdater> ConfigurationUpdater::Create(
 
 ConfigurationUpdater::ConfigurationUpdater(
     std::shared_ptr<Configuration> configuration,
-    std::shared_ptr<core::TaskManager> task_manager,
+    std::shared_ptr<core::tasks::TaskManager> task_manager,
     const log::LoggerProvider &logger_provider
 )
     : task_manager_(std::move(task_manager)),

@@ -9,10 +9,16 @@
 #include "core/http/http.h"
 #include "core/http/http_repository.h"
 
+/// Реализации HTTP-репозиториев.
 namespace call_center::repository {
-using namespace core::http;
 
-class CallRepository : public HttpRepository, public std::enable_shared_from_this<CallRepository> {
+namespace b_http = http::http;
+
+/**
+ * @brief Репозиторий для обработки вызовов.
+ */
+class CallRepository : public http::HttpRepository,
+                       public std::enable_shared_from_this<CallRepository> {
  public:
   static std::shared_ptr<CallRepository> Create(
       std::shared_ptr<CallCenter> call_center,
@@ -23,7 +29,7 @@ class CallRepository : public HttpRepository, public std::enable_shared_from_thi
   CallRepository(const CallRepository &other) = delete;
   CallRepository &operator=(const CallRepository &other) = delete;
 
-  void HandleRequest(const http::request<http::string_body> &request, const OnHandle &on_handle)
+  void HandleRequest(const b_http::request<b_http::string_body> &request, const OnHandle &on_handle)
       override;
 
  private:
@@ -31,6 +37,9 @@ class CallRepository : public HttpRepository, public std::enable_shared_from_thi
   const std::shared_ptr<CallCenter> call_center_;
   const std::shared_ptr<Configuration> configuration_;
 
+  /**
+   * @brief Сформировать ответ из обработанного вызова.
+   */
   static std::string MakeResponseBody(const CallDetailedRecord &cdr);
 
   CallRepository(
@@ -39,7 +48,10 @@ class CallRepository : public HttpRepository, public std::enable_shared_from_thi
       const log::LoggerProvider &logger_provider
   );
 
-  std::optional<CallRequestDto> ParseRequestBody(const std::string_view &body);
+  /**
+   * @brief Сформировать объект вызова из тела запроса.
+   */
+  std::optional<CallRequestDto> ParseRequestBody(const std::string_view &body) const;
 };
 
 }  // namespace call_center::repository

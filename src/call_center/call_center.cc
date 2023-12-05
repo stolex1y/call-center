@@ -4,17 +4,15 @@
 #include <chrono>
 
 namespace call_center {
+
 using namespace std::chrono_literals;
 using namespace qs::metrics;
 
-/**
- * Creating an instance of a class.
- */
 std::shared_ptr<CallCenter> CallCenter::Create(
     std::unique_ptr<Journal> journal,
     std::shared_ptr<Configuration> configuration,
-    std::shared_ptr<core::TaskManager> task_manager,
-    const log::LoggerProvider& logger_provider,
+    std::shared_ptr<tasks::TaskManager> task_manager,
+    const log::LoggerProvider &logger_provider,
     std::unique_ptr<OperatorSet> operator_set,
     std::unique_ptr<CallQueue> call_queue,
     std::shared_ptr<QueueingSystemMetrics> metrics
@@ -33,8 +31,8 @@ std::shared_ptr<CallCenter> CallCenter::Create(
 CallCenter::CallCenter(
     std::unique_ptr<Journal> journal,
     std::shared_ptr<Configuration> configuration,
-    std::shared_ptr<core::TaskManager> task_manager,
-    const log::LoggerProvider& logger_provider,
+    std::shared_ptr<tasks::TaskManager> task_manager,
+    const log::LoggerProvider &logger_provider,
     std::unique_ptr<OperatorSet> operator_set,
     std::unique_ptr<CallQueue> call_queue,
     std::shared_ptr<QueueingSystemMetrics> metrics
@@ -49,11 +47,7 @@ CallCenter::CallCenter(
   metrics_->Start();
 }
 
-/**
- * Placing a new call in the queue to processing.
- * @param call - call for processing.
- */
-void CallCenter::PushCall(const CallPtr& call) {
+void CallCenter::PushCall(const CallPtr &call) {
   call->SetArrivalTime();
   metrics_->RecordRequestArrival(call);
   // try to bypass the queue
@@ -78,21 +72,15 @@ void CallCenter::PushCall(const CallPtr& call) {
   }
 }
 
-/**
- * The main task is to process calls from the queue.
- * Cancels all calls with expired waiting time, after that, if there is a free
- * operator, then sends him a request. Otherwise, it looks at the minimum
- * timeout point of waiting calls and plans a new iteration for this time.
- */
 void CallCenter::PerformCallProcessingIteration() {
   if (calls_->QueueIsEmpty())
     return;
 
   RejectAllTimeoutCalls();
 
-  auto op = operators_->EraseFree();
+  const auto op = operators_->EraseFree();
   if (op) {
-    CallPtr call = calls_->PopFromQueue();
+    const CallPtr call = calls_->PopFromQueue();
     if (call) {
       calls_->InsertToProcessing(call);
       StartCallProcessing(call, op);
@@ -100,19 +88,14 @@ void CallCenter::PerformCallProcessingIteration() {
       operators_->InsertFree(op);
     }
   } else {
-    CallPtr call = calls_->GetMinTimeoutCallInQueue();
+    const CallPtr call = calls_->GetMinTimeoutCallInQueue();
     if (call) {
       ScheduleCallProcessingIteration(*call->GetTimeoutPoint());
     }
   }
 }
 
-/**
- * Start processing the call.
- * @param call - next call from the queue;
- * @param op - free operator who will handle the call.
- */
-void CallCenter::StartCallProcessing(const CallPtr& call, const OperatorPtr& op) {
+void CallCenter::StartCallProcessing(const CallPtr &call, const OperatorPtr &op) {
   logger_->Debug() << "Start call (" << boost::uuids::to_string(call->GetId()) << ") processing";
   call->StartService(op->GetId());
   metrics_->RecordServiceStart(call);
@@ -121,18 +104,11 @@ void CallCenter::StartCallProcessing(const CallPtr& call, const OperatorPtr& op)
   });
 }
 
-/**
- * Start processing a call if the queue is empty, there is a free operator and
- * the call is unique. It is necessary to bypass the queue, as it may have zero
- * capacity.
- * @param call - call for processing.
- * @return True if processing has stopped_, otherwise - false.
- */
-bool CallCenter::StartCallProcessingIfPossible(const CallPtr& call) {
+bool CallCenter::StartCallProcessingIfPossible(const CallPtr &call) {
   if (!calls_->QueueIsEmpty())
     return false;
 
-  auto op = operators_->EraseFree();
+  const auto op = operators_->EraseFree();
   if (op) {
     const auto added = calls_->InsertToProcessing(call);
     if (added) {
@@ -146,12 +122,7 @@ bool CallCenter::StartCallProcessingIfPossible(const CallPtr& call) {
   return false;
 }
 
-/**
- * Finish processing the call.
- * @param call - handled call;
- * @param op - operator who processed the call.
- */
-void CallCenter::FinishCallProcessing(const CallPtr& call, const OperatorPtr& op) {
+void CallCenter::FinishCallProcessing(const CallPtr &call, const OperatorPtr &op) {
   logger_->Debug() << "Finish call processing (" << boost::uuids::to_string(call->GetId()) << ")";
   call->CompleteService(CallStatus::kOk);
   metrics_->RecordServiceComplete(call, op);
@@ -165,12 +136,7 @@ void CallCenter::FinishCallProcessing(const CallPtr& call, const OperatorPtr& op
   }
 }
 
-/**
- * Schedule a new iteration of call processing at a certain time point.
- * @param time_point - time of execution of the new iteration of call
- * processing.
- */
-void CallCenter::ScheduleCallProcessingIteration(const CallDetailedRecord::TimePoint& time_point) {
+void CallCenter::ScheduleCallProcessingIteration(const CallDetailedRecord::TimePoint &time_point) {
   logger_->Debug() << "Add task to call processing at: " << time_point;
 
   const auto task = [call_center = shared_from_this()]() {
@@ -179,21 +145,13 @@ void CallCenter::ScheduleCallProcessingIteration(const CallDetailedRecord::TimeP
   task_manager_->PostTaskAt(time_point, task);
 }
 
-/**
- * Cancel call with for the specified reason.
- * @param call - call to reject;
- * @param reason - reason for rejection.
- */
-void CallCenter::RejectCall(const CallPtr& call, CallStatus reason) const {
+void CallCenter::RejectCall(const CallPtr &call, const CallStatus reason) const {
   logger_->Info() << "Reject call (" << boost::uuids::to_string(call->GetId()) << ") - " << reason;
   call->CompleteService(reason);
   metrics_->RecordRequestDropout(call);
   journal_->AddRecord(*call);
 }
 
-/**
- * Cancel all calls with expired waiting time.
- */
 void CallCenter::RejectAllTimeoutCalls() const {
   auto to_reject = calls_->EraseTimeoutCallFromQueue();
   while (to_reject) {
@@ -201,4 +159,5 @@ void CallCenter::RejectAllTimeoutCalls() const {
     to_reject = calls_->EraseTimeoutCallFromQueue();
   }
 }
+
 }  // namespace call_center

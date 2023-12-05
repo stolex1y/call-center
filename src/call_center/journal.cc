@@ -46,7 +46,7 @@ std::string Journal::FormatCallDetailedRecord(const CallDetailedRecord &cdr) {
 void Journal::AddRecord(const CallDetailedRecord &cdr) {
   UpdateSink();
   assert(cdr.WasFinished());
-  auto result = FormatCallDetailedRecord(cdr);
+  const auto result = FormatCallDetailedRecord(cdr);
   logger_->Info() << result;
 }
 
@@ -86,7 +86,7 @@ std::string Journal::FormatUuid(const std::optional<boost::uuids::uuid> &uuid) {
 
 void Journal::UpdateSink() {
   auto new_file_name = ReadFileName();
-  auto new_max_size = ReadMaxSize();
+  const auto new_max_size = ReadMaxSize();
   if (new_file_name != file_name_ || new_max_size != max_size_) {
     file_name_ = std::move(new_file_name);
     max_size_ = new_max_size;
@@ -99,7 +99,7 @@ std::shared_ptr<log::Sink> Journal::MakeSink() {
   return std::make_shared<log::Sink>(
       boost::make_shared<std::ofstream>(file_name_, std::ios_base::app),
       log::SeverityLevel::kTrace,
-      Journal::Formatter,
+      Formatter,
       max_size_
   );
 }

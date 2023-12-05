@@ -4,8 +4,10 @@
 
 namespace call_center {
 
+using namespace core::tasks;
+
 std::shared_ptr<Operator> Operator::Create(
-    std::shared_ptr<core::TaskManager> task_manager,
+    std::shared_ptr<TaskManager> task_manager,
     std::shared_ptr<Configuration> configuration,
     const log::LoggerProvider &logger_provider
 ) {
@@ -15,7 +17,7 @@ std::shared_ptr<Operator> Operator::Create(
 }
 
 Operator::Operator(
-    std::shared_ptr<core::TaskManager> task_manager,
+    std::shared_ptr<TaskManager> task_manager,
     std::shared_ptr<Configuration> configuration,
     const log::LoggerProvider &logger_provider
 )
@@ -62,8 +64,8 @@ void Operator::UpdateDistributionParameters() {
 }
 
 std::pair<uint64_t, uint64_t> Operator::ReadMinMax() const {
-  const uint64_t new_min = configuration_->GetProperty(kMinDelayKey_, min_delay_);
-  const uint64_t new_max = configuration_->GetNumber(kMaxDelayKey_, max_delay_, new_min);
+  const uint64_t new_min = configuration_->GetProperty(kMinDelayKey, min_delay_);
+  const uint64_t new_max = configuration_->GetNumber(kMaxDelayKey, max_delay_, new_min);
   return {new_min, new_max};
 }
 

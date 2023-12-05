@@ -14,6 +14,7 @@ using namespace core;
 using namespace std::chrono_literals;
 using namespace std::chrono;
 using namespace qs::metrics;
+using namespace core::tasks::test;
 
 using CallPtr = std::shared_ptr<CallDetailedRecord>;
 using CallsVector = std::vector<CallPtr>;
@@ -29,8 +30,8 @@ class CallCenterTest : public testing::Test {
   [[nodiscard]] CallsVector DuplicateCalls(const CallsVector &calls) const;
   [[nodiscard]] CallPtr CreateUniqueCall();
   [[nodiscard]] CallsVector CreateUniqueCalls(size_t count);
-  void PushCalls(const CallsVector &calls);
-  void PushCall(const CallPtr &call);
+  void PushCalls(const CallsVector &calls) const;
+  void PushCall(const CallPtr &call) const;
 
   const std::string test_name_;
   const std::string test_group_name_;
@@ -91,11 +92,11 @@ CallCenterTest::~CallCenterTest() {
   VerifyAllDone();
 }
 
-void CallCenterTest::PushCall(const CallPtr &call) {
+void CallCenterTest::PushCall(const CallPtr &call) const {
   call_center_->PushCall(call);
 }
 
-void CallCenterTest::PushCalls(const CallsVector &calls) {
+void CallCenterTest::PushCalls(const CallsVector &calls) const {
   for (const auto &call : calls) {
     PushCall(call);
   }
@@ -107,7 +108,7 @@ CallPtr CallCenterTest::CreateUniqueCall() {
   );
 }
 
-CallsVector CallCenterTest::CreateUniqueCalls(size_t count) {
+CallsVector CallCenterTest::CreateUniqueCalls(const size_t count) {
   CallsVector calls(count);
   for (size_t i = 0; i < count; ++i) {
     calls[i] = CreateUniqueCall();
@@ -117,11 +118,11 @@ CallsVector CallCenterTest::CreateUniqueCalls(size_t count) {
 
 CallPtr CallCenterTest::DuplicateCall(const CallPtr &call) const {
   return FakeCallDetailedRecord::Create(
-      clock_, call->GetCallerPhoneNumber(), configuration_, [](const auto &call) {}
+      clock_, call->GetCallerPhoneNumber(), configuration_, [](const auto &c) {}
   );
 }
 
-CallsVector CallCenterTest::DuplicateCall(const CallPtr &call, size_t count) const {
+CallsVector CallCenterTest::DuplicateCall(const CallPtr &call, const size_t count) const {
   CallsVector clones(count);
   for (size_t i = 0; i < count; ++i) {
     clones[i] = DuplicateCall(call);
@@ -145,7 +146,7 @@ void CallCenterTest::VerifyAllDone() const {
 
 template <typename Duration>
 void VerifyCallResult(
-    const CallDetailedRecord &call, CallStatus finish_status, Duration handling_duration
+    const CallDetailedRecord &call, const CallStatus finish_status, Duration handling_duration
 ) {
   EXPECT_EQ(finish_status, call.GetStatus())
       << "The call with number '" << call.GetCallerPhoneNumber()
@@ -168,8 +169,8 @@ void VerifyCallsResult(
 TEST_F(CallCenterTest, AllOperatorsAreBusy_CallRejectedWithTimout) {
   const auto operator_delay = 3s;
   const auto call_max_wait = 1s;
-  const auto operator_count = 5;
-  const auto call_in_queue_count = 10;
+  constexpr auto operator_count = 5;
+  constexpr auto call_in_queue_count = 10;
 
   configuration_adapter_.SetOperatorCount(operator_count);
   configuration_adapter_.SetOperatorDelay(operator_delay);
@@ -192,8 +193,8 @@ TEST_F(CallCenterTest, AllOperatorsAreBusy_CallRejectedWithTimout) {
 TEST_F(CallCenterTest, OperatorsAreReleasedAfterProcessingCalls) {
   const auto operator_delay = 4s;
   const auto call_max_wait = 2s;
-  const auto operator_count = 5;
-  const auto timeout_calls_count = 5;
+  constexpr auto operator_count = 5;
+  constexpr auto timeout_calls_count = 5;
 
   configuration_adapter_.SetOperatorCount(operator_count);
   configuration_adapter_.SetOperatorDelay(operator_delay);
@@ -220,8 +221,8 @@ TEST_F(CallCenterTest, OperatorsAreReleasedAfterProcessingCalls) {
 TEST_F(CallCenterTest, FullQueue_CallRejectedWithOverload) {
   const auto operator_delay = 3s;
   const auto call_max_wait = 1s;
-  const auto operator_count = 5;
-  const auto queue_capacity = 5;
+  constexpr auto operator_count = 5;
+  constexpr auto queue_capacity = 5;
 
   configuration_adapter_.SetOperatorCount(operator_count);
   configuration_adapter_.SetOperatorDelay(operator_delay);
@@ -247,7 +248,7 @@ TEST_F(CallCenterTest, FullQueue_CallRejectedWithOverload) {
 TEST_F(CallCenterTest, HasFreeOperators_CallsProcessed) {
   const auto operator_delay = 3s;
   const auto call_max_wait = 10s;
-  const auto operator_count = 5;
+  constexpr auto operator_count = 5;
 
   configuration_adapter_.SetOperatorCount(operator_count);
   configuration_adapter_.SetOperatorDelay(operator_delay);
@@ -267,7 +268,7 @@ TEST_F(CallCenterTest, HasFreeOperators_CallsProcessed) {
 TEST_F(CallCenterTest, FirstCallInProcessing_SecondIsClone_FirstIsOk_SecondIsRejected) {
   const auto operator_delay = 3s;
   const auto call_max_wait = 10s;
-  const auto operator_count = 5;
+  constexpr auto operator_count = 5;
 
   configuration_adapter_.SetOperatorCount(operator_count);
   configuration_adapter_.SetOperatorDelay(operator_delay);
@@ -290,7 +291,7 @@ TEST_F(CallCenterTest, FirstCallInProcessing_SecondIsClone_FirstIsOk_SecondIsRej
 TEST_F(CallCenterTest, FirstGroupInProcessing_SecondGroupIsClone_FirstGroupIsOk_SecondIsRejected) {
   const auto operator_delay = 3s;
   const auto call_max_wait = 10s;
-  const auto operator_count = 10;
+  constexpr auto operator_count = 10;
 
   configuration_adapter_.SetOperatorCount(operator_count);
   configuration_adapter_.SetOperatorDelay(operator_delay);
@@ -313,7 +314,7 @@ TEST_F(CallCenterTest, FirstGroupInProcessing_SecondGroupIsClone_FirstGroupIsOk_
 TEST_F(CallCenterTest, FirstGroupInQueue_SecondGroupIsClone_FirstGroupIsOk_SecondIsRejected) {
   const auto operator_delay = 3s;
   const auto call_max_wait = 10s;
-  const auto operator_count = 10;
+  constexpr auto operator_count = 10;
 
   configuration_adapter_.SetOperatorCount(operator_count);
   configuration_adapter_.SetOperatorDelay(operator_delay);
@@ -339,7 +340,7 @@ TEST_F(CallCenterTest, FirstGroupInQueue_SecondGroupIsClone_FirstGroupIsOk_Secon
 TEST_F(CallCenterTest, ZeroQueueCapacity_HasFreeOperators_CallsAreOk) {
   const auto operator_delay = 3s;
   const auto call_max_wait = 10s;
-  const auto operator_count = 10;
+  constexpr auto operator_count = 10;
 
   configuration_adapter_.SetOperatorCount(operator_count);
   configuration_adapter_.SetOperatorDelay(operator_delay);
@@ -359,7 +360,7 @@ TEST_F(CallCenterTest, ZeroQueueCapacity_HasFreeOperators_CallsAreOk) {
 TEST_F(CallCenterTest, ZeroCallMaxWait_HasFreeOperators_CallsAreOk) {
   const auto operator_delay = 3s;
   const auto call_max_wait = 0s;
-  const auto operator_count = 10;
+  constexpr auto operator_count = 10;
 
   configuration_adapter_.SetOperatorCount(operator_count);
   configuration_adapter_.SetOperatorDelay(operator_delay);

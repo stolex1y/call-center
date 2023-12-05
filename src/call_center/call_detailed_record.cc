@@ -101,7 +101,7 @@ bool CallDetailedRecord::IsTimeout() const {
 }
 
 uint64_t CallDetailedRecord::ReadMaxWait() const {
-  return configuration_->GetProperty<uint64_t>(kMaxWaitKey_, max_wait_.count());
+  return configuration_->GetProperty<uint64_t>(kMaxWaitKey, max_wait_.count());
 }
 
 std::optional<CallDetailedRecord::TimePoint> CallDetailedRecord::GetTimeoutPoint() const {

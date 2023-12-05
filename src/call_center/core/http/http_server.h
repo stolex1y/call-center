@@ -12,6 +12,10 @@
 #include "log/sink.h"
 
 namespace call_center::core::http {
+
+/**
+ * @brief HTTP-сервер для обработки запросов.
+ */
 class HttpServer : public std::enable_shared_from_this<HttpServer> {
  public:
   HttpServer(const HttpServer &other) = delete;
@@ -21,6 +25,9 @@ class HttpServer : public std::enable_shared_from_this<HttpServer> {
       net::io_context &ioc, const tcp::endpoint &endpoint, log::LoggerProvider logger_provider
   );
 
+  /**
+   * @brief Добавить репозиторий для обработки запросов.
+   */
   void AddRepository(const std::shared_ptr<HttpRepository> &repository);
   void Start();
   void Stop();
@@ -38,7 +45,15 @@ class HttpServer : public std::enable_shared_from_this<HttpServer> {
       net::io_context &ioc, const tcp::endpoint &endpoint, log::LoggerProvider logger_provider
   );
 
-  void OnAccept(beast::error_code error, tcp::socket socket);
+  /**
+   * @brief Обратный вызов при получении нового соединения.
+   * @param error возникшие ошибки
+   * @param socket открытый сокет для соединения
+   */
+  void OnAccept(const beast::error_code &error, tcp::socket socket);
+  /**
+   * @brief Открыть acceptor для приема новых соедиений.
+   */
   void Open();
 };
 

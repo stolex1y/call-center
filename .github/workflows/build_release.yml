@@ -31,6 +31,10 @@ jobs:
           sudo apt install -y iwyu
           sudo apt install -y valgrind
 
+      - name: Install doxygen
+        run: |
+          sudo apt install -y doxygen graphviz
+
       - name: Cache boost
         uses: actions/cache@v3
         id: cache-boost
@@ -72,7 +76,7 @@ jobs:
 
       - name: Valgrind
         run: |
-          cmake --build ./build -t memcheck-callcenter_test -j 2   
+          cmake --build ./build -t memcheck-call-center-test -j 2   
       
       - name: Upload build logs if failed
         uses: actions/upload-artifact@v3

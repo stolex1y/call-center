@@ -99,7 +99,7 @@ bool CallQueue::InsertToProcessing(const CallPtr &call) {
 }
 
 void CallQueue::UpdateCapacity() {
-  capacity_ = configuration_->GetProperty(kCapacityKey_, capacity_);
+  capacity_ = configuration_->GetProperty(kCapacityKey, capacity_);
 }
 
 void CallQueue::EraseFromQueue(const CallPtr &call) {

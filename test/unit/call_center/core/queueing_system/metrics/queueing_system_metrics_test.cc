@@ -1,4 +1,4 @@
-#include "queueing_system/metrics/queueing_system_metrics.h"
+#include "core/queueing_system/metrics/queueing_system_metrics.h"
 
 #include <gtest/gtest.h>
 
@@ -12,12 +12,14 @@
 #include "journal.h"
 #include "utils.h"
 
-namespace call_center::qs::metrics::test {
+namespace call_center::core::qs::metrics::test {
+
 using namespace log;
 using namespace std::chrono_literals;
 using namespace std::chrono;
 using namespace core;
 using namespace call_center::test;
+using namespace call_center::core::tasks::test;
 
 using CallPtr = std::shared_ptr<CallDetailedRecord>;
 using CallsVector = std::vector<CallPtr>;
@@ -106,20 +108,20 @@ std::ostream &operator<<(std::ostream &out, Metric<T, Avg> metric) {
   return out;
 }
 
-double ExpectedUtilization(double lambda, int b) {
+double ExpectedUtilization(const double lambda, const int b) {
   return lambda * b;
 }
 
-double ExpectedWaitTime(double lambda, int b) {
+double ExpectedWaitTime(const double lambda, const int b) {
   const auto rho = ExpectedUtilization(lambda, b);
   return b * rho / (2 * (1 - rho));
 }
 
-double ExpectedQueueSize(double lambda, int b) {
+double ExpectedQueueSize(const double lambda, const int b) {
   return ExpectedWaitTime(lambda, b) * lambda;
 }
 
-double ExpectedInSystemCount(double lambda, int b) {
+double ExpectedInSystemCount(const double lambda, const int b) {
   return lambda * (ExpectedWaitTime(lambda, b) + b);
 }
 
@@ -221,4 +223,4 @@ TEST_F(QueueingSystemMetricsTest, AverageQueueSize) {
   EXPECT_NEAR(expct_queue_size, metrics_->GetQueueSizeMetric().GetAvg(), accuracy);
 }
 
-}  // namespace call_center::qs::metrics::test
+}  // namespace call_center::core::qs::metrics::test

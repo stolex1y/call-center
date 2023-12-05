@@ -2,10 +2,8 @@
 #define CALL_CENTER_SRC_CALL_CENTER_LOG_SINK_H_
 
 #include <boost/log/sinks.hpp>
-#include <boost/move/unique_ptr.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
-#include <optional>
 #include <ostream>
 #include <string>
 
@@ -13,17 +11,52 @@
 
 namespace call_center::log {
 
+/**
+ * @brief Класс приёмника логов, связанный с потоком вывода.
+ */
 class Sink {
  public:
+  /**
+   * @brief Функция форматирования логов.
+   */
   using Formatter =
       std::function<void(const boost::log::record_view &rec, boost::log::formatting_ostream &out)>;
 
+  /**
+   * @brief Использует стандартный поток вывода для записи логов.
+   * @param level уровень логирования
+   */
   explicit Sink(SeverityLevel level);
+  /**
+   * @brief Использует указанный файл для записи логов.
+   * @param file_name название файла
+   * @param level уровень логирования
+   * @param max_size максимальный размер файла
+   */
   Sink(const std::string &file_name, SeverityLevel level, size_t max_size);
+  /**
+   * @brief Использует указанный файл для записи логов.
+   * @param file_name название файла
+   * @param level уровень логирования
+   * @param max_size максимальный размер файла
+   * @param formatter функция для форматирования логов
+   */
   Sink(
       const std::string &file_name, SeverityLevel level, size_t max_size, const Formatter &formatter
   );
+  /**
+   * @brief Использует стандартный поток вывода для записи логов.
+   * @param level уровень логирования
+   * @param formatter функция для форматирования логов
+   */
   Sink(SeverityLevel level, const Formatter &formatter);
+  /**
+   * @brief Использует указанный поток вывода для записи логов.
+   * @param ostream поток для записи логов
+   * @param level уровень логирования
+   * @param formatter функция для форматирования логов
+   * @param max_size максимальный размер файла
+   */
   Sink(
       boost::shared_ptr<std::ostream> ostream,
       SeverityLevel level,
@@ -36,6 +69,9 @@ class Sink {
   Sink &operator=(Sink &other) = delete;
   Sink &operator=(Sink &&other) = default;
 
+  /**
+   * @brief Идентификатор приемника логов для связи с @link Logger логерами@endlink.
+   */
   [[nodiscard]] const boost::uuids::uuid &Id() const;
 
  private:
@@ -47,6 +83,11 @@ class Sink {
   SeverityLevel level_;
   size_t max_size_;
 
+  /**
+   * @brief Форматирование логов по умолчанию.
+   * @param rec запись лога
+   * @param out поток форматированного вывода
+   */
   static void DefaultFormatter(
       const boost::log::record_view &rec, boost::log::formatting_ostream &out
   );

@@ -10,6 +10,9 @@ namespace json = boost::json;
 struct CallRequestDto {
   std::string phone;
 
+  /**
+   * @brief Преобразование из json в объект.
+   */
   friend CallRequestDto tag_invoke(
       const json::value_to_tag<CallRequestDto> &, const json::value &json
   );

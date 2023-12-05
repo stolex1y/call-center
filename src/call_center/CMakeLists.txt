@@ -1,6 +1,6 @@
-set(OBJ_LIB_TARGET callcenter)
-set(RUNNABLE_TARGET "${OBJ_LIB_TARGET}_runnable")
-set(STATIC_LIB_TARGET "${OBJ_LIB_TARGET}_static")
+set(OBJ_LIB_TARGET ${CMAKE_PROJECT_NAME})
+set(RUNNABLE_TARGET "${OBJ_LIB_TARGET}-runnable")
+set(STATIC_LIB_TARGET "${OBJ_LIB_TARGET}-static")
 
 find_package(Boost COMPONENTS program_options log log_setup json REQUIRED)
 
@@ -36,8 +36,8 @@ add_library(${OBJ_LIB_TARGET} OBJECT
         repository/call/call_request_dto.h
         repository/call/call_response_dto.cc
         repository/call/call_response_dto.h
-        core/task_manager_impl.cc
-        core/task_manager.h
+        core/tasks/task_manager_impl.cc
+        core/tasks/task_manager.h
         log/sink.cc
         log/sink.h
         log/severity_level.h
@@ -45,7 +45,7 @@ add_library(${OBJ_LIB_TARGET} OBJECT
         log/severity_level.cc
         core/containers/queue.h
         core/containers/concurrent_hash_set.h
-        core/tasks.h
+        core/tasks/tasks.h
         core/utils/date_time.h
         core/utils/concepts.h
         log/logger_provider.cc
@@ -55,18 +55,18 @@ add_library(${OBJ_LIB_TARGET} OBJECT
         core/containers/concurrent_hash_map.h
         core/utils/uuids.h
         core/utils/uuids.cc
-        core/task_manager_impl.h
-        queueing_system/metrics/queueing_system_metrics.cc
-        queueing_system/metrics/queueing_system_metrics.h
-        queueing_system/metrics/metric.h
-        queueing_system/metrics/request_metrics.cc
-        queueing_system/metrics/request_metrics.h
-        queueing_system/metrics/service_metrics.cc
-        queueing_system/metrics/service_metrics.h
-        queueing_system/server.h
-        queueing_system/request.h
-        queueing_system/request.cc
-        queueing_system/server.cc
+        core/tasks/task_manager_impl.h
+        core/queueing_system/metrics/queueing_system_metrics.cc
+        core/queueing_system/metrics/queueing_system_metrics.h
+        core/queueing_system/metrics/metric.h
+        core/queueing_system/metrics/request_metrics.cc
+        core/queueing_system/metrics/request_metrics.h
+        core/queueing_system/metrics/service_metrics.cc
+        core/queueing_system/metrics/service_metrics.h
+        core/queueing_system/server.h
+        core/queueing_system/request.h
+        core/queueing_system/request.cc
+        core/queueing_system/server.cc
         repository/metrics/metrics_repository.cc
         repository/metrics/metrics_repository.h
         repository/metrics/metrics_response_dto.cc

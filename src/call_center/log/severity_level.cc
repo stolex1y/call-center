@@ -4,7 +4,7 @@
 
 namespace call_center::log {
 
-std::ostream &operator<<(std::ostream &out, SeverityLevel level) {
+std::ostream& operator<<(std::ostream& out, const SeverityLevel level) {
   switch (level) {
     case SeverityLevel::kTrace: {
       out << "TRACE";

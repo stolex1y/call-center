@@ -6,8 +6,13 @@
 
 #include "core/clock_adapter.h"
 
-namespace call_center {
+namespace call_center::test {
 
+/**
+ * @brief Виртаульные часы.
+ *
+ * Данные часы идут только за счет переводов вперед на необходимое время.
+ */
 class FakeClock : public core::ClockAdapter {
  public:
   void AdvanceTo(TimePoint target_time);
@@ -17,10 +22,10 @@ class FakeClock : public core::ClockAdapter {
 
  private:
   Duration relative_{0};
-  TimePoint absolute_{std::chrono::floor<Duration>(Clock_t::now())};
+  TimePoint absolute_{std::chrono::floor<Duration>(Clock::now())};
   mutable std::shared_mutex mutex_;
 };
 
-}  // namespace call_center
+}  // namespace call_center::test
 
 #endif  // CALL_CENTER_TEST_UNIT_CALL_CENTER_FAKE_FAKE_CLOCK_H_

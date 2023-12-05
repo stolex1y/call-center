@@ -2,10 +2,10 @@
 
 #include "fake_call_detailed_record.h"
 
-namespace call_center {
+namespace call_center::test {
 
 FakeServiceLoader::FakeServiceLoader(
-    std::shared_ptr<core::TaskManager> task_manager,
+    std::shared_ptr<tasks::TaskManager> task_manager,
     std::shared_ptr<CallCenter> call_center,
     CallProvider call_provider
 )
@@ -16,7 +16,7 @@ FakeServiceLoader::FakeServiceLoader(
 }
 
 std::shared_ptr<FakeServiceLoader> FakeServiceLoader::Create(
-    std::shared_ptr<core::TaskManager> task_manager,
+    std::shared_ptr<tasks::TaskManager> task_manager,
     std::shared_ptr<CallCenter> call_center,
     CallProvider call_provider
 ) {
@@ -25,7 +25,7 @@ std::shared_ptr<FakeServiceLoader> FakeServiceLoader::Create(
   ));
 }
 
-void FakeServiceLoader::StartLoading(double lambda) {
+void FakeServiceLoader::StartLoading(const double lambda) {
   distribution_ = Distribution(lambda);
   SchedulePostCall();
 }
@@ -38,4 +38,4 @@ void FakeServiceLoader::SchedulePostCall() {
   });
 }
 
-}  // namespace call_center
+}  // namespace call_center::test

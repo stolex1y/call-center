@@ -2,10 +2,11 @@
 
 #include "metrics_response_dto.h"
 
+namespace call_center::repository {
+
 using namespace std::chrono_literals;
 namespace json = boost::json;
 
-namespace call_center::repository {
 std::shared_ptr<MetricsRepository> MetricsRepository::Create(
     std::shared_ptr<const QueueingSystemMetrics> metrics, const log::LoggerProvider &logger_provider
 ) {
@@ -23,20 +24,20 @@ MetricsRepository::MetricsRepository(
 }
 
 void MetricsRepository::HandleRequest(
-    const http::request<http::string_body> &request, const OnHandle &on_handle
+    const b_http::request<b_http::string_body> &request, const OnHandle &on_handle
 ) {
   logger_->Info() << "Start handle request: " << to_string(request.method()) << " "
                   << request.target();
-  if (request.method() != http::verb::get) {
+  if (request.method() != b_http::verb::get) {
     logger_->Info() << "Cannot handle request with illegal method (" << to_string(request.method())
                     << ")";
-    on_handle(MakeResponse(http::status::method_not_allowed, false, {}));
+    on_handle(MakeResponse(b_http::status::method_not_allowed, false, {}));
     return;
   }
-  on_handle(MakeResponse(http::status::ok, false, MakeResponseBody()));
+  on_handle(MakeResponse(b_http::status::ok, false, MakeGetMetricsResponseBody()));
 }
 
-std::string MetricsRepository::MakeResponseBody() const {
+std::string MetricsRepository::MakeGetMetricsResponseBody() const {
   const MetricsReponseDto response_dto(
       metrics_->GetWaitTimeMetric(),
       metrics_->GetQueueSizeMetric(),

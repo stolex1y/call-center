@@ -6,32 +6,29 @@
 
 #include "service_metrics.h"
 
-namespace call_center::qs::metrics {
+namespace call_center::core::qs::metrics {
 
 std::shared_ptr<QueueingSystemMetrics> QueueingSystemMetrics::Create(
-    std::shared_ptr<core::TaskManager> task_manager,
+    std::shared_ptr<tasks::TaskManager> task_manager,
     std::shared_ptr<Configuration> configuration,
-    const log::LoggerProvider& logger_provider,
-    std::shared_ptr<const core::ClockAdapter> clock
+    const log::LoggerProvider &logger_provider,
+    std::shared_ptr<const ClockAdapter> clock
 ) {
   return std::shared_ptr<QueueingSystemMetrics>(new QueueingSystemMetrics(
-    std::move(task_manager),
-    std::move(configuration),
-    logger_provider,
-    std::move(clock)
+      std::move(task_manager), std::move(configuration), logger_provider, std::move(clock)
   ));
 }
 
 QueueingSystemMetrics::QueueingSystemMetrics(
-    std::shared_ptr<core::TaskManager> task_manager,
+    std::shared_ptr<tasks::TaskManager> task_manager,
     std::shared_ptr<Configuration> configuration,
-    const log::LoggerProvider& logger_provider,
-    std::shared_ptr<const core::ClockAdapter> clock
+    const log::LoggerProvider &logger_provider,
+    std::shared_ptr<const ClockAdapter> clock
 )
-  : clock_(std::move(clock)),
-    configuration_(std::move(configuration)),
-    task_manager_(std::move(task_manager)),
-    logger_(logger_provider.Get("QueueingSystemMetrics")) {
+    : clock_(std::move(clock)),
+      configuration_(std::move(configuration)),
+      task_manager_(std::move(task_manager)),
+      logger_(logger_provider.Get("QueueingSystemMetrics")) {
 }
 
 void QueueingSystemMetrics::Start() {
@@ -208,7 +205,7 @@ Metric<QueueingSystemMetrics::Duration> QueueingSystemMetrics::GetRefusedWaitTim
 QueueingSystemMetrics::Duration QueueingSystemMetrics::GetAverageServiceTime() const {
   std::shared_lock lock(service_mutex_);
   Duration avg_service_time_{0};
-  for (const auto& service_metrics : std::views::values(servers_metrics_)) {
+  for (const auto &service_metrics : std::views::values(servers_metrics_)) {
     avg_service_time_ += service_metrics.GetServiceTimeMetric().GetAvg();
   }
   return avg_service_time_;
@@ -224,12 +221,11 @@ double QueueingSystemMetrics::GetProbabilityOfLoss() const {
   const size_t serviced_count = GetServicedCount();
   service_lock.unlock();
   std::shared_lock queue_lock(queue_mutex_);
-  return static_cast<double>(serviced_count) / arrival_count_;
+  return static_cast<double>(serviced_count) / static_cast<double>(arrival_count_);
 }
 
 bool QueueingSystemMetrics::ServerEquals::operator()(
-  const ServerPtr& first,
-  const ServerPtr& second
+    const ServerPtr &first, const ServerPtr &second
 ) const {
   if ((first == nullptr) ^ (second == nullptr))
     return false;
@@ -240,8 +236,8 @@ bool QueueingSystemMetrics::ServerEquals::operator()(
   return first->GetId() == second->GetId();
 }
 
-size_t QueueingSystemMetrics::ServerHash::operator()(const ServerPtr& server) const {
+size_t QueueingSystemMetrics::ServerHash::operator()(const ServerPtr &server) const {
   return server->hash();
 }
 
-}  // namespace call_center::qs::metrics
+}  // namespace call_center::core::qs::metrics

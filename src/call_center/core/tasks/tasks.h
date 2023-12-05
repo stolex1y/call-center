@@ -2,19 +2,23 @@
 #define CALL_CENTER_SRC_CALL_CENTER_TASKS_H_
 
 #include <boost/asio.hpp>
-#include <chrono>
 #include <functional>
-#include <thread>
 
 #include "log/logger.h"
 
 namespace call_center::core::tasks {
 
+/**
+ * @brief Класс-обертка для задачи.
+ */
 template <typename Task>
 class TaskWrapped {
  public:
   TaskWrapped(std::function<Task> task, log::Logger &logger);
 
+  /**
+   * @brief Запустить задау.
+   */
   void operator()() const;
 
  private:
@@ -22,6 +26,12 @@ class TaskWrapped {
   log::Logger &logger_;
 };
 
+/**
+ * @brief Класс-обертка для запланированной задачи.
+ *
+ * Ссылка на запущенный таймер сохраняется внутри экзмепляра.
+ * При запуске таймера экземпляр данного класса необходимо передать в качестве обратного вызова.
+ */
 template <typename Task, typename Clock>
 class TimerTaskWrapped {
  public:
@@ -29,6 +39,9 @@ class TimerTaskWrapped {
 
   TimerTaskWrapped(std::function<Task> task, std::unique_ptr<Timer> timer, log::Logger &logger);
 
+  /**
+   * @brief Запустить задау.
+   */
   void operator()(const boost::system::error_code &error) const;
 
  private:

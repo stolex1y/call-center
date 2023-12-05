@@ -5,10 +5,10 @@
 #include <future>
 
 #include "configuration_adapter.h"
-#include "core/task_manager_impl.h"
-#include "fake/fake_operator.h"
+#include "core/tasks/task_manager_impl.h"
 #include "log/logger.h"
 #include "log/logger_provider.h"
+#include "mock/mock_operator.h"
 #include "utils.h"
 
 namespace call_center::test {
@@ -17,7 +17,8 @@ using namespace call_center::log;
 using namespace std::chrono_literals;
 using namespace std::chrono;
 using namespace call_center::core;
-using namespace call_center::qs::metrics;
+using namespace call_center::core::tasks;
+using namespace call_center::core::qs::metrics;
 
 using OperatorPtr = std::shared_ptr<Operator>;
 using Operators = std::vector<OperatorPtr>;
@@ -59,7 +60,7 @@ OperatorSetTest::OperatorSetTest()
       operator_set_(
           configuration_,
           [logger_provider = logger_provider_, config = configuration_]() {
-            return FakeOperator::Create(config, logger_provider);
+            return MockOperator::Create(config, logger_provider);
           },
           logger_provider_,
           metrics_
@@ -73,7 +74,7 @@ OperatorSetTest::OperatorSetTest()
   task_manager_->Start();
 }
 
-Operators OperatorSetTest::EraseOperators(size_t count) {
+Operators OperatorSetTest::EraseOperators(const size_t count) {
   std::vector<OperatorPtr> free_operators(count);
   for (size_t i = 0; i < count; ++i) {
     free_operators[i] = operator_set_.EraseFree();

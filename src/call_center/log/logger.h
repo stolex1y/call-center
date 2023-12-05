@@ -9,15 +9,25 @@
 #include "severity_level.h"
 #include "sink.h"
 
+/// Логирование.
 namespace call_center::log {
 
-class Logger : private boost::log::sources::severity_logger_mt<SeverityLevel> {
+/**
+ * @brief Класс-обертка над boost::log::sources::serverity_logger_mt.
+ */
+class Logger : boost::log::sources::severity_logger_mt<SeverityLevel> {
  public:
+  /**
+   * @brief Поток вывода логов.
+   */
   class Ostream {
    public:
     explicit Ostream(Logger &log, SeverityLevel level);
     Ostream(const Ostream &other) = delete;
     Ostream &operator=(const Ostream &other) = delete;
+    /**
+     * @brief При уничтожении отправляет запись в @link Logger @endlink.
+     */
     ~Ostream();
 
     template <typename T>
@@ -38,11 +48,29 @@ class Logger : private boost::log::sources::severity_logger_mt<SeverityLevel> {
   Logger(const Logger &other) = delete;
   Logger &operator=(const Logger &other) = delete;
 
+  /**
+   * @brief Открыть поток вывода логов уровня @link SeverityLevel::kTrace @endlink.
+   */
   Ostream Trace();
+  /**
+   * @brief Открыть поток вывода логов уровня @link SeverityLevel::kDebug @endlink.
+   */
   Ostream Debug();
+  /**
+   * @brief Открыть поток вывода логов уровня @link SeverityLevel::kInfo @endlink.
+   */
   Ostream Info();
+  /**
+   * @brief Открыть поток вывода логов уровня @link SeverityLevel::kWarning @endlink.
+   */
   Ostream Warning();
+  /**
+   * @brief Открыть поток вывода логов уровня @link SeverityLevel::kError @endlink.
+   */
   Ostream Error();
+  /**
+   * @brief Открыть поток вывода логов уровня @link SeverityLevel::kFatal @endlink.
+   */
   Ostream Fatal();
 
  private:

@@ -8,60 +8,129 @@
 #include <unordered_set>
 
 #include "core/clock_adapter.h"
-#include "core/task_manager.h"
+#include "core/queueing_system/request.h"
+#include "core/queueing_system/server.h"
+#include "core/tasks/task_manager.h"
 #include "metric.h"
 #include "operator.h"
-#include "queueing_system/request.h"
-#include "queueing_system/server.h"
 #include "service_metrics.h"
 
-namespace call_center::qs::metrics {
+/// Метрики для СМО.
+namespace call_center::core::qs::metrics {
 
+/**
+ * @brief Класс для подсчета различных метрик для системы массового обслуживания.
+ */
 class QueueingSystemMetrics : public std::enable_shared_from_this<QueueingSystemMetrics> {
  public:
   using RequestPtr = std::shared_ptr<const Request>;
   using ServerPtr = std::shared_ptr<const Server>;
+  /// Основной временной промежуток, используемый в метриках.
   using Duration = Request::Duration;
+  /// Основной тип временной точки, используемый в метриках.
   using TimePoint = Request::TimePoint;
+  /// Временной промежуток обновления метрик.
   using MetricsUpdateDuration = std::chrono::seconds;
 
+  /// Ключ в конфигурации, соответствующий значению времени обновления метрик в секундах.
   static constexpr auto kMetricsUpdateTimeKey = "metrics_update_time";
 
   static std::shared_ptr<QueueingSystemMetrics> Create(
-      std::shared_ptr<core::TaskManager> task_manager,
+      std::shared_ptr<tasks::TaskManager> task_manager,
       std::shared_ptr<Configuration> configuration,
       const log::LoggerProvider &logger_provider,
-      std::shared_ptr<const core::ClockAdapter> clock = core::ClockAdapter::default_clock
+      std::shared_ptr<const ClockAdapter> clock = ClockAdapter::default_clock
   );
 
   QueueingSystemMetrics(const QueueingSystemMetrics &other) = delete;
   QueueingSystemMetrics &operator=(const QueueingSystemMetrics &other) = delete;
 
+  /**
+   * @brief Запустить периодическое обновление метрик.
+   */
   void Start();
+  /**
+   * @brief Сбросить все метрики.
+   */
   void Reset();
+  /**
+   * @brief Остановить обновление метрик.
+   */
   void Stop();
 
+  /**
+   * @brief Добавить обслуживающие приборы для отслеживания их статуса.
+   * @tparam ServerImplSet множество приборов
+   */
   template <typename ServerImplSet>
   void SetServers(const ServerImplSet &server_impls);
+  /**
+   * @brief Зафиксировать получение нового запроса.
+   */
   void RecordRequestArrival(const RequestPtr &request);
+  /**
+   * @brief Зафиксировать начало обработки запроса.
+   */
   void RecordServiceStart(const RequestPtr &request);
+  /**
+   * @brief Зафиксировать завершение обработки запроса указанным прибором.
+   */
   void RecordServiceComplete(const RequestPtr &request, const ServerPtr &server);
+  /**
+   * @brief Зафиксировать отклоненный запрос.
+   */
   void RecordRequestDropout(const RequestPtr &request);
 
+  /**
+   * @brief Получить метрики по времени ожидания в очереди.
+   */
   [[nodiscard]] Metric<Duration> GetWaitTimeMetric() const;
+  /**
+   * @brief Получить метрики по размеру очереди.
+   */
   [[nodiscard]] Metric<size_t, double> GetQueueSizeMetric() const;
+  /**
+   * @brief Получить метрики по количеству обслуживающих приборов.
+   */
   [[nodiscard]] Metric<size_t, double> GetBusyServerCountMetric() const;
+  /**
+   * @brief Получить обслуженную нагрузку в Эрлангах (E) с начала записи.
+   */
   [[nodiscard]] double GetServiceLoadInErlang() const;
+  /**
+   * @brief Получить метрики по среднему времени между запросами.
+   */
   [[nodiscard]] Metric<Duration> GetTimeBetweenRequestsMetric() const;
+  /**
+   * @brief Получить количество отклоненных запросов.
+   */
   [[nodiscard]] size_t GetDropoutCount() const;
+  /**
+   * @brief Получить метрики по времени ожидания отклоненных запросов.
+   */
   [[nodiscard]] Metric<Duration> GetRefusedWaitTimeMetric() const;
+  /**
+   * @brief Получить среднее время обслуживания среди всех приборов.
+   */
   [[nodiscard]] Duration GetAverageServiceTime() const;
+  /**
+   * @brief Получить метрики по количеству запросов, одновременно находящихся в системе.
+   */
   [[nodiscard]] Metric<size_t, double> GetRequestCountInSystemMetric() const;
+  /**
+   * @brief Получить вероятность потери запроса.
+   */
   [[nodiscard]] double GetProbabilityOfLoss() const;
+  /**
+   * @brief Получить количество обслуженных запросов.
+   */
   [[nodiscard]] size_t GetServicedCount() const;
+  /**
+   * @brief Получить количество принятых запросов.
+   */
   [[nodiscard]] size_t GetArrivalCount() const;
 
-private:
+ private:
   struct ServerEquals {
     bool operator()(const ServerPtr &first, const ServerPtr &second) const;
   };
@@ -72,11 +141,11 @@ private:
 
   static constexpr uint64_t kDefaultMetricsUpdateTime = 10;
 
-  std::shared_ptr<const core::ClockAdapter> clock_;
+  std::shared_ptr<const ClockAdapter> clock_;
 
   std::atomic_flag started_ = false;
   const std::shared_ptr<Configuration> configuration_;
-  const std::shared_ptr<core::TaskManager> task_manager_;
+  const std::shared_ptr<tasks::TaskManager> task_manager_;
   const std::unique_ptr<log::Logger> logger_;
   uint64_t metrics_update_time_ = kDefaultMetricsUpdateTime;
   std::atomic<TimePoint> recording_start_time_ = TimePoint(Duration(0));
@@ -100,18 +169,35 @@ private:
   mutable std::shared_mutex service_mutex_;
 
   QueueingSystemMetrics(
-      std::shared_ptr<core::TaskManager> task_manager,
+      std::shared_ptr<tasks::TaskManager> task_manager,
       std::shared_ptr<Configuration> configuration,
       const log::LoggerProvider &logger_provider,
-      std::shared_ptr<const core::ClockAdapter> clock
+      std::shared_ptr<const ClockAdapter> clock
   );
 
+  /**
+   * @brief Обновить периодические метрики.
+   */
   void UpdatePeriodicMetrics();
+  /**
+   * @brief Запланировать очередное периодическое обновление метрик.
+   */
   void ScheduleUpdatePeriodicMetrics();
+  /**
+   * @brief Получить текущее количество занятых приборов.
+   */
   [[nodiscard]] size_t GetCurrentBusyServerCount() const;
+  /**
+   * @brief Обновить среднее время между запросами, используя время получения нового запрсоа.
+   */
   void UpdateAvgTimeBetweenRequests(TimePoint last_arrival_time_);
+  /**
+   * @brief Получить метрики для заданного прибора.
+   */
   ServiceMetrics &GetServerMetrics(const ServerPtr &server);
-  // [[nodiscard]] size_t GetServicedCount() const;
+  /**
+   * @brief Обновить интервал обновления метрик.
+   */
   void UpdateMetricsUpdateTime();
 };
 
@@ -131,6 +217,6 @@ void QueueingSystemMetrics::SetServers(const ServerImplSet &server_impls) {
   }
 }
 
-}  // namespace call_center::qs::metrics
+}  // namespace call_center::core::qs::metrics
 
 #endif  // CALL_CENTER_SRC_CALL_CENTER_QUEUEING_SYSTEM_METRICS_H_

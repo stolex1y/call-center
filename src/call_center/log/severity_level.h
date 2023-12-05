@@ -5,8 +5,14 @@
 
 namespace call_center::log {
 
+/**
+ * @brief Уровень логирования.
+ */
 enum class SeverityLevel { kTrace, kDebug, kInfo, kWarning, kError, kFatal };
 
+/**
+ * @brief Вывод строкового представления уровня логирования.
+ */
 std::ostream &operator<<(std::ostream &out, SeverityLevel level);
 
 }  // namespace call_center::log

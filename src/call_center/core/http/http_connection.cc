@@ -3,9 +3,10 @@
 #include <boost/beast/version.hpp>
 #include <chrono>
 
+namespace call_center::core::http {
+
 using namespace std::chrono_literals;
 
-namespace call_center::core::http {
 std::atomic_size_t HttpConnection::next_id_ = 0;
 
 std::shared_ptr<HttpConnection> HttpConnection::Create(
@@ -37,14 +38,17 @@ void HttpConnection::ReadRequest() {
       stream_,
       buffer_,
       *request,
-      [request, conn = shared_from_this()](beast::error_code ec, std::size_t bytes_transferred) {
+      [request,
+       conn = shared_from_this()](const beast::error_code &ec, std::size_t bytes_transferred) {
         boost::ignore_unused(bytes_transferred);
         conn->OnReadRequest(*request, ec);
       }
   );
 }
 
-void HttpConnection::OnReadRequest(const HttpRepository::Request &request, beast::error_code ec) {
+void HttpConnection::OnReadRequest(
+    const HttpRepository::Request &request, const beast::error_code &ec
+) {
   if (ec == http::error::end_of_stream) {
     Close();
     return;
@@ -58,8 +62,8 @@ void HttpConnection::OnReadRequest(const HttpRepository::Request &request, beast
 
   logger_->Info() << "Read request: " << to_string(request.method()) << " " << request.target();
 
-  auto path_root = request.target().substr(1, request.target().find_first_of("/", 1));
-  auto repository = repositories_.find(path_root);
+  const auto path_root = request.target().substr(1, request.target().find_first_of("/", 1));
+  const auto repository = repositories_.find(path_root);
   if (repository == repositories_.end()) {
     logger_->Info() << "No processing repository found";
     WriteResponse(MakeNotFoundResponse());
@@ -80,14 +84,15 @@ void HttpConnection::WriteResponse(HttpRepository::Response &&response) {
   beast::async_write(
       stream_,
       http::message_generator{std::move(response)},
-      [conn = shared_from_this(), keep_alive](beast::error_code ec, std::size_t bytes_transferred) {
+      [conn = shared_from_this(),
+       keep_alive](const beast::error_code &ec, std::size_t bytes_transferred) {
         boost::ignore_unused(bytes_transferred);
         conn->OnWriteResponse(keep_alive, ec);
       }
   );
 }
 
-void HttpConnection::OnWriteResponse(bool keep_alive, beast::error_code error_code) {
+void HttpConnection::OnWriteResponse(const bool keep_alive, const beast::error_code &error_code) {
   if (error_code) {
     Close();
     logger_->Error() << "Failed on write response: " << error_code.what();

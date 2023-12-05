@@ -8,6 +8,7 @@
 
 #include "severity_level.h"
 
+/// Основные атрибуты для логирования @link attrs.h @endlink.
 namespace call_center::log::attrs {
 
 BOOST_LOG_ATTRIBUTE_KEYWORD(channel, "Channel", boost::uuids::uuid)

@@ -7,9 +7,12 @@
 
 namespace call_center::test {
 
-class FakeOperator : public Operator {
+/**
+ * @brief Заглушка для замены операторов в тестах.
+ */
+class MockOperator : public Operator {
  public:
-  static std::shared_ptr<FakeOperator> Create(
+  static std::shared_ptr<MockOperator> Create(
       std::shared_ptr<Configuration> configuration, const log::LoggerProvider &logger_provider
   );
 
@@ -17,7 +20,7 @@ class FakeOperator : public Operator {
       override;
 
  private:
-  FakeOperator(
+  MockOperator(
       std::shared_ptr<Configuration> configuration, const log::LoggerProvider &logger_provider
   );
 };

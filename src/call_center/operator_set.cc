@@ -3,12 +3,10 @@
 #include <boost/functional/hash.hpp>
 #include <boost/uuid/uuid.hpp>
 
-#include "core/utils/uuids.h"
-
 namespace call_center {
 
-using namespace core::utils;
-using namespace qs::metrics;
+using namespace core::utils::uuids;
+using namespace core::qs::metrics;
 
 OperatorSet::OperatorSet(
     std::shared_ptr<Configuration> configuration,
@@ -48,8 +46,8 @@ void OperatorSet::InsertFree(const std::shared_ptr<Operator> &op) {
   UpdateOperatorCount();
 }
 
-size_t OperatorSet::ReadOperatorCount(size_t default_value) const {
-  return configuration_->GetNumber<size_t>(kOperatorCountKey_, default_value, 1);
+size_t OperatorSet::ReadOperatorCount(const size_t default_value) const {
+  return configuration_->GetNumber<size_t>(kOperatorCountKey, default_value, 1);
 }
 
 size_t OperatorSet::GetSize() const {
@@ -82,7 +80,7 @@ void OperatorSet::UpdateOperatorCount() {
   }
 }
 
-void OperatorSet::AddOperators(size_t count) {
+void OperatorSet::AddOperators(const size_t count) {
   for (size_t i = 0; i < count; ++i) {
     const auto op = operator_provider_();
     operators_.emplace(op);
@@ -90,7 +88,7 @@ void OperatorSet::AddOperators(size_t count) {
   }
 }
 
-void OperatorSet::RemoveOperators(size_t count) {
+void OperatorSet::RemoveOperators(const size_t count) {
   for (size_t i = 0; i < count; ++i) {
     if (free_operators_.empty()) {
       break;
@@ -115,4 +113,5 @@ bool OperatorSet::OperatorEquals::operator()(const OperatorPtr &first, const Ope
 size_t OperatorSet::OperatorHash::operator()(const OperatorPtr &op) const {
   return op->hash();
 }
+
 }  // namespace call_center
