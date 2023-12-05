@@ -1,0 +1,72 @@
+name: Test release
+
+on:
+  pull_request:
+    branches:
+      - '*'
+  push:
+    branches:
+      - master
+
+env:
+  BUILD_DIR: "cmake-build-release"
+
+jobs:
+  vars:
+    runs-on: ubuntu-latest
+    outputs:
+      build_dir: ${{ env.BUILD_DIR }}
+    steps:
+      - run: echo "Exposing env vars"
+
+  build-release:
+    uses: ./.github/workflows/build.yml
+    needs: vars
+    with:
+      build_type: "Release"
+      build_dir: ${{ needs.vars.outputs.build_dir }}
+
+  test-release:
+    runs-on: ubuntu-latest
+    needs: [ vars, build-release ]
+    steps:
+      - name: Download build
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ needs.vars.outputs.build_dir }}
+          path: .
+
+      - name: Extract build archive
+        run: tar -xzf "$BUILD_DIR.tar.gz"
+
+      - name: Restore boost cache
+        uses: actions/cache@v3
+        id: cache-boost
+        with:
+          path: "~/boost"
+          key: ${{ runner.os }}-build-boost
+
+      - name: Install boost
+        env:
+          CACHE_HIT: ${{ steps.cache-boost.outputs.cache-hit }}
+        run: |
+          if [[ "$CACHE_HIT" == 'true' ]]; then
+            sudo cp --force --recursive ~/boost/lib/* /usr/lib
+            sudo cp --force --recursive ~/boost/include/* /usr/include/boost
+          else
+            echo "Didn't find boost cache"
+            exit 1
+          fi
+
+      - name: Test
+        run: |
+          sudo chmod -R 755 $BUILD_DIR
+          cd $BUILD_DIR
+          ctest --timeout 10 --output-on-failure --schedule-random -j 2
+
+      - name: Upload build logs if failed
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: Test release build
+          path: ${{ needs.vars.outputs.build_dir }}/test

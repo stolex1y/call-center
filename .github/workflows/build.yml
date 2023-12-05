@@ -1,14 +1,35 @@
-name: Release build
+name: Build
 
 on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      build_type:
+        description: "Build type: Debug, Release"
+        type: string
+        required: false
+        default: "Release"
+      build_dir:
+        description: "Build directory"
+        type: string
+        required: false
+        default: "build"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  BUILD_DIR: ${{ inputs.build_dir }}
+  BUILD_TYPE: ${{ inputs.build_type }}
+  CCACHE_BASEDIR: $GITHUB_WORKSPACE
+  CCACHE_DIR: $GITHUB_WORKSPACE/.ccache
+  CCACHE_COMPRESS: "true"
+  CCACHE_COMPRESSLEVEL: "6"
+  CCACHE_MAXSIZE: "400M"
 
 jobs:
-  build-and-test:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -34,6 +55,9 @@ jobs:
       - name: Install doxygen
         run: |
           sudo apt install -y doxygen graphviz
+
+      - name: Install ccache
+        run: sudo apt install -y ccache
 
       - name: Cache boost
         uses: actions/cache@v3
@@ -62,32 +86,39 @@ jobs:
             sudo cp --force --recursive /usr/local/include/boost ~/boost/include
           fi
 
+      - name: Prepare ccache timestamp
+        id: ccache_cache_timestamp
+        run: |
+          current_date=`date "+%Y-%m-%d-%H;%M;%S"`
+          echo "timestamp=${current_date}" >> $GITHUB_OUTPUT
+
+      - name: ccache cache files
+        uses: actions/cache@v3
+        with:
+          path: .ccache
+          key: ${{ runner.os }}-ccache-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-
+
+      - name: Zero the cache statistics
+        run: |
+          ccache -p
+          ccache -z
+
       - name: Configure CMake
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+        run: cmake -S . -B $BUILD_DIR -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
 
       - name: Build
-        run: |
-          cmake --build ./build --config Release -j 2
+        run: cmake --build ./$BUILD_DIR -j 2
 
-      - name: Test
-        run: |
-          cd build
-          ctest --timeout 10 --output-on-failure --schedule-random -j 2
+      - name: ccache statistics
+        run: ccache -s
 
-      - name: Valgrind
-        run: |
-          cmake --build ./build -t memcheck-call-center-test -j 2   
-      
-      - name: Upload build logs if failed
+      - name: Make build archive
+        run: tar -czf $BUILD_DIR.tar.gz $BUILD_DIR
+
+      - name: Upload build
         uses: actions/upload-artifact@v3
-        if: failure()
         with:
-          name: Build
-          path: build/test
-
-      - name: Upload valgrind report if failed
-        uses: actions/upload-artifact@v3
-        if: failure()
-        with:
-          name: Valgrind-report
-          path: build/valgrind-*
+          name: ${{ inputs.build_dir }}
+          path: ${{ inputs.build_dir }}.tar.gz

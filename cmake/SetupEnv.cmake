@@ -9,3 +9,6 @@ message(STATUS "C++ compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERS
 
 include(Doxygen)
 Doxygen()
+
+include(Ccache)
+Ccache()
