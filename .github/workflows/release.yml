@@ -1,0 +1,46 @@
+name: "Release"
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  release:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Configure git
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Update changelog
+        uses: release-drafter/release-drafter@v5
+        id: release-drafter
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update version
+        run: |
+          NEW_VERSION=$(echo "${{ steps.release-drafter.outputs.tag_name }}" | sed 's/v//')
+          echo $NEW_VERSION > version.txt
+          git add version.txt
+          git commit -m "Release ${{ steps.release-drafter.outputs.tag_name }}" && git push || echo "Version already up to date"
+
+      - name: Publish release
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          script: |
+            const { owner, repo } = context.repo;
+            await github.rest.repos.updateRelease({
+              owner,
+              repo,
+              release_id: "${{ steps.release-drafter.outputs.id }}",
+              draft: false,
+            });    
