@@ -5,9 +5,6 @@ on:
   pull_request:
     branches:
       - '*'
-  push:
-    branches:
-      - master
 
 env:
   BUILD_DIR: "cmake-build-release"
@@ -21,7 +18,7 @@ jobs:
       - run: echo "Exposing env vars"
 
   build-release:
-    uses: ./.github/workflows/build.yml
+    uses: stolex1y/call-center/.github/workflows/build.yml@master
     needs: vars
     with:
       build_type: "Release"
@@ -38,7 +35,9 @@ jobs:
           path: .
 
       - name: Extract build archive
-        run: tar -xzf "$BUILD_DIR.tar.gz"
+        run: |
+          tar -xzf "$BUILD_DIR.tar.gz"
+          sudo chmod -R 755 $BUILD_DIR
 
       - name: Restore boost cache
         uses: actions/cache@v3
@@ -61,7 +60,6 @@ jobs:
 
       - name: Test
         run: |
-          sudo chmod -R 755 $BUILD_DIR
           cd $BUILD_DIR
           ctest --timeout 10 --output-on-failure --schedule-random -j 2
 

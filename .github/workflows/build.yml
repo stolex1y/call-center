@@ -114,6 +114,19 @@ jobs:
       - name: ccache statistics
         run: ccache -s
 
+      - name: Pack executable
+        run: |
+          cd $BUILD_DIR
+          cpack -G TGZ -B packages
+          mv packages/*.tar.gz .
+
+      - name: Make documentation
+        run: |
+          cd $BUILD_DIR
+          cmake --build . -t doxygen
+          mv doxygen docs
+          tar -czf docs.tar.gz docs
+
       - name: Make build archive
         run: tar -czf $BUILD_DIR.tar.gz $BUILD_DIR
 

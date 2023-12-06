@@ -19,8 +19,7 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Update changelog
-        uses: release-drafter/release-drafter@v5
+      - uses: release-drafter/release-drafter@v5
         id: release-drafter
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -32,15 +31,14 @@ jobs:
           git add version.txt
           git commit -m "Release ${{ steps.release-drafter.outputs.tag_name }}" && git push || echo "Version already up to date"
 
-      - name: Publish release
-        uses: actions/github-script@v6
+      - name: Create release
+        uses: ncipollo/release-action@v1
         with:
-          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          script: |
-            const { owner, repo } = context.repo;
-            await github.rest.repos.updateRelease({
-              owner,
-              repo,
-              release_id: "${{ steps.release-drafter.outputs.id }}",
-              draft: false,
-            });    
+          body: ${{ steps.release-drafter.outputs.body }}
+          id: ${{ steps.release-drafter.outputs.id }}
+          prerelease: false
+          draft: false
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          tag: ${{ steps.release-drafter.outputs.tag_name }}
+          allowUpdates: true
+          name: ${{ steps.release-drafter.outputs.name }}

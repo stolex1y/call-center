@@ -11,4 +11,3 @@ include(Doxygen)
 Doxygen()
 
 include(Ccache)
-Ccache()

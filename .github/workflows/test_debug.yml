@@ -18,7 +18,7 @@ jobs:
       - run: echo "Exposing env vars"
 
   build-debug:
-    uses: ./.github/workflows/build.yml
+    uses: stolex1y/call-center/.github/workflows/build.yml@master
     needs: vars
     with:
       build_type: "Debug"
@@ -35,7 +35,9 @@ jobs:
           path: .
 
       - name: Extract build archive
-        run: tar -xzf "$BUILD_DIR.tar.gz"
+        run: |
+          tar -xzf "$BUILD_DIR.tar.gz"
+          sudo chmod -R 755 $BUILD_DIR
 
       - name: Restore boost cache
         uses: actions/cache@v3
@@ -58,7 +60,6 @@ jobs:
 
       - name: Test
         run: |
-          sudo chmod -R 755 $BUILD_DIR
           cd $BUILD_DIR
           ctest --timeout 10 --output-on-failure --schedule-random -j 2
 
@@ -77,15 +78,38 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: ${{ needs.vars.outputs.build_dir }}
-          path: ${{ needs.vars.outputs.build_dir }}
+          path: .
+
+      - name: Extract build archive
+        run: |
+          tar -xzf "$BUILD_DIR.tar.gz"
+          sudo chmod -R 755 $BUILD_DIR
+
+      - name: Restore boost cache
+        uses: actions/cache@v3
+        id: cache-boost
+        with:
+          path: "~/boost"
+          key: ${{ runner.os }}-build-boost
+
+      - name: Install boost
+        env:
+          CACHE_HIT: ${{ steps.cache-boost.outputs.cache-hit }}
+        run: |
+          if [[ "$CACHE_HIT" == 'true' ]]; then
+            sudo cp --force --recursive ~/boost/lib/* /usr/lib
+            sudo cp --force --recursive ~/boost/include/* /usr/include/boost
+          else
+            echo "Didn't find boost cache"
+            exit 1
+          fi
 
       - name: Valgrind
         run: |
-          sudo chmod -R 755 $BUILD_DIR
           cd $BUILD_DIR
           cmake --build . -t memcheck-call-center-test -j 2
 
-      - name: Upload build logs if failed
+      - name: Upload valgrind report if failed
         uses: actions/upload-artifact@v3
         if: failure()
         with:
