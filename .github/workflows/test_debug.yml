@@ -1,6 +1,7 @@
 name: Test debug
 
 on:
+  workflow_dispatch:
   pull_request:
     branches:
       - '*'

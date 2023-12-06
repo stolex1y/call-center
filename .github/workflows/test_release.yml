@@ -1,6 +1,7 @@
 name: Test release
 
 on:
+  workflow_dispatch:
   pull_request:
     branches:
       - '*'
