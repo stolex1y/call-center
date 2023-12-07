@@ -3,20 +3,25 @@ tag-template: 'v$RESOLVED_VERSION'
 categories:
   - title: ' New Features'
     labels:
-      - 'type:major_features'
-      - 'type:minor_features'
+      - 'major'
+      - 'minor'
 
   - title: ' Bugs Fixes'
     labels:
-      - 'type:fix'
+      - 'fix'
 
   - title: ' Documentation'
     labels:
-      - 'type:documentation'
+      - 'documentation'
 
-  - title: ' Configuration'
+  - title: ' Configuration | Workflows'
     labels:
-      - 'type:config'
+      - 'config'
+      - 'workflows'
+
+  - title: ' Tests'
+    labels:
+      - 'tests'
 
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 template: |
@@ -26,13 +31,14 @@ template: |
 version-resolver:
   major:
     labels:
-      - 'type:major_features'
+      - 'major'
   minor:
     labels:
-      - 'type:minor_features'
+      - 'minor'
   patch:
     labels:
-      - 'type:fix'
-      - 'type:documentation'
-      - 'type:config'
-      - 'type:tests'
+      - 'fix'
+      - 'documentation'
+      - 'config'
+      - 'tests'
+      - 'workflows'
