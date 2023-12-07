@@ -6,7 +6,7 @@ on:
     types: [opened, labeled, unlabeled, synchronize]
 
 jobs:
-  triage:
+  verify-pr-labels:
     runs-on: ubuntu-latest
     steps:
       - uses: zwaldowski/match-label-action@v2
