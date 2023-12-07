@@ -7,7 +7,7 @@ namespace call_center::test {
 std::shared_ptr<FakeCallDetailedRecord> FakeCallDetailedRecord::Create(
     std::shared_ptr<const core::ClockAdapter> clock,
     std::string caller_phone_number,
-    std::shared_ptr<Configuration> configuration,
+    std::shared_ptr<config::Configuration> configuration,
     OnFinish on_finish
 ) {
   return std::make_shared<FakeCallDetailedRecord>(
@@ -21,7 +21,7 @@ std::shared_ptr<FakeCallDetailedRecord> FakeCallDetailedRecord::Create(
 FakeCallDetailedRecord::FakeCallDetailedRecord(
     std::shared_ptr<const core::ClockAdapter> clock,
     std::string caller_phone_number,
-    std::shared_ptr<Configuration> configuration,
+    std::shared_ptr<config::Configuration> configuration,
     OnFinish on_finish
 )
     : CallDetailedRecord(

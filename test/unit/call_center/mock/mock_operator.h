@@ -13,7 +13,8 @@ namespace call_center::test {
 class MockOperator : public Operator {
  public:
   static std::shared_ptr<MockOperator> Create(
-      std::shared_ptr<Configuration> configuration, const log::LoggerProvider &logger_provider
+      std::shared_ptr<config::Configuration> configuration,
+      const log::LoggerProvider &logger_provider
   );
 
   void HandleCall(const std::shared_ptr<CallDetailedRecord> &call, const OnFinishHandle &on_finish)
@@ -21,7 +22,8 @@ class MockOperator : public Operator {
 
  private:
   MockOperator(
-      std::shared_ptr<Configuration> configuration, const log::LoggerProvider &logger_provider
+      std::shared_ptr<config::Configuration> configuration,
+      const log::LoggerProvider &logger_provider
   );
 };
 
