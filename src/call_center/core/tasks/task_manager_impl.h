@@ -5,8 +5,9 @@
 #include <chrono>
 #include <functional>
 
-#include "configuration.h"
+#include "configuration/configuration.h"
 #include "log/logger.h"
+#include "log/logger_provider.h"
 #include "log/sink.h"
 #include "task_manager.h"
 #include "tasks.h"
@@ -26,7 +27,8 @@ class TaskManagerImpl : public TaskManager {
   static constexpr auto kIoThreadCountKey = "task_manager_io_thread_count";
 
   static std::shared_ptr<TaskManagerImpl> Create(
-      std::shared_ptr<Configuration> configuration, const log::LoggerProvider &logger_provider
+      std::shared_ptr<config::Configuration> configuration,
+      const log::LoggerProvider &logger_provider
   );
   TaskManagerImpl(const TaskManagerImpl &other) = delete;
   TaskManagerImpl &operator=(const TaskManagerImpl &other) = delete;
@@ -56,7 +58,7 @@ class TaskManagerImpl : public TaskManager {
   bool started_ = false;
   mutable std::mutex start_mutex_;
   const std::unique_ptr<log::Logger> logger_;
-  const std::shared_ptr<Configuration> configuration_;
+  const std::shared_ptr<config::Configuration> configuration_;
   boost::thread_group user_threads_;
   boost::thread_group io_threads_;
   std::atomic_size_t user_thread_count_ = kDefaultUserThreadCount;
@@ -71,7 +73,8 @@ class TaskManagerImpl : public TaskManager {
   );
 
   TaskManagerImpl(
-      std::shared_ptr<Configuration> configuration, const log::LoggerProvider &logger_provider
+      std::shared_ptr<config::Configuration> configuration,
+      const log::LoggerProvider &logger_provider
   );
 
   /**

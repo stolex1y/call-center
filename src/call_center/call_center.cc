@@ -10,7 +10,7 @@ using namespace qs::metrics;
 
 std::shared_ptr<CallCenter> CallCenter::Create(
     std::unique_ptr<Journal> journal,
-    std::shared_ptr<Configuration> configuration,
+    std::shared_ptr<config::Configuration> configuration,
     std::shared_ptr<tasks::TaskManager> task_manager,
     const log::LoggerProvider &logger_provider,
     std::unique_ptr<OperatorSet> operator_set,
@@ -30,7 +30,7 @@ std::shared_ptr<CallCenter> CallCenter::Create(
 
 CallCenter::CallCenter(
     std::unique_ptr<Journal> journal,
-    std::shared_ptr<Configuration> configuration,
+    std::shared_ptr<config::Configuration> configuration,
     std::shared_ptr<tasks::TaskManager> task_manager,
     const log::LoggerProvider &logger_provider,
     std::unique_ptr<OperatorSet> operator_set,

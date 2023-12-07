@@ -6,7 +6,7 @@
 #include <functional>
 
 #include "call_status.h"
-#include "configuration.h"
+#include "configuration/configuration.h"
 #include "core/queueing_system/request.h"
 
 namespace call_center {
@@ -27,7 +27,7 @@ class CallDetailedRecord : public core::qs::Request {
 
   CallDetailedRecord(
       std::string caller_phone_number,
-      std::shared_ptr<Configuration> configuration,
+      std::shared_ptr<config::Configuration> configuration,
       OnFinish on_finish
   );
   ~CallDetailedRecord() override = default;
@@ -85,7 +85,7 @@ class CallDetailedRecord : public core::qs::Request {
   static constexpr WaitingDuration kDefaultMaxWait_{30};
 
   mutable std::shared_mutex mutex_;
-  const std::shared_ptr<Configuration> configuration_;
+  const std::shared_ptr<config::Configuration> configuration_;
   std::optional<TimePoint> arrival_time_;
   std::optional<TimePoint> complete_service_time_;
   std::optional<TimePoint> start_service_time_;

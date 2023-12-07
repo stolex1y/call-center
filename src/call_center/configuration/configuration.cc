@@ -2,7 +2,7 @@
 
 #include <fstream>
 
-namespace call_center {
+namespace call_center::config {
 
 std::shared_ptr<Configuration> Configuration::Create(
     const log::LoggerProvider &logger_provider, std::string file_name
@@ -45,4 +45,4 @@ const std::string &Configuration::GetFileName() const {
   return file_name_;
 }
 
-}  // namespace call_center
+}  // namespace call_center::config

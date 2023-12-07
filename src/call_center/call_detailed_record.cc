@@ -9,7 +9,7 @@ namespace call_center {
 
 CallDetailedRecord::CallDetailedRecord(
     std::string caller_phone_number,
-    std::shared_ptr<Configuration> configuration,
+    std::shared_ptr<config::Configuration> configuration,
     OnFinish on_finish
 )
     : configuration_(std::move(configuration)),

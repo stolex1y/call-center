@@ -5,7 +5,7 @@
 
 #include "call_detailed_record.h"
 #include "call_queue.h"
-#include "configuration.h"
+#include "configuration/configuration.h"
 #include "core/containers/concurrent_hash_set.h"
 #include "core/queueing_system/metrics/queueing_system_metrics.h"
 #include "core/tasks/task_manager.h"
@@ -31,7 +31,7 @@ class CallCenter : public std::enable_shared_from_this<CallCenter> {
 
   static std::shared_ptr<CallCenter> Create(
       std::unique_ptr<Journal> journal,
-      std::shared_ptr<Configuration> configuration,
+      std::shared_ptr<config::Configuration> configuration,
       std::shared_ptr<tasks::TaskManager> task_manager,
       const log::LoggerProvider &logger_provider,
       std::unique_ptr<OperatorSet> operator_set,
@@ -51,7 +51,7 @@ class CallCenter : public std::enable_shared_from_this<CallCenter> {
  protected:
   CallCenter(
       std::unique_ptr<Journal> journal,
-      std::shared_ptr<Configuration> configuration,
+      std::shared_ptr<config::Configuration> configuration,
       std::shared_ptr<tasks::TaskManager> task_manager,
       const log::LoggerProvider &logger_provider,
       std::unique_ptr<OperatorSet> operator_set,
@@ -64,7 +64,7 @@ class CallCenter : public std::enable_shared_from_this<CallCenter> {
   const std::unique_ptr<OperatorSet> operators_;
   const std::unique_ptr<CallQueue> calls_;
   const std::shared_ptr<tasks::TaskManager> task_manager_;
-  const std::shared_ptr<Configuration> configuration_;
+  const std::shared_ptr<config::Configuration> configuration_;
   const std::unique_ptr<log::Logger> logger_;
   const std::shared_ptr<qs::metrics::QueueingSystemMetrics> metrics_;
 

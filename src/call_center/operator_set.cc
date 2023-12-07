@@ -9,7 +9,7 @@ using namespace core::utils::uuids;
 using namespace core::qs::metrics;
 
 OperatorSet::OperatorSet(
-    std::shared_ptr<Configuration> configuration,
+    std::shared_ptr<config::Configuration> configuration,
     OperatorProvider operator_provider,
     const log::LoggerProvider &logger_provider,
     std::shared_ptr<QueueingSystemMetrics> metrics

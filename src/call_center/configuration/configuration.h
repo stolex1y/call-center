@@ -11,7 +11,8 @@
 #include "log/logger.h"
 #include "log/logger_provider.h"
 
-namespace call_center {
+namespace call_center::config {
+
 using namespace core::utils::concepts;
 
 /**
@@ -146,6 +147,6 @@ T Configuration::GetNumber(const std::string &key, T default_value, T min, T max
   return std::max(min, std::min(max, value));
 }
 
-}  // namespace call_center
+}  // namespace call_center::config
 
 #endif  // CALL_CENTER_SRC_CALL_CENTER_CONFIGURATION_H_

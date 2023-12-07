@@ -8,7 +8,7 @@
 #include <random>
 
 #include "call_detailed_record.h"
-#include "configuration.h"
+#include "configuration/configuration.h"
 #include "core/queueing_system/server.h"
 #include "core/tasks/task_manager.h"
 
@@ -42,7 +42,7 @@ class Operator : public std::enable_shared_from_this<Operator>, public core::qs:
 
   static std::shared_ptr<Operator> Create(
       std::shared_ptr<core::tasks::TaskManager> task_manager,
-      std::shared_ptr<Configuration> configuration,
+      std::shared_ptr<config::Configuration> configuration,
       const log::LoggerProvider &logger_provider
   );
 
@@ -65,7 +65,7 @@ class Operator : public std::enable_shared_from_this<Operator>, public core::qs:
  protected:
   Operator(
       std::shared_ptr<core::tasks::TaskManager> task_manager,
-      std::shared_ptr<Configuration> configuration,
+      std::shared_ptr<config::Configuration> configuration,
       const log::LoggerProvider &logger_provider
   );
 
@@ -78,7 +78,7 @@ class Operator : public std::enable_shared_from_this<Operator>, public core::qs:
 
   std::atomic<Status> status_ = Status::kFree;
   const std::shared_ptr<core::tasks::TaskManager> task_manager_;
-  const std::shared_ptr<Configuration> configuration_;
+  const std::shared_ptr<config::Configuration> configuration_;
   uint64_t min_delay_ = kDefaultMinDelay_;
   uint64_t max_delay_ = kDefaultMaxDelay_;
   Generator generator_;
