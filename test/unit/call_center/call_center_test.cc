@@ -15,6 +15,8 @@ using namespace std::chrono_literals;
 using namespace std::chrono;
 using namespace qs::metrics;
 using namespace core::tasks::test;
+using namespace config;
+using namespace config::test;
 
 using CallPtr = std::shared_ptr<CallDetailedRecord>;
 using CallsVector = std::vector<CallPtr>;

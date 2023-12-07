@@ -20,6 +20,8 @@ using namespace std::chrono;
 using namespace core;
 using namespace call_center::test;
 using namespace call_center::core::tasks::test;
+using namespace config;
+using namespace config::test;
 
 using CallPtr = std::shared_ptr<CallDetailedRecord>;
 using CallsVector = std::vector<CallPtr>;

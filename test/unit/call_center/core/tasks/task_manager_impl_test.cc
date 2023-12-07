@@ -13,6 +13,8 @@ using namespace log;
 using namespace std::chrono_literals;
 using namespace std::chrono;
 using namespace call_center::test;
+using namespace config;
+using namespace config::test;
 
 using TaskResult = std::future<bool>;
 using TaskResults = std::vector<TaskResult>;

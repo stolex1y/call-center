@@ -4,7 +4,7 @@
 
 #include "call_queue.h"
 
-namespace call_center::test {
+namespace call_center::config::test {
 
 ConfigurationAdapter::ConfigurationAdapter(std::shared_ptr<Configuration> configuration)
     : configuration_(std::move(configuration)) {
@@ -55,4 +55,4 @@ void ConfigurationAdapter::SetMetricsUpdateTime(
   config_json[metrics::QueueingSystemMetrics::kMetricsUpdateTimeKey] = delay.count();
 }
 
-}  // namespace call_center::test
+}  // namespace call_center::config::test
