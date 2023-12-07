@@ -44,10 +44,9 @@ Sink::Sink(
 )
     : sink_impl_(new SinkImpl(keywords::max_size = max_size * 1024 * 1024)),
       stream_(std::move(ostream)),
-      level_(level),
       max_size_(max_size) {
+  SetSeverityLevel(level);
   sink_impl_->set_formatter(formatter);
-  sink_impl_->set_filter((attrs::severity >= level_) && (attrs::channel == id_));
   sink_impl_->locked_backend()->add_stream(stream_);
   sink_impl_->locked_backend()->auto_flush(true);
 
@@ -60,6 +59,17 @@ Sink::~Sink() {
 
 const boost::uuids::uuid &Sink::Id() const {
   return id_;
+}
+
+void Sink::SetSeverityLevel(const SeverityLevel level) {
+  std::lock_guard lock(mutex_);
+  level_ = level;
+  sink_impl_->set_filter((attrs::severity >= level_) && (attrs::channel == id_));
+}
+
+SeverityLevel Sink::GetSeverityLevel() const {
+  std::lock_guard lock(mutex_);
+  return level_;
 }
 
 void Sink::DefaultFormatter(

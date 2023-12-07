@@ -26,7 +26,7 @@ class Sink {
    * @brief Использует стандартный поток вывода для записи логов.
    * @param level уровень логирования
    */
-  explicit Sink(SeverityLevel level);
+  explicit Sink(SeverityLevel level = SeverityLevel::kTrace);
   /**
    * @brief Использует указанный файл для записи логов.
    * @param file_name название файла
@@ -63,16 +63,22 @@ class Sink {
       const Formatter &formatter,
       size_t max_size = SIZE_MAX
   );
-  ~Sink();
+  virtual ~Sink();
   Sink(Sink &other) = delete;
-  Sink(Sink &&other) = default;
   Sink &operator=(Sink &other) = delete;
-  Sink &operator=(Sink &&other) = default;
 
   /**
    * @brief Идентификатор приемника логов для связи с @link Logger логерами@endlink.
    */
   [[nodiscard]] const boost::uuids::uuid &Id() const;
+  /**
+   * @brief Установить уровень логирования.
+   */
+  void SetSeverityLevel(SeverityLevel level);
+  /**
+   * @brief Уровень логирования.
+   */
+  [[nodiscard]] SeverityLevel GetSeverityLevel() const;
 
  private:
   using SinkImpl = boost::log::sinks::synchronous_sink<boost::log::sinks::text_ostream_backend>;
@@ -80,8 +86,9 @@ class Sink {
   boost::shared_ptr<SinkImpl> sink_impl_;
   boost::shared_ptr<std::ostream> stream_;
   boost::uuids::uuid id_ = boost::uuids::random_generator_mt19937()();
-  SeverityLevel level_;
+  SeverityLevel level_ = SeverityLevel::kTrace;
   size_t max_size_;
+  mutable std::mutex mutex_;
 
   /**
    * @brief Форматирование логов по умолчанию.
