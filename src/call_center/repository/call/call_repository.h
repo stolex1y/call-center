@@ -1,8 +1,6 @@
 #ifndef CALL_CENTER_SRC_CALL_CENTER_DATA_QUERY_REPOSITORY_H_
 #define CALL_CENTER_SRC_CALL_CENTER_DATA_QUERY_REPOSITORY_H_
 
-#include <boost/utility/base_from_member.hpp>
-
 #include "call_center.h"
 #include "call_detailed_record.h"
 #include "call_request_dto.h"
@@ -22,7 +20,7 @@ class CallRepository : public http::HttpRepository,
  public:
   static std::shared_ptr<CallRepository> Create(
       std::shared_ptr<CallCenter> call_center,
-      std::shared_ptr<Configuration> configuration,
+      std::shared_ptr<config::Configuration> configuration,
       const log::LoggerProvider &logger_provider
   );
 
@@ -35,7 +33,7 @@ class CallRepository : public http::HttpRepository,
  private:
   const std::unique_ptr<log::Logger> logger_;
   const std::shared_ptr<CallCenter> call_center_;
-  const std::shared_ptr<Configuration> configuration_;
+  const std::shared_ptr<config::Configuration> configuration_;
 
   /**
    * @brief Сформировать ответ из обработанного вызова.
@@ -44,7 +42,7 @@ class CallRepository : public http::HttpRepository,
 
   CallRepository(
       std::shared_ptr<CallCenter> call_center,
-      std::shared_ptr<Configuration> configuration,
+      std::shared_ptr<config::Configuration> configuration,
       const log::LoggerProvider &logger_provider
   );
 

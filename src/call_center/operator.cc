@@ -8,7 +8,7 @@ using namespace core::tasks;
 
 std::shared_ptr<Operator> Operator::Create(
     std::shared_ptr<TaskManager> task_manager,
-    std::shared_ptr<Configuration> configuration,
+    std::shared_ptr<config::Configuration> configuration,
     const log::LoggerProvider &logger_provider
 ) {
   return std::shared_ptr<Operator>(
@@ -18,7 +18,7 @@ std::shared_ptr<Operator> Operator::Create(
 
 Operator::Operator(
     std::shared_ptr<TaskManager> task_manager,
-    std::shared_ptr<Configuration> configuration,
+    std::shared_ptr<config::Configuration> configuration,
     const log::LoggerProvider &logger_provider
 )
     : task_manager_(std::move(task_manager)),

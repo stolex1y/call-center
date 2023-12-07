@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "configuration/configuration.h"
 #include "core/clock_adapter.h"
 #include "core/queueing_system/request.h"
 #include "core/queueing_system/server.h"
@@ -37,7 +38,7 @@ class QueueingSystemMetrics : public std::enable_shared_from_this<QueueingSystem
 
   static std::shared_ptr<QueueingSystemMetrics> Create(
       std::shared_ptr<tasks::TaskManager> task_manager,
-      std::shared_ptr<Configuration> configuration,
+      std::shared_ptr<config::Configuration> configuration,
       const log::LoggerProvider &logger_provider,
       std::shared_ptr<const ClockAdapter> clock = ClockAdapter::default_clock
   );
@@ -144,7 +145,7 @@ class QueueingSystemMetrics : public std::enable_shared_from_this<QueueingSystem
   std::shared_ptr<const ClockAdapter> clock_;
 
   std::atomic_flag started_ = false;
-  const std::shared_ptr<Configuration> configuration_;
+  const std::shared_ptr<config::Configuration> configuration_;
   const std::shared_ptr<tasks::TaskManager> task_manager_;
   const std::unique_ptr<log::Logger> logger_;
   uint64_t metrics_update_time_ = kDefaultMetricsUpdateTime;
@@ -170,7 +171,7 @@ class QueueingSystemMetrics : public std::enable_shared_from_this<QueueingSystem
 
   QueueingSystemMetrics(
       std::shared_ptr<tasks::TaskManager> task_manager,
-      std::shared_ptr<Configuration> configuration,
+      std::shared_ptr<config::Configuration> configuration,
       const log::LoggerProvider &logger_provider,
       std::shared_ptr<const ClockAdapter> clock
   );

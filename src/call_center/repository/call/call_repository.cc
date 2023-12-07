@@ -13,7 +13,7 @@ namespace call_center::repository {
 
 std::shared_ptr<CallRepository> CallRepository::Create(
     std::shared_ptr<CallCenter> call_center,
-    std::shared_ptr<Configuration> configuration,
+    std::shared_ptr<config::Configuration> configuration,
     const log::LoggerProvider &logger_provider
 ) {
   return std::shared_ptr<CallRepository>(
@@ -23,7 +23,7 @@ std::shared_ptr<CallRepository> CallRepository::Create(
 
 CallRepository::CallRepository(
     std::shared_ptr<CallCenter> call_center,
-    std::shared_ptr<Configuration> configuration,
+    std::shared_ptr<config::Configuration> configuration,
     const log::LoggerProvider &logger_provider
 )
     : HttpRepository("call"),

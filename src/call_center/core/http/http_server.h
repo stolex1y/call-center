@@ -5,11 +5,10 @@
 #include <boost/beast/http.hpp>
 #include <unordered_map>
 
-#include "configuration.h"
 #include "http.h"
 #include "http_repository.h"
 #include "log/logger.h"
-#include "log/sink.h"
+#include "log/logger_provider.h"
 
 namespace call_center::core::http {
 

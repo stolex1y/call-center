@@ -11,7 +11,7 @@ namespace call_center {
 namespace expr = boost::log::expressions;
 namespace date_time_utils = core::utils::date_time;
 
-Journal::Journal(std::shared_ptr<Configuration> configuration)
+Journal::Journal(std::shared_ptr<config::Configuration> configuration)
     : configuration_(std::move(configuration)) {
   file_name_ = ReadFileName();
   max_size_ = ReadMaxSize();

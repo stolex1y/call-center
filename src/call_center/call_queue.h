@@ -6,7 +6,7 @@
 #include <unordered_set>
 
 #include "call_detailed_record.h"
-#include "configuration.h"
+#include "configuration/configuration.h"
 
 namespace call_center {
 
@@ -37,7 +37,8 @@ class CallQueue {
   static constexpr auto kCapacityKey = "queue_capacity";
 
   CallQueue(
-      std::shared_ptr<Configuration> configuration, const log::LoggerProvider &logger_provider
+      std::shared_ptr<config::Configuration> configuration,
+      const log::LoggerProvider &logger_provider
   );
   CallQueue(const CallQueue &other) = delete;
   CallQueue &operator=(const CallQueue &other) = delete;
@@ -117,7 +118,7 @@ class CallQueue {
   std::multiset<CallPtr, ReceiptOrder> in_receipt_order_;
   mutable std::shared_mutex queue_mutex_;
   std::unique_ptr<log::Logger> logger_;
-  const std::shared_ptr<Configuration> configuration_;
+  const std::shared_ptr<config::Configuration> configuration_;
   size_t capacity_ = kDefaultCapacity_;
 
   /**
