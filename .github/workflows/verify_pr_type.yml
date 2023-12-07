@@ -6,9 +6,9 @@ on:
     types: [opened, labeled, unlabeled, synchronize]
 
 jobs:
-  triage:
+  verify-pr-labels:
     runs-on: ubuntu-latest
     steps:
       - uses: zwaldowski/match-label-action@v2
         with:
-          allowed: 'type: major_features, type:fix, type:minor_features, type:documentation, type:tests, type:config'
+          allowed: 'major, minor, fix, documentation, workflows, tests, config'
