@@ -29,7 +29,7 @@ jobs:
           NEW_VERSION=$(echo "${{ steps.release-drafter.outputs.tag_name }}" | sed 's/v//')
           echo $NEW_VERSION > version.txt
           git add version.txt
-          git commit -m "Release ${{ steps.release-drafter.outputs.tag_name }}" && git push || echo "Version already up to date"
+          git commit -m "Release ${{ steps.release-drafter.outputs.tag_name }}" && git push -f || echo "Version already up to date"
 
       - name: Create release
         uses: ncipollo/release-action@v1
