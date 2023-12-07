@@ -1,14 +1,16 @@
 {
-  "call_max_wait": 5,
-  "queue_capacity": 2,
-  "configuration_is_caching": false,
+  "call_max_wait": 15,
+  "configuration_is_caching": true,
   "configuration_updating_period": 10,
-  "journal_file_name": "journal1.csv",
+  "http_server_port": 8080,
+  "journal_file_name": "journal.csv",
   "journal_max_size": 10000,
-  "operator_min_delay": 10,
+  "log_severity_level": "INFO",
+  "metrics_update_time": 5,
+  "operator_min_delay": 5,
   "operator_max_delay": 10,
-  "operator_count": 1,
+  "operator_count": 10,
+  "queue_capacity": 10,
   "task_manager_user_thread_count": 10,
-  "task_manager_io_thread_count": 64,
-  "metrics_update_time": 5
+  "task_manager_io_thread_count": 64
 }
