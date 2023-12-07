@@ -17,6 +17,8 @@ using namespace call_center::log;
 using namespace std::chrono_literals;
 using namespace std::chrono;
 using namespace call_center::core;
+using namespace call_center::config::test;
+using namespace call_center::config;
 using namespace call_center::core::tasks;
 using namespace call_center::core::qs::metrics;
 

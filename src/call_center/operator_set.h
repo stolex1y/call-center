@@ -5,7 +5,7 @@
 #include <boost/uuid/uuid.hpp>
 #include <unordered_set>
 
-#include "configuration.h"
+#include "configuration/configuration.h"
 #include "core/containers/concurrent_hash_set.h"
 #include "core/queueing_system/metrics/queueing_system_metrics.h"
 #include "core/utils/uuids.h"
@@ -25,7 +25,7 @@ class OperatorSet {
   static constexpr auto kOperatorCountKey = "operator_count";
 
   OperatorSet(
-      std::shared_ptr<Configuration> configuration,
+      std::shared_ptr<config::Configuration> configuration,
       OperatorProvider operator_provider,
       const log::LoggerProvider &logger_provider,
       std::shared_ptr<core::qs::metrics::QueueingSystemMetrics> metrics
@@ -68,7 +68,7 @@ class OperatorSet {
 
   std::unordered_set<OperatorPtr, OperatorHash, OperatorEquals> free_operators_;
   std::unordered_set<OperatorPtr, OperatorHash, OperatorEquals> operators_;
-  const std::shared_ptr<Configuration> configuration_;
+  const std::shared_ptr<config::Configuration> configuration_;
   mutable std::shared_mutex mutex_;
   std::unique_ptr<log::Logger> logger_;
   OperatorProvider operator_provider_;

@@ -6,7 +6,7 @@
 namespace call_center {
 
 CallQueue::CallQueue(
-    std::shared_ptr<Configuration> configuration, const log::LoggerProvider &logger_provider
+    std::shared_ptr<config::Configuration> configuration, const log::LoggerProvider &logger_provider
 )
     : logger_(logger_provider.Get("CallQueue")), configuration_(std::move(configuration)) {
   UpdateCapacity();

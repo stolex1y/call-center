@@ -9,7 +9,7 @@
 #include <string>
 
 #include "call_detailed_record.h"
-#include "configuration.h"
+#include "configuration/configuration.h"
 #include "log/logger.h"
 #include "log/severity_level.h"
 #include "log/sink.h"
@@ -24,7 +24,7 @@ namespace call_center {
  */
 class Journal {
  public:
-  explicit Journal(std::shared_ptr<Configuration> configuration);
+  explicit Journal(std::shared_ptr<config::Configuration> configuration);
   Journal(const Journal &other) = delete;
   Journal &operator=(const Journal &other) = delete;
 
@@ -41,7 +41,7 @@ class Journal {
   static constexpr auto kMaxSizeKey_ = "journal_max_size";
   static constexpr size_t kDefaultMaxSize_ = SIZE_MAX;
 
-  std::shared_ptr<Configuration> configuration_;
+  std::shared_ptr<config::Configuration> configuration_;
   std::string file_name_ = kDefaultFileName_;
   size_t max_size_ = kDefaultMaxSize_;
   std::shared_ptr<log::Sink> sink_;

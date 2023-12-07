@@ -9,13 +9,16 @@
 #include "log/logger.h"
 #include "log/logger_provider.h"
 
-namespace call_center {
+namespace call_center::config {
 
 /**
  * @brief Класс для запуска регулярных обновлений конфигурации по таймеру.
  */
 class ConfigurationUpdater : public std::enable_shared_from_this<ConfigurationUpdater> {
  public:
+  /// Обратный вызов при обновлении конфигурации.
+  using OnUpdate = std::function<void(const std::shared_ptr<Configuration> &)>;
+
   static std::shared_ptr<ConfigurationUpdater> Create(
       std::shared_ptr<Configuration> configuration,
       std::shared_ptr<core::tasks::TaskManager> task_manager,
@@ -26,6 +29,10 @@ class ConfigurationUpdater : public std::enable_shared_from_this<ConfigurationUp
    * @brief Запустить регулярные обновления.
    */
   void StartUpdating();
+  /**
+   * @brief Добавить слушатель события обновления конфигурации.
+   */
+  void AddUpdateListener(OnUpdate listener);
 
  private:
   using Duration = std::chrono::minutes;
@@ -38,6 +45,7 @@ class ConfigurationUpdater : public std::enable_shared_from_this<ConfigurationUp
   std::shared_ptr<Configuration> configuration_;
   Duration updating_period_ = kDefaultUpdatingPeriod_;
   std::unique_ptr<log::Logger> logger_;
+  std::vector<OnUpdate> update_listeners_;
 
   explicit ConfigurationUpdater(
       std::shared_ptr<Configuration> configuration,
@@ -53,8 +61,12 @@ class ConfigurationUpdater : public std::enable_shared_from_this<ConfigurationUp
    * @brief Обновить значение периода обновления конфигурации.
    */
   void UpdateUpdatingPeriod();
+  /**
+   * @brief Уведомить слушателей об обновлении конфигурации.
+   */
+  void NotifyListeners() const;
 };
 
-}  // namespace call_center
+}  // namespace call_center::config
 
 #endif  // CALL_CENTER_SRC_CALL_CENTER_CONFIGURATION_UPDATER_H_

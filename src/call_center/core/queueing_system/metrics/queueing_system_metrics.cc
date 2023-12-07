@@ -10,7 +10,7 @@ namespace call_center::core::qs::metrics {
 
 std::shared_ptr<QueueingSystemMetrics> QueueingSystemMetrics::Create(
     std::shared_ptr<tasks::TaskManager> task_manager,
-    std::shared_ptr<Configuration> configuration,
+    std::shared_ptr<config::Configuration> configuration,
     const log::LoggerProvider &logger_provider,
     std::shared_ptr<const ClockAdapter> clock
 ) {
@@ -21,7 +21,7 @@ std::shared_ptr<QueueingSystemMetrics> QueueingSystemMetrics::Create(
 
 QueueingSystemMetrics::QueueingSystemMetrics(
     std::shared_ptr<tasks::TaskManager> task_manager,
-    std::shared_ptr<Configuration> configuration,
+    std::shared_ptr<config::Configuration> configuration,
     const log::LoggerProvider &logger_provider,
     std::shared_ptr<const ClockAdapter> clock
 )

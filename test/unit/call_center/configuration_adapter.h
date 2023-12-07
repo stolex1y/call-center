@@ -5,11 +5,11 @@
 #include <memory>
 
 #include "call_detailed_record.h"
-#include "configuration.h"
+#include "configuration/configuration.h"
 #include "operator.h"
 #include "operator_set.h"
 
-namespace call_center::test {
+namespace call_center::config::test {
 
 using namespace core::qs;
 
@@ -36,6 +36,6 @@ class ConfigurationAdapter {
   boost::json::object config_json;
 };
 
-}  // namespace call_center::test
+}  // namespace call_center::config::test
 
 #endif  // CALL_CENTER_TEST_UNIT_CALL_CENTER_CONFIGURATION_ADAPTER_H_
