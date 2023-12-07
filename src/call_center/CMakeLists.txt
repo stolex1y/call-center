@@ -11,8 +11,8 @@ add_library(${OBJ_LIB_TARGET} OBJECT
         call_center.h
         journal.cc
         journal.h
-        configuration.cc
-        configuration.h
+        configuration/configuration.cc
+        configuration/configuration.h
         operator.cc
         operator.h
         call_detailed_record.cc
@@ -50,8 +50,8 @@ add_library(${OBJ_LIB_TARGET} OBJECT
         core/utils/concepts.h
         log/logger_provider.cc
         log/logger_provider.h
-        configuration_updater.cc
-        configuration_updater.h
+        configuration/configuration_updater.cc
+        configuration/configuration_updater.h
         core/containers/concurrent_hash_map.h
         core/utils/uuids.h
         core/utils/uuids.cc
@@ -93,7 +93,11 @@ target_compile_definitions(${OBJ_LIB_TARGET} PUBLIC "BOOST_LOG_DYN_LINK")
 add_library(${STATIC_LIB_TARGET} STATIC)
 target_link_libraries(${STATIC_LIB_TARGET} ${OBJ_LIB_TARGET})
 
-add_executable(${RUNNABLE_TARGET} main.cc)
+add_executable(${RUNNABLE_TARGET}
+        main.cc
+        main_sink.cc
+        main_sink.h
+)
 target_link_libraries(${RUNNABLE_TARGET} ${OBJ_LIB_TARGET})
 
 # clang-format
